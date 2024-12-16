@@ -1,0 +1,66 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  username: String!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON
+
+type LoginResponse {
+  access_token: String!
+  user: User!
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+type Mutation {
+  create(createUserInput: CreateUserInput!): User!
+  login(loginUserInput: LoginUserInput!): LoginResponse!
+  resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  signup(signupUserInput: CreateUserInput!): SignupResponse!
+  updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
+}
+
+type Query {
+  account: User!
+  getpermissions: JSON!
+  user(email: String!): User!
+  users: [User!]
+}
+
+input ResetPasswordInput {
+  newPassword: String!
+  oldPassword: String!
+}
+
+type SignupResponse {
+  access_token: String!
+}
+
+input UpdateProfileInput {
+  name: String!
+  username: String!
+}
+
+type User {
+  createdAt: DateTime!
+  email: String!
+  id: String!
+  updatedAt: DateTime
+  username: String!
+}

@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String    @unique
+  password  String
+  name      String?
+  username  String?
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at")
+  roleId    String    @map("role_id") @db.Uuid
+  role      Role      @relation(fields: [roleId], references: [id])
+
+  @@map("users")
+}
+
+model Role {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String
+  privileges  Json?
+  description String?
+  userType    UserRole @map("user_type")
+  User        User[]
+
+  @@map("roles")
+}
+
+enum UserRole {
+  OWNER
+  EMPLOYER
+  USER
+}
