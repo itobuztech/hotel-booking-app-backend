@@ -13,6 +13,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type File {
+  createdAt: String
+  file: String
+  fileUrl: String
+  id: String
+  updatedAt: String
+}
+
+input GetUploadedFile {
+  id: String!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -30,15 +42,29 @@ input LoginUserInput {
 
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
+  deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   signup(signupUserInput: CreateUserInput!): SignupResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
+  uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
+}
+
+type PaginatedFile {
+  files: [File!]!
+  total: Int!
+}
+
+input PaginationArgs {
+  limit: Int
+  skip: Int
 }
 
 type Query {
+  File(getUploadedFile: GetUploadedFile!): File!
   account: User!
   getpermissions: JSON!
+  listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]
 }
@@ -55,6 +81,18 @@ type SignupResponse {
 input UpdateProfileInput {
   name: String!
   username: String!
+}
+
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input UploadFileInput {
+  file: Upload!
+}
+
+type UploadFileResponse {
+  fileUrl: String!
+  id: String!
 }
 
 type User {

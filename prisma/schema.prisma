@@ -37,3 +37,13 @@ enum UserRole {
   EMPLOYER
   USER
 }
+
+
+model Upload {
+  id           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  file         String             @db.VarChar(500)
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime?          @default(now()) @updatedAt @map("updated_at")
+
+  @@map("upload")
+}
