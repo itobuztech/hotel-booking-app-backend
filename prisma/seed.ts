@@ -4,6 +4,10 @@ import { PrivilegesList } from "../src/privileges/user-privileges";
 const prisma = new PrismaClient();
 
 async function main() {
+
+  await prisma.user.deleteMany({});
+  await prisma.role.deleteMany({});
+
   //CREATE UserRoles
   await prisma.role.createMany({
     data: [
@@ -12,7 +16,7 @@ async function main() {
         description: "Owner of the hotel.",
         userType: UserRole.ADMIN,
         privileges: [
-          101, 102, 201, 202, 203, 204, 301, 302, 303, 304, 401, 402, 403, 404,
+          101, 102, 111, 112, 113, 114, 121, 122, 123, 124, 131, 132, 133, 134,
         ],
       },
       {
