@@ -5,12 +5,12 @@ const prisma = new PrismaClient();
 
 async function main() {
   //CREATE UserRoles
-  const roles = await prisma.role.createMany({
+  await prisma.role.createMany({
     data: [
       {
         name: "Owner",
         description: "Owner of the hotel.",
-        userType: UserRole.OWNER,
+        userType: UserRole.ADMIN,
         privileges: [
           101, 102, 201, 202, 203, 204, 301, 302, 303, 304, 401, 402, 403, 404,
         ],
@@ -18,35 +18,46 @@ async function main() {
       {
         name: "Customer",
         description: "Customers of hotel",
-        userType: UserRole.EMPLOYER,
+        userType: UserRole.CUSTOMER,
         privileges: [101],
       },
     ],
     skipDuplicates: true,
   });
 
-  const ownerRole = await prisma.role.findFirst({
+  const adminRole = await prisma.role.findFirst({
     where: {
-      userType: UserRole.OWNER,
+      userType: UserRole.ADMIN,
     },
   });
 
   const password = await bcrypt.hash("Itobuz#1234", 10);
 
   //Create OWNER user
-  const owner = await prisma.user.createMany({
+  await prisma.user.createMany({
     data: [
       {
         email: "palash@itobuz.com",
         name: "Owner One",
         password: password,
-        roleId: ownerRole.id,
+        roleId: adminRole.id,
       },
       {
         email: "sudeep@itobuz.com",
         name: "Owner Two",
         password: password,
-        roleId: ownerRole.id,
+        roleId: adminRole.id,
+      },
+    ],
+  });
+
+  await prisma.entity.createMany({
+    data: [
+      {
+        name: "Amenities",
+      },
+      {
+        name: "Room Type",
       },
     ],
   });

@@ -33,17 +33,54 @@ model Role {
 }
 
 enum UserRole {
-  OWNER
-  EMPLOYER
-  USER
+  ADMIN
+  CUSTOMER
 }
 
+model Entity {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String    @db.VarChar(500)
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at")
+  items     Item[]    @relation("EntityItems") // One-to-many relation
+
+  @@map("entity")
+}
+
+model Item {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String    @db.VarChar(500)
+  description String
+  roomInitial String?   @map("room_initial") @db.VarChar(250)
+  status      Boolean   @default(true)
+  entity      Entity    @relation("EntityItems", fields: [entityId], references: [id])
+  entityId    String    @map("entity_id") @db.Uuid // Removed @unique
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at")
+
+  @@map("item")
+}
+
+enum TableName {
+  ITEM
+}
 
 model Upload {
-  id           String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  file         String             @db.VarChar(500)
-  createdAt    DateTime           @default(now()) @map("created_at")
-  updatedAt    DateTime?          @default(now()) @updatedAt @map("updated_at")
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  file           String           @db.VarChar(500)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime?        @default(now()) @updatedAt @map("updated_at")
+  UploadRelation UploadRelation[]
 
   @@map("upload")
+}
+
+model UploadRelation {
+  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  upload        Upload?    @relation(fields: imageUploadId, references: id)
+  imageUploadId String?    @map("image_upload_id") @db.Uuid
+  tableId       String?    @map("table_id") @db.Uuid
+  table         TableName?
+
+  @@map("uploadRelation")
 }

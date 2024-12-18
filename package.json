@@ -19,13 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "dotenv -e .env.test -- jest --verbose --config ./test/jest-e2e.json",
-    "seed:user": "ts-node prisma/seed/rolesAndUsersSeed.ts",
-    "seed:category": "ts-node prisma/seed/categorySeed.ts",
-    "seed:keyword": "ts-node prisma/seed/keywordSeed.ts",
-    "seed:video": "ts-node prisma/seed/videoSeed.ts",
-    "seed:course": "ts-node prisma/seed/courseSeed.ts",
-    "seed:chapter": "ts-node prisma/seed/chapterSeed.ts",
-    "seed:wishlist": "ts-node prisma/seed/wishlistSeed.ts"
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.10.4",
@@ -118,6 +112,6 @@
     "silent": false
   },
   "prisma": {
-    "seed": "ts-node --transpile-only prisma/seed/rolesAndUsersSeed.ts"
+    "seed": "ts-node prisma/seed.ts"
   }
 }

@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CreateItemInput {
+  description: String!
+  entity: ID!
+  name: String!
+  png: ID
+  roomInitial: String
+  status: Boolean! = true
+}
+
 input CreateUserInput {
   email: String!
   password: String!
@@ -43,6 +52,7 @@ input LoginUserInput {
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
+  itemCreate(createItemInput: CreateItemInput!): createSucess!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   signup(signupUserInput: CreateUserInput!): SignupResponse!
@@ -101,4 +111,8 @@ type User {
   id: String!
   updatedAt: DateTime
   username: String!
+}
+
+type createSucess {
+  message: String!
 }
