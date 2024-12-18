@@ -5,6 +5,7 @@ import { CreateUserInput } from 'src/users/dto/create-user.input';
 import { UsersService } from '../users/users.service';
 import { LoginUserInput } from './dto/login-user.input';
 import { PrivilegesList, PrivilegesListType } from '../privileges/user-privileges';
+import { UserPayload } from 'src/util/extended-types';
 
 @Injectable()
 export class AuthService {
@@ -12,6 +13,17 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
   ) { }
+
+  async generateAccessToken(userPayload: UserPayload) {
+    return this.jwtService.sign(userPayload);
+  }
+
+  async generateRefreshToken(userPayload: UserPayload) {
+    return this.jwtService.sign(userPayload, {
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: '7d',
+    });
+  }
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findOne(email);
@@ -33,12 +45,29 @@ export class AuthService {
 
     if (!match) throw new UnauthorizedException("Unauthorized");
 
+    const access_token = await this.generateAccessToken({
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+    });
+
+    if (!access_token) {
+      throw new Error('Access token creation error!');
+    }
+
+    const refresh_token = await this.generateRefreshToken({
+      email: user.email,
+      sub: user.id,
+      role: user.role,
+    });
+
+    if (!refresh_token) {
+      throw new Error('Refresh token creation error!');
+    }
+
     return {
-      access_token: this.jwtService.sign({
-        email: user.email,
-        sub: user.id,
-        role: user.role,
-      }),
+      access_token: access_token,
+      refresh_token,
       user: result,
     };
   }
