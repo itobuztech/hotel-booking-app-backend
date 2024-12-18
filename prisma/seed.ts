@@ -8,7 +8,7 @@ async function main() {
   await prisma.role.createMany({
     data: [
       {
-        name: "Owner",
+        name: "Robert Smith",
         description: "Owner of the hotel.",
         userType: UserRole.ADMIN,
         privileges: [
@@ -16,7 +16,7 @@ async function main() {
         ],
       },
       {
-        name: "Customer",
+        name: "Benjamin Miller",
         description: "Customers of hotel",
         userType: UserRole.CUSTOMER,
         privileges: [101],
