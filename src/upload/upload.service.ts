@@ -15,7 +15,7 @@ import { Prisma, UserRole } from "@prisma/client";
 import * as thumbsupply from "thumbsupply";
 import { createWriteStream } from "fs";
 import { join } from "path";
-// import { CreateCourseInput } from "../courses/dto/create-course.input";
+// import { CreateCourseInput } from "../courses/dto/create-item.input";
 import { UploadFileInput } from "./dto/upload-file-input.dto";
 import { GetUploadedFile } from "./dto/get-upload-file.dto";
 

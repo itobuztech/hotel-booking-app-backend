@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   //CREATE UserRoles
-  const roles = await prisma.role.createMany({
+  await prisma.role.createMany({
     data: [
       {
         name: "Robert Smith",
@@ -25,7 +25,7 @@ async function main() {
     skipDuplicates: true,
   });
 
-  const ownerRole = await prisma.role.findFirst({
+  const adminRole = await prisma.role.findFirst({
     where: {
       userType: UserRole.ADMIN,
     },
@@ -34,19 +34,30 @@ async function main() {
   const password = await bcrypt.hash("Itobuz#1234", 10);
 
   //Create OWNER user
-  const owner = await prisma.user.createMany({
+  await prisma.user.createMany({
     data: [
       {
         email: "palash@itobuz.com",
         name: "Owner One",
         password: password,
-        roleId: ownerRole.id,
+        roleId: adminRole.id,
       },
       {
         email: "sudeep@itobuz.com",
         name: "Owner Two",
         password: password,
-        roleId: ownerRole.id,
+        roleId: adminRole.id,
+      },
+    ],
+  });
+
+  await prisma.entity.createMany({
+    data: [
+      {
+        name: "Amenities",
+      },
+      {
+        name: "Room Type",
       },
     ],
   });
