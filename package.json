@@ -18,7 +18,8 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "dotenv -e .env.test -- jest --verbose --config ./test/jest-e2e.json"
+    "test:e2e": "dotenv -e .env.test -- jest --verbose --config ./test/jest-e2e.json",
+    "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.2",
@@ -28,6 +29,7 @@
     "@nestjs/core": "^10.4.15",
     "@nestjs/graphql": "^12.2.2",
     "@nestjs/jwt": "^10.2.0",
+    "@nestjs/mapped-types": "*",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.4.15",
     "@nestjs/throttler": "^6.3.0",
@@ -35,6 +37,7 @@
     "@sentry/hub": "^7.114.0",
     "@sentry/node": "^8.46.0",
     "@travelerdev/nestjs-sentry-graphql": "^4.3.0",
+    "@types/graphql-upload": "^16.0.7",
     "apollo-server-express": "^3.13.0",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
@@ -42,6 +45,9 @@
     "dotenv": "^16.4.7",
     "graphql": "^16.10.0",
     "graphql-type-json": "^0.3.2",
+    "graphql-upload": "14",
+    "graphql-upload-ts": "^2.1.2",
+    "multer": "^1.4.5-lts.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
@@ -61,6 +67,7 @@
     "@types/passport-jwt": "^4.0.1",
     "@types/passport-local": "^1.0.38",
     "@types/supertest": "^6.0.2",
+    "@types/thumbsupply": "^0.4.2",
     "@typescript-eslint/eslint-plugin": "^8.18.1",
     "@typescript-eslint/parser": "^8.18.1",
     "eslint": "^9.17.0",
@@ -97,7 +104,7 @@
     "silent": false
   },
   "prisma": {
-    "seed": "ts-node --transpile-only prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts"
   },
   "keywords": [
     "hotel",

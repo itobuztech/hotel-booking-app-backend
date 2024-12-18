@@ -10,7 +10,7 @@ services:
       - .:/app
       - /app/node_modules
     ports:
-      - '${API_PORT}:${API_PORT}'
+      - "${API_PORT}:${API_PORT}"
     environment:
       - POSTGRES_HOST=${POSTGRES_HOST}
       - POSTGRES_USERNAME=${POSTGRES_USERNAME}
@@ -27,4 +27,4 @@ services:
       - POSTGRES_USER=${POSTGRES_USERNAME}
       - POSTGRES_DB=${POSTGRES_DB}
     ports:
-      - '5435:${POSTGRES_DB_PORT}'
+      - "${POSTGRES_DB_EXIT_PORT}:${POSTGRES_DB_PORT}"

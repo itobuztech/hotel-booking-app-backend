@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input CreateItemInput {
+  description: String!
+  entity: ID!
+  name: String!
+  png: ID
+  roomInitial: String
+  status: Boolean! = true
+}
+
 input CreateUserInput {
   email: String!
   password: String!
@@ -13,6 +22,18 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type File {
+  createdAt: String
+  file: String
+  fileUrl: String
+  id: String
+  updatedAt: String
+}
+
+input GetUploadedFile {
+  id: String!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -20,6 +41,7 @@ scalar JSON
 
 type LoginResponse {
   access_token: String!
+  refresh_token: String!
   user: User!
 }
 
@@ -30,15 +52,30 @@ input LoginUserInput {
 
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
+  deleteFile(deleteUploadedFile: GetUploadedFile!): String!
+  itemCreate(createItemInput: CreateItemInput!): createSucess!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   signup(signupUserInput: CreateUserInput!): SignupResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
+  uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
+}
+
+type PaginatedFile {
+  files: [File!]!
+  total: Int!
+}
+
+input PaginationArgs {
+  limit: Int
+  skip: Int
 }
 
 type Query {
+  File(getUploadedFile: GetUploadedFile!): File!
   account: User!
   getpermissions: JSON!
+  listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]
 }
@@ -57,10 +94,26 @@ input UpdateProfileInput {
   username: String!
 }
 
+"""The `Upload` scalar type represents a file upload."""
+scalar Upload
+
+input UploadFileInput {
+  file: Upload!
+}
+
+type UploadFileResponse {
+  fileUrl: String!
+  id: String!
+}
+
 type User {
   createdAt: DateTime!
   email: String!
   id: String!
   updatedAt: DateTime
   username: String!
+}
+
+type createSucess {
+  message: String!
 }

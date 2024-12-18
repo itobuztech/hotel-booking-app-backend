@@ -1,18 +1,23 @@
-import { NestFactory, Reflector } from '@nestjs/core';
-import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { AppModule } from './app.module';
+import { NestFactory, Reflector } from "@nestjs/core";
+import { ClassSerializerInterceptor, ValidationPipe } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { AppModule } from "./app.module";
+import { graphqlUploadExpress } from "graphql-upload-ts";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
-    logger: ['error', 'warn', 'log', 'debug', 'verbose'],
+    logger: ["error", "warn", "log", "debug", "verbose"],
   });
 
   const configService = app.get(ConfigService);
 
-  //app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  // app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.use(
+    "/graphql",
+    graphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 10 })
+  );
   await app.listen(configService.get("API_PORT"));
 }
 bootstrap();
