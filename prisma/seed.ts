@@ -27,7 +27,7 @@ async function main() {
 
   const ownerRole = await prisma.role.findFirst({
     where: {
-      userType: UserRole.OWNER,
+      userType: UserRole.ADMIN,
     },
   });
 
