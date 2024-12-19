@@ -104,6 +104,7 @@ type Query {
   entityListing: PaginatedEntity!
   getpermissions: JSON!
   itemListing(filterArgs: FilterItemInput): PaginatedItem!
+  itemView(itemId: UniqueIdentifierInput!): Item!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]
@@ -116,6 +117,10 @@ input ResetPasswordInput {
 
 type SignupResponse {
   access_token: String!
+}
+
+input UniqueIdentifierInput {
+  id: ID!
 }
 
 input UpdateProfileInput {

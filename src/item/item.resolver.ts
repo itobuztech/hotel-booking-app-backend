@@ -12,7 +12,7 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { SearchPaginationArgs } from "../types/inputtypes/search-pagination.input";
 import { SortByFilters } from "../types/inputtypes/sortBy-filters.input";
 import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
-import { PaginatedItem } from "./entities/item.entity";
+import { Item, PaginatedItem } from "./entities/item.entity";
 import { createSucess } from "src/types/inputtypes/create-success.entity";
 import { FilterItemInput } from "./dto/filter-item.input";
 import { PaginatedEntity } from "./entities/entity.entity";
@@ -54,15 +54,15 @@ export class ItemResolver {
   ) {
     return this.itemService.listItem(filterArgs);
   }
+
+  @Query(() => Item)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  itemView(
+    @Args("itemId")
+    itemId: UniqueIdentifierInput
+  ) {
+    return this.itemService.viewItem(itemId);
+  }
 }
-// @Query(() => CourseListResponse)
-// @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-// @Roles(UserRole.ADMIN, UserRole.ENDUSER)
-// @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
-// viewCourse(
-//   @Context() ctx,
-//   @Args("viewCourseInput")
-//   viewCourseInput: UniqueIdentifierInput
-// ) {
-//   return this.coursesService.viewCourse(ctx, viewCourseInput);
-// }
