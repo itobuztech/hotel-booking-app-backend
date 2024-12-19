@@ -140,6 +140,14 @@ export class ItemService {
   async viewItem(itemId: UniqueIdentifierInput) {
     const { id } = itemId;
 
+    // Validate if the entityId exists
+    const itemPresence = await this.prisma.item.findUnique({
+      where: { id },
+    });
+    if (!itemPresence) {
+      throw new NotFoundException(`Item ID does not exist.`);
+    }
+
     try {
       // Fetch item with all necessary relations
       const item = await this.prisma.item.findUnique({
@@ -166,6 +174,62 @@ export class ItemService {
       }
 
       return item;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteItem(itemId: UniqueIdentifierInput) {
+    const { id } = itemId;
+
+    // Validate if the entityId exists
+    const itemPresence = await this.prisma.item.findUnique({
+      where: { id },
+    });
+    if (!itemPresence) {
+      throw new NotFoundException(`Item ID does not exist.`);
+    }
+
+    try {
+      // Fetch item with all necessary relations
+      const item = await this.prisma.item.delete({
+        where: { id },
+      });
+
+      // Check if item exists
+      if (!item) {
+        throw new NotFoundException("No item found with this ID!");
+      }
+
+      return { message: `Item deleted succesully with the Id ${id}` };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteEntity(entityId: UniqueIdentifierInput) {
+    const { id } = entityId;
+
+    // Validate if the entityId exists
+    const entityPresence = await this.prisma.entity.findUnique({
+      where: { id },
+    });
+    if (!entityPresence) {
+      throw new NotFoundException(`Entity ID does not exist.`);
+    }
+
+    try {
+      // Fetch item with all necessary relations
+      const Entity = await this.prisma.entity.delete({
+        where: { id },
+      });
+
+      // Check if Entity exists
+      if (!Entity) {
+        throw new NotFoundException("No Entity found with this ID!");
+      }
+
+      return { message: `Entity deleted succesully with the Id ${id}` };
     } catch (error) {
       throw error;
     }

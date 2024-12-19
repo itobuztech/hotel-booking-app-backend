@@ -1,7 +1,7 @@
 import { Field, ObjectType } from "@nestjs/graphql";
 
 @ObjectType()
-export class createSucess {
+export class Message {
   @Field(() => String)
   message: String;
 }

@@ -67,10 +67,16 @@ input LoginUserInput {
   password: String!
 }
 
+type Message {
+  message: String!
+}
+
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
-  itemCreate(createItemInput: CreateItemInput!): createSucess!
+  entityDelete(entityId: UniqueIdentifierInput!): Message!
+  itemCreate(createItemInput: CreateItemInput!): Message!
+  itemDelete(itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   signup(signupUserInput: CreateUserInput!): SignupResponse!
@@ -146,8 +152,4 @@ type User {
   id: String!
   updatedAt: DateTime
   username: String!
-}
-
-type createSucess {
-  message: String!
 }
