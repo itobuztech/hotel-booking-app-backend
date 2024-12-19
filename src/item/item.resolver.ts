@@ -13,17 +13,16 @@ import { SearchPaginationArgs } from "../types/inputtypes/search-pagination.inpu
 import { SortByFilters } from "../types/inputtypes/sortBy-filters.input";
 import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
 import { Item, PaginatedItem } from "./entities/item.entity";
-import { createSucess } from "src/types/inputtypes/create-success.entity";
+import { Message } from "src/types/inputtypes/message.entity";
 import { FilterItemInput } from "./dto/filter-item.input";
 import { PaginatedEntity } from "./entities/entity.entity";
-// import { courseWishlisted } from "../util/extended-types";
 
 @Resolver()
 export class ItemResolver {
   constructor(private readonly itemService: ItemService) {}
 
   // Item Creation
-  @Mutation(() => createSucess)
+  @Mutation(() => Message)
   // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   // @Roles(UserRole.ADMIN)
   // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.CREATE])
@@ -55,6 +54,7 @@ export class ItemResolver {
     return this.itemService.listItem(filterArgs);
   }
 
+  // Item Viewing
   @Query(() => Item)
   // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
@@ -64,5 +64,29 @@ export class ItemResolver {
     itemId: UniqueIdentifierInput
   ) {
     return this.itemService.viewItem(itemId);
+  }
+
+  // Item Delete
+  @Mutation(() => Message)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  itemDelete(
+    @Args("itemId")
+    itemId: UniqueIdentifierInput
+  ) {
+    return this.itemService.deleteItem(itemId);
+  }
+
+  // Entity Delete
+  @Mutation(() => Message)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  entityDelete(
+    @Args("entityId")
+    entityId: UniqueIdentifierInput
+  ) {
+    return this.itemService.deleteEntity(entityId);
   }
 }
