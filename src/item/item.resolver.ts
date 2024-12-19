@@ -17,6 +17,7 @@ import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
 import { UpdateItemInput } from "./dto/update-item.input";
 import { PaginatedItem } from "./entities/item.entity";
 import { createSucess } from "src/types/inputtypes/create-success.entity";
+import { FilterItemInput } from "./dto/filter-item.input";
 // import { courseWishlisted } from "../util/extended-types";
 
 @Resolver()
@@ -34,78 +35,16 @@ export class ItemResolver {
     return this.itemService.createItem(ctx, createItemInput);
   }
 
-  // @Mutation(() => Course)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.EDIT])
-  // updateCourse(
-  //   @Context() ctx,
-  //   @Args("updateCourseInput") updateCourseInput: UpdateCourseInput
-  // ) {
-  //   const loggedInUserId = ctx.req.user.userId;
-  //   const { id, ...data } = updateCourseInput;
-
-  //   return this.coursesService.updateCourse(loggedInUserId, id, data);
-  // }
-
-  // @Query(() => PaginatedCourse)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ENDUSER)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
-  // listCourses(
+  // @Query(() => PaginatedItem)
+  // // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // // @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ENDUSER)
+  // // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  // itemListing(
   //   @Context() ctx: any,
-  //   @Args("searchPaginationInputs")
-  //   searchPaginationInputs: SearchPaginationArgs,
-  //   @Args("sortOrderInputs", { nullable: true }) sortOrderInputs: SortByFilters,
   //   @Args("filterArgs", { nullable: true })
-  //   filterArgs: FilterCourseInputs
+  //   filterArgs?: FilterItemInput
   // ) {
-  //   return this.coursesService.listCourses(
-  //     ctx,
-  //     searchPaginationInputs,
-  //     sortOrderInputs,
-  //     filterArgs
-  //   );
-  // }
-
-  // @Query(() => PaginatedBoughtCourse)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.SUPERADMIN, UserRole.ADMIN)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
-  // listBoughtCourses(
-  //   @Context() ctx: any,
-  //   @Args("searchPaginationInputs")
-  //   searchPaginationInputs: SearchPaginationArgs,
-  //   @Args("sortOrderInputs", { nullable: true }) sortOrderInputs: SortByFilters,
-  //   @Args("filterArgs", { nullable: true })
-  //   filterArgs: FilterCourseInputs
-  // ) {
-  //   return this.coursesService.listBoughtCourses(
-  //     ctx,
-  //     searchPaginationInputs,
-  //     sortOrderInputs,
-  //     filterArgs
-  //   );
-  // }
-
-  // @Query(() => PaginatedCourse)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ENDUSER)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
-  // listCoursesLibrary(
-  //   @Context() ctx: any,
-  //   @Args("searchPaginationInputs")
-  //   searchPaginationInputs: SearchPaginationArgs,
-  //   @Args("sortOrderInputs", { nullable: true }) sortOrderInputs: SortByFilters,
-  //   @Args("filterArgs", { nullable: true })
-  //   filterArgs: FilterCourseInputs
-  // ) {
-  //   return this.coursesService.listCoursesLibrary(
-  //     ctx,
-  //     searchPaginationInputs,
-  //     sortOrderInputs,
-  //     filterArgs
-  //   );
+  //   return this.itemService.listItems(ctx, filterArgs);
   // }
 
   // @Query(() => CourseListResponse)
@@ -134,18 +73,5 @@ export class ItemResolver {
   //     uniqueIdentifierInput,
   //     toggleCourseInput
   //   );
-  // }
-
-  // @Mutation(() => Boolean)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.DELETE])
-  // deleteCourse(
-  //   @Context() ctx,
-  //   @Args("deleteCourseInput") deleteCourseInput: UniqueIdentifierInput
-  // ): Promise<boolean> {
-  //   const loggedInUser = ctx.req.user.userId;
-  //   const { id } = deleteCourseInput;
-  //   return this.coursesService.deleteCourse(loggedInUser, id);
   // }
 }
