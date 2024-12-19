@@ -1,5 +1,5 @@
 FROM node:20-alpine
-RUN apk add --update --no-cache postgresql-client nano sudo ffmpeg openssl
+RUN apk add --update --no-cache postgresql-client nano sudo openssl
 RUN mkdir /app 
 WORKDIR /app
 COPY package.json yarn.lock ./
