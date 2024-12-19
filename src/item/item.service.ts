@@ -83,30 +83,56 @@ export class ItemService {
     }
   }
 
-  // async listItems(ctx, filterArgs: FilterItemInput) {
-  //   try {
-  //     const items = await this.prisma.item.findMany({
-  //       where: { status: true },
-  //       include: {
-  //         entity: true,
-  //         uploadRelation: {
-  //           include: {
-  //             upload: true,
-  //           },
-  //         },
-  //       },
-  //     });
+  async listEntity() {
+    try {
+      const entities = await this.prisma.entity.findMany();
 
-  //     items.map((item): any => {
-  //       item.uploadRelation[0].upload[
-  //         "fileUrl"
-  //       ] = `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
-  //       item["image"] = item.uploadRelation[0].upload;
-  //     });
+      return { entities, total: entities.length };
+    } catch (error) {
+      throw error;
+    }
+  }
 
-  //     return { items, total: items.length };
-  //   } catch (error) {
-  //     throw error;
-  //   }
-  // }
+  async listItem(filterArgs: FilterItemInput) {
+    let extraWhere = null;
+
+    if (filterArgs) {
+      const { entity } = filterArgs;
+
+      // Validate if the entityId exists
+      const entityPresence = await this.prisma.entity.findUnique({
+        where: { id: entity },
+      });
+      if (!entityPresence) {
+        throw new NotFoundException(`Entity ID does not exist.`);
+      } else {
+        extraWhere = { entityId: entity };
+      }
+    }
+
+    try {
+      const items = await this.prisma.item.findMany({
+        where: { status: true, ...extraWhere },
+        include: {
+          entity: true,
+          uploadRelation: {
+            include: {
+              upload: true,
+            },
+          },
+        },
+      });
+
+      items.map((item): any => {
+        item.uploadRelation[0].upload[
+          "fileUrl"
+        ] = `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
+        item["image"] = item.uploadRelation[0].upload;
+      });
+
+      return { items, total: items.length };
+    } catch (error) {
+      throw error;
+    }
+  }
 }
