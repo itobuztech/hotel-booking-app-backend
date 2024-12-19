@@ -9,6 +9,7 @@ import { CreateItemInput } from "./dto/create-item.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { FilterItemInput } from "./dto/filter-item.input";
 import { Item } from "./entities/item.entity";
+import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Injectable()
 export class ItemService {
@@ -123,7 +124,7 @@ export class ItemService {
         },
       });
 
-      items.map((item): any => {
+      items?.map((item): any => {
         item.uploadRelation[0].upload[
           "fileUrl"
         ] = `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
@@ -131,6 +132,40 @@ export class ItemService {
       });
 
       return { items, total: items.length };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async viewItem(itemId: UniqueIdentifierInput) {
+    const { id } = itemId;
+
+    try {
+      // Fetch item with all necessary relations
+      const item = await this.prisma.item.findUnique({
+        where: { id, status: true },
+        include: {
+          entity: true,
+          uploadRelation: {
+            include: {
+              upload: true,
+            },
+          },
+        },
+      });
+
+      // Item image realation added
+      item.uploadRelation[0].upload[
+        "fileUrl"
+      ] = `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
+      item["image"] = item.uploadRelation[0].upload;
+
+      // Check if item exists
+      if (!item) {
+        throw new NotFoundException("No item found with this ID!");
+      }
+
+      return item;
     } catch (error) {
       throw error;
     }
