@@ -1,60 +1,112 @@
 import {
-  HttpException,
-  HttpStatus,
+  ConflictException,
   Injectable,
-  InternalServerErrorException,
-  NotAcceptableException,
   NotFoundException,
-  UnauthorizedException,
 } from "@nestjs/common";
+import { TableName } from "@prisma/client";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { CreateItemInput } from "./dto/create-item.input";
 import { PrismaService } from "../prisma/prisma.service";
-import { GraphQLError } from "graphql";
-import { SearchPaginationArgs } from "../types/inputtypes/search-pagination.input";
-import { SortByFilters } from "../types/inputtypes/sortBy-filters.input";
-// import { viewCourseInputArgs } from "./dto/view-item.input";
-import { AccountService } from "../account/account.service";
-// import { Course as PrismaCourse, Prisma, UserRole } from "@prisma/client";
-import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
-import { ApolloError } from "apollo-server-express";
-// import { courseWishlisted } from "../util/extended-types";
-import { createWriteStream } from "fs";
+import { FilterItemInput } from "./dto/filter-item.input";
 import { Item } from "./entities/item.entity";
-import { TableName } from "@prisma/client";
 
 @Injectable()
 export class ItemService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createItem(ctx, createItemInput: CreateItemInput) {
-    const { name, description, roomInitial, status, entity, png } =
+    const { name, description, roomInitial, status, entity, image } =
       createItemInput;
 
-    try {
-      const item = await this.prisma.item.create({
-        data: {
-          name,
-          description,
-          roomInitial,
-          entityId: entity,
-          status,
-        },
-      });
+    // Validate if the entityId exists
+    const entityPresence = await this.prisma.entity.findUnique({
+      where: { id: entity },
+    });
+    if (!entityPresence) {
+      throw new NotFoundException(`Entity ID does not exist.`);
+    }
 
-      await this.prisma.uploadRelation.create({
-        data: {
-          imageUploadId: png,
-          tableId: item.id,
-          table: TableName.ITEM,
-        },
-      });
+    // Validate if the entityId exists
+    const uploadPresence = await this.prisma.upload.findUnique({
+      where: { id: image },
+    });
+    if (!uploadPresence) {
+      throw new NotFoundException(`Image ID does not exist.`);
+    }
+
+    try {
+      let item = null;
+      try {
+        item = await this.prisma.item.create({
+          data: {
+            name,
+            description,
+            roomInitial,
+            entityId: entity,
+            status,
+          },
+        });
+      } catch (error) {
+        if (
+          error instanceof PrismaClientKnownRequestError &&
+          error.code === "P2002"
+        ) {
+          const target = (error.meta?.target as string[]) || [];
+          if (target.includes("name")) {
+            throw new ConflictException("The item name must be unique.");
+          }
+          if (target.includes("room_initial")) {
+            throw new ConflictException("The room initial must be unique.");
+          }
+        } else {
+          console.log("Error=", error);
+          throw new Error("Item could not be created!");
+        }
+      }
+
+      try {
+        await this.prisma.uploadRelation.create({
+          data: {
+            imageUploadId: image,
+            tableId: item.id,
+            table: TableName.ITEM,
+          },
+        });
+      } catch (error) {
+        console.log("Error=", error);
+        throw new Error("Upload relation creation error!");
+      }
 
       return { message: `Item created succesully with the Id ${item.id}` };
     } catch (error) {
-      throw new NotAcceptableException("Item couldn't be created", {
-        cause: new Error(),
-        description: error,
-      });
+      throw error;
     }
   }
+
+  // async listItems(ctx, filterArgs: FilterItemInput) {
+  //   try {
+  //     const items = await this.prisma.item.findMany({
+  //       where: { status: true },
+  //       include: {
+  //         entity: true,
+  //         uploadRelation: {
+  //           include: {
+  //             upload: true,
+  //           },
+  //         },
+  //       },
+  //     });
+
+  //     items.map((item): any => {
+  //       item.uploadRelation[0].upload[
+  //         "fileUrl"
+  //       ] = `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
+  //       item["image"] = item.uploadRelation[0].upload;
+  //     });
+
+  //     return { items, total: items.length };
+  //   } catch (error) {
+  //     throw error;
+  //   }
+  // }
 }

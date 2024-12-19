@@ -1,7 +1,8 @@
-import { Field, ID, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType } from "@nestjs/graphql";
 import { Item as ItemDB } from "@prisma/client";
-import { File } from "../../upload/entities/files.entity";
 import { TotalCount } from "src/types/inputtypes/toalCount.entity";
+import { Entity } from "./entity.entity";
+import { File } from "src/upload/entities/files.entity";
 
 @ObjectType()
 export class Item {
@@ -17,11 +18,14 @@ export class Item {
   @Field(() => Boolean)
   status: ItemDB["status"];
 
-  @Field(() => String)
-  entity: ItemDB["entityId"];
+  @Field(() => Entity)
+  entity: Entity;
 
-  @Field(() => String, { name: "roomInitial", nullable: true })
-  room_initial?: ItemDB["roomInitial"];
+  @Field(() => File)
+  image: File;
+
+  @Field(() => String, { nullable: true })
+  roomInitial?: ItemDB["roomInitial"];
 }
 
 @ObjectType()
