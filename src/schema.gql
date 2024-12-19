@@ -22,14 +22,33 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Entity {
+  id: String!
+  name: String!
+}
+
 type File {
   file: String
   fileUrl: String
   id: String
 }
 
+input FilterItemInput {
+  entity: ID!
+}
+
 input GetUploadedFile {
   id: String!
+}
+
+type Item {
+  description: String!
+  entity: Entity!
+  id: String!
+  image: File!
+  name: String!
+  roomInitial: String
+  status: Boolean!
 }
 
 """
@@ -59,8 +78,18 @@ type Mutation {
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
 }
 
+type PaginatedEntity {
+  entities: [Entity!]!
+  total: Int!
+}
+
 type PaginatedFile {
   files: [File!]!
+  total: Int!
+}
+
+type PaginatedItem {
+  items: [Item!]!
   total: Int!
 }
 
@@ -72,7 +101,9 @@ input PaginationArgs {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: User!
+  entityListing: PaginatedEntity!
   getpermissions: JSON!
+  itemListing(filterArgs: FilterItemInput): PaginatedItem!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]

@@ -14,5 +14,5 @@ export class Entity {
 @ObjectType()
 export class PaginatedEntity extends TotalCount {
   @Field(() => [Entity])
-  items: Entity[];
+  entities: Entity[];
 }
