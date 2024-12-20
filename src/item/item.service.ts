@@ -65,22 +65,18 @@ export class ItemService {
         }
       }
 
-      try {
-        await this.prisma.uploadRelation.create({
-          data: {
-            imageUploadId: image,
-            tableId: item.id,
-            table: TableName.ITEM,
-          },
-        });
-      } catch (error) {
-        console.log("Error=", error);
-        throw new Error("Upload relation creation error!");
-      }
+      await this.prisma.uploadRelation.create({
+        data: {
+          imageUploadId: image,
+          tableId: item.id,
+          table: TableName.ITEM,
+        },
+      });
 
       return { message: `Item created succesully with the Id ${item.id}` };
     } catch (error) {
-      throw error;
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
     }
   }
 
@@ -90,7 +86,8 @@ export class ItemService {
 
       return { entities, total: entities.length };
     } catch (error) {
-      throw error;
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
     }
   }
 
@@ -133,20 +130,13 @@ export class ItemService {
 
       return { items, total: items.length };
     } catch (error) {
-      throw error;
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
     }
   }
 
   async viewItem(itemId: UniqueIdentifierInput) {
     const { id } = itemId;
-
-    // Validate if the entityId exists
-    const itemPresence = await this.prisma.item.findUnique({
-      where: { id },
-    });
-    if (!itemPresence) {
-      throw new NotFoundException(`Item ID does not exist.`);
-    }
 
     try {
       // Fetch item with all necessary relations
@@ -162,20 +152,21 @@ export class ItemService {
         },
       });
 
+      // Check if item exists
+      if (!item) {
+        throw new NotFoundException("No item found with this ID!");
+      }
+
       // Item image realation added
       item.uploadRelation[0].upload[
         "fileUrl"
       ] = `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
       item["image"] = item.uploadRelation[0].upload;
 
-      // Check if item exists
-      if (!item) {
-        throw new NotFoundException("No item found with this ID!");
-      }
-
       return item;
     } catch (error) {
-      throw error;
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
     }
   }
 
@@ -192,18 +183,14 @@ export class ItemService {
 
     try {
       // Fetch item with all necessary relations
-      const item = await this.prisma.item.delete({
+      await this.prisma.item.delete({
         where: { id },
       });
 
-      // Check if item exists
-      if (!item) {
-        throw new NotFoundException("No item found with this ID!");
-      }
-
       return { message: `Item deleted succesully with the Id ${id}` };
     } catch (error) {
-      throw error;
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
     }
   }
 
@@ -220,18 +207,44 @@ export class ItemService {
 
     try {
       // Fetch item with all necessary relations
-      const Entity = await this.prisma.entity.delete({
+      await this.prisma.entity.delete({
         where: { id },
       });
 
-      // Check if Entity exists
-      if (!Entity) {
-        throw new NotFoundException("No Entity found with this ID!");
-      }
-
       return { message: `Entity deleted succesully with the Id ${id}` };
     } catch (error) {
-      throw error;
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
+    }
+  }
+
+  async toggleItem(itemId: UniqueIdentifierInput) {
+    const { id } = itemId;
+
+    // Validate if the entityId exists
+    const itemPresence = await this.prisma.item.findUnique({
+      select: { status: true },
+      where: { id },
+    });
+    if (!itemPresence) {
+      throw new NotFoundException(`Item ID does not exist.`);
+    }
+
+    try {
+      // Fetch item with all necessary relations
+      await this.prisma.item.update({
+        where: { id },
+        data: { status: !itemPresence.status },
+      });
+
+      return {
+        message: `Item ${
+          !itemPresence.status === true ? "Enabled" : "Disabled"
+        }!`,
+      };
+    } catch (error) {
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
     }
   }
 }
