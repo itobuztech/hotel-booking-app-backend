@@ -89,4 +89,16 @@ export class ItemResolver {
   ) {
     return this.itemService.deleteEntity(entityId);
   }
+
+  // Item Toggle
+  @Mutation(() => Message)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  itemToggle(
+    @Args("itemId")
+    entityId: UniqueIdentifierInput
+  ) {
+    return this.itemService.toggleItem(entityId);
+  }
 }

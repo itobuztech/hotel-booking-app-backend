@@ -77,6 +77,7 @@ type Mutation {
   entityDelete(entityId: UniqueIdentifierInput!): Message!
   itemCreate(createItemInput: CreateItemInput!): Message!
   itemDelete(itemId: UniqueIdentifierInput!): Message!
+  itemToggle(itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   signup(signupUserInput: CreateUserInput!): SignupResponse!
