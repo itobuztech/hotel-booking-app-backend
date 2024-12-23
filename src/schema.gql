@@ -80,7 +80,8 @@ type Mutation {
   itemToggle(itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
-  signup(signupUserInput: CreateUserInput!): SignupResponse!
+  signup(signupUserInput: CreateUserInput!): Message!
+  tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
 }
@@ -122,8 +123,8 @@ input ResetPasswordInput {
   oldPassword: String!
 }
 
-type SignupResponse {
-  access_token: String!
+input TokenConfirmationInput {
+  token: String!
 }
 
 input UniqueIdentifierInput {

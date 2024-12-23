@@ -1,30 +1,47 @@
-import { UseGuards } from '@nestjs/common';
-import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
-import JSON from 'graphql-type-json';
-import { CreateUserInput } from '../users/dto/create-user.input';
-import { User } from '../users/entities/user.entity';
-import { AuthService } from './auth.service';
-import { LoginResponse } from './dto/login-response';
-import { LoginUserInput } from './dto/login-user.input';
-import { GqlAuthGuard } from './guards/gql-auth.guard';
-import { PrivilegesList, PrivilegesListType } from '../privileges/user-privileges';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { Permissions } from '../auth/decorators/permissions.decorator';
-import { PermissionsGuardOR } from './guards/permissions-or.guard';
-import { SignupResponse } from './dto/signup-response';
+import { BadRequestException, UseGuards } from "@nestjs/common";
+import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
+import JSON from "graphql-type-json";
+import { CreateUserInput } from "../users/dto/create-user.input";
+import { User } from "../users/entities/user.entity";
+import { AuthService } from "./auth.service";
+import { LoginResponse } from "./dto/login-response";
+import { LoginUserInput } from "./dto/login-user.input";
+import { GqlAuthGuard } from "./guards/gql-auth.guard";
+import {
+  PrivilegesList,
+  PrivilegesListType,
+} from "../privileges/user-privileges";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { Permissions } from "../auth/decorators/permissions.decorator";
+import { PermissionsGuardOR } from "./guards/permissions-or.guard";
+import { SignupResponse } from "./dto/signup-response";
+import { Message } from "src/types/inputtypes/message.entity";
+import { TokenConfirmationInput } from "./dto/token-confirmation.input";
 @Resolver()
 export class AuthResolver {
-  constructor(private authService: AuthService) { }
+  constructor(private authService: AuthService) {}
 
   @Mutation(() => LoginResponse)
   @UseGuards(GqlAuthGuard)
-  async login(@Args('loginUserInput') loginUserInput: LoginUserInput) {
+  async login(@Args("loginUserInput") loginUserInput: LoginUserInput) {
     return this.authService.login(loginUserInput);
   }
 
-  @Mutation(() => SignupResponse)
-  signup(@Args('signupUserInput') signupUserInput: CreateUserInput) {
+  @Mutation(() => Message)
+  signup(@Args("signupUserInput") signupUserInput: CreateUserInput) {
     return this.authService.signup(signupUserInput);
+  }
+
+  @Mutation(() => LoginResponse)
+  async tokenConfirmation(
+    @Args("tokenConfirmationInput")
+    tokenConfirmationInput: TokenConfirmationInput
+  ) {
+    try {
+      return this.authService.tokenConfirmation(tokenConfirmationInput);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   @Query(() => JSON)

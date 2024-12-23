@@ -4,7 +4,6 @@ import { PrivilegesList } from "../src/privileges/user-privileges";
 const prisma = new PrismaClient();
 
 async function main() {
-
   await prisma.user.deleteMany({});
   await prisma.role.deleteMany({});
 
@@ -45,12 +44,14 @@ async function main() {
         name: "Owner One",
         password: password,
         roleId: adminRole.id,
+        isEmailConfirmed: true,
       },
       {
         email: "sudeep@itobuz.com",
         name: "Owner Two",
         password: password,
         roleId: adminRole.id,
+        isEmailConfirmed: true,
       },
     ],
   });
