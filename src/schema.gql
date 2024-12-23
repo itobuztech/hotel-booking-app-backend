@@ -87,9 +87,8 @@ type Message {
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
-  forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
-  itemCreate(createItemInput: CreateItemInput!): createSucess!
   entityDelete(entityId: UniqueIdentifierInput!): Message!
+  forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemCreate(createItemInput: CreateItemInput!): Message!
   itemDelete(itemId: UniqueIdentifierInput!): Message!
   itemToggle(itemId: UniqueIdentifierInput!): Message!
@@ -173,9 +172,5 @@ type User {
 }
 
 type ValidateForgotPasswordResponse {
-  message: String!
-}
-
-type createSucess {
   message: String!
 }
