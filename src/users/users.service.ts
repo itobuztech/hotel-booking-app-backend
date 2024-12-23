@@ -9,14 +9,10 @@ import { Prisma, User, Role, UserRole } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
-<<<<<<< HEAD
   constructor(
     private prisma: PrismaService,
     private readonly logger: Logger
   ) {}
-=======
-  constructor(private prisma: PrismaService, private readonly logger: Logger) { }
->>>>>>> 9385d4afc9c5977b2b8cdb84da39eae08c1a7ca3
 
   async findAll(): Promise<User[]> {
     return await this.prisma.user.findMany({});
@@ -97,7 +93,6 @@ export class UsersService {
   }
 
   async findOneByToken(
-<<<<<<< HEAD
     emailConfirmationToken: string
   ): Promise<User & { role: Partial<Role> }> {
     try {
@@ -134,46 +129,5 @@ export class UsersService {
     } catch (error) {
       throw error;
     }
-=======
-    emailConfirmationToken: string,
-  ): Promise<User> {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        emailConfirmationToken,
-        deactivated: false,
-      },
-      include: {
-        role: {
-          select: {
-            privileges: true,
-            userType: true,
-          },
-        },
-      },
-    });
-
-    if (!user) {
-      throw new Error(
-        'Their is no user with this token Or the token has expired Or The user is already confirmed!!',
-      );
-    }
-
-    const confirmingUser = await this.prisma.user.update({
-      where: {
-        id: user.id,
-        deactivated: false,
-      },
-      data: {
-        emailConfirmationToken: '',
-        isEmailConfirmed: true,
-      },
-    });
-
-    if (!confirmingUser) {
-      throw new Error('User not confirmed. Please try after some time!');
-    }
-
-    return user;
->>>>>>> 9385d4afc9c5977b2b8cdb84da39eae08c1a7ca3
   }
 }
