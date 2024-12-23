@@ -1,16 +1,6 @@
 import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { UserRole } from "@prisma/client";
-import { UseGuards } from "@nestjs/common";
 import { ItemService } from "./item.service";
-import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
-import { PermissionsGuardOR } from "../auth/guards/permissions-or.guard";
-import { PrivilegesList } from "../privileges/user-privileges";
-import { Permissions } from "../auth/decorators/permissions.decorator";
 import { CreateItemInput } from "./dto/create-item.input";
-import { RolesGuard } from "../auth/guards/roles.guard";
-import { Roles } from "../auth/decorators/roles.decorator";
-import { SearchPaginationArgs } from "../types/inputtypes/search-pagination.input";
-import { SortByFilters } from "../types/inputtypes/sortBy-filters.input";
 import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
 import { Item, PaginatedItem } from "./entities/item.entity";
 import { Message } from "src/types/inputtypes/message.entity";
@@ -19,7 +9,7 @@ import { PaginatedEntity } from "./entities/entity.entity";
 
 @Resolver()
 export class ItemResolver {
-  constructor(private readonly itemService: ItemService) {}
+  constructor(private readonly itemService: ItemService) { }
 
   // Item Creation
   @Mutation(() => Message)

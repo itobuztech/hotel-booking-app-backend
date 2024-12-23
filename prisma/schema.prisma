@@ -13,8 +13,9 @@ model User {
   password               String
   name                   String?
   username               String?
-  isEmailConfirmed       Boolean?  @default(false)
-  emailConfirmationToken String?
+  emailConfirmationToken String?   @map("email_confirmation_token")
+  isEmailConfirmed       Boolean   @default(false) @map("is_email_confirmed")
+  status                 Boolean   @default(false)
   createdAt              DateTime  @default(now()) @map("created_at")
   updatedAt              DateTime? @default(now()) @updatedAt @map("updated_at")
   roleId                 String    @map("role_id") @db.Uuid

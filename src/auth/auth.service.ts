@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import * as bcrypt from "bcrypt";
@@ -12,14 +13,33 @@ import { UserPayload } from "../util/extended-types";
 import { generateToken } from "../util/helper";
 import { EmailService } from "../email/email.service";
 import { TokenConfirmationInput } from "./dto/token-confirmation.input";
+=======
+import { Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { CreateUserInput } from 'src/users/dto/create-user.input';
+import { UsersService } from '../users/users.service';
+import { LoginUserInput } from './dto/login-user.input';
+import { PrivilegesList, PrivilegesListType } from '../privileges/user-privileges';
+import { UserPayload } from 'src/util/extended-types';
+import { ForgotPasswordResponse, ValidateForgotPasswordResponse } from './dto/forgot-password-response';
+import { ForgotPasswordConfirmationInput, ForgotPasswordInput } from './dto/forgot-password';
+import { generateToken } from '../util/helper';
+import { EmailService } from '../email/email.service';
+>>>>>>> 9385d4afc9c5977b2b8cdb84da39eae08c1a7ca3
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+<<<<<<< HEAD
     private readonly emailService: EmailService
   ) {}
+=======
+    private emailService: EmailService,
+  ) { }
+>>>>>>> 9385d4afc9c5977b2b8cdb84da39eae08c1a7ca3
 
   async generateAccessToken(userPayload: UserPayload) {
     return this.jwtService.sign(userPayload);
@@ -182,5 +202,67 @@ export class AuthService {
       };
     }
     return rebuiltSections;
+  }
+
+  async forgotPassword(
+    forgotPasswordInput: ForgotPasswordInput,
+  ): Promise<ForgotPasswordResponse> {
+    const user = await this.usersService.findOne(forgotPasswordInput.email);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const { email, id, name } = user;
+
+    const confirmationToken = await generateToken();
+    const subject = 'Forgot Password Request!';
+    const body = `<p>Hello ${name}</p>
+        <p>We received a request to reset the password for your [Service Name] account. To ensure the security of your account, please click the link below to set a new password:.</p> 
+        <p>By clicking on this link ${process.env.FRONTEND_BASE_URL}/forgotpasswordconfirmation?confirmation_token=${confirmationToken}</p> 
+        <p>Thanks</p>`;
+
+    const emailSent = await this.emailService.run(email, subject, body);
+
+    if (!emailSent) {
+      throw new InternalServerErrorException(
+        'Failed to send confirmation email!',
+      );
+    }
+
+    try {
+      await this.usersService.updateUser(id, {
+        emailConfirmationToken: confirmationToken,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to generate confirmation token!',
+      );
+    }
+
+    return { token: confirmationToken };
+  }
+
+  async validateForgotPasswordToken(
+    forgotPasswordConfirmationInput: ForgotPasswordConfirmationInput,
+  ): Promise<ValidateForgotPasswordResponse> {
+    const { confirmationToken, newPassword } = forgotPasswordConfirmationInput;
+    const user = await this.usersService.findOneByToken(confirmationToken);
+    const { id } = user;
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    const password = await bcrypt.hash(newPassword, 10);
+    try {
+      await this.usersService.updateUser(id, {
+        emailConfirmationToken: null,
+        password,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to generate confirmation token!',
+      );
+    }
+
+    return { message: 'Password has been reset. Try loggin in.' };
   }
 }

@@ -37,6 +37,19 @@ input FilterItemInput {
   entity: ID!
 }
 
+input ForgotPasswordConfirmationInput {
+  confirmationToken: String!
+  newPassword: String!
+}
+
+input ForgotPasswordInput {
+  email: String!
+}
+
+type ForgotPasswordResponse {
+  token: String!
+}
+
 input GetUploadedFile {
   id: String!
 }
@@ -74,6 +87,8 @@ type Message {
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
+  forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
+  itemCreate(createItemInput: CreateItemInput!): createSucess!
   entityDelete(entityId: UniqueIdentifierInput!): Message!
   itemCreate(createItemInput: CreateItemInput!): Message!
   itemDelete(itemId: UniqueIdentifierInput!): Message!
@@ -84,6 +99,7 @@ type Mutation {
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
+  validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
 }
 
 type PaginatedEntity {
@@ -154,4 +170,12 @@ type User {
   id: String!
   updatedAt: DateTime
   username: String!
+}
+
+type ValidateForgotPasswordResponse {
+  message: String!
+}
+
+type createSucess {
+  message: String!
 }
