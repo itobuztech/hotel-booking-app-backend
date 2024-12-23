@@ -5,8 +5,8 @@
 input CreateItemInput {
   description: String!
   entity: ID!
+  image: ID
   name: String!
-  png: ID
   roomInitial: String
   status: Boolean! = true
 }
@@ -22,12 +22,19 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Entity {
+  id: String!
+  name: String!
+}
+
 type File {
-  createdAt: String
   file: String
   fileUrl: String
   id: String
-  updatedAt: String
+}
+
+input FilterItemInput {
+  entity: ID!
 }
 
 input ForgotPasswordConfirmationInput {
@@ -47,6 +54,16 @@ input GetUploadedFile {
   id: String!
 }
 
+type Item {
+  description: String!
+  entity: Entity!
+  id: String!
+  image: File!
+  name: String!
+  roomInitial: String
+  status: Boolean!
+}
+
 """
 The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
 """
@@ -63,11 +80,19 @@ input LoginUserInput {
   password: String!
 }
 
+type Message {
+  message: String!
+}
+
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemCreate(createItemInput: CreateItemInput!): createSucess!
+  entityDelete(entityId: UniqueIdentifierInput!): Message!
+  itemCreate(createItemInput: CreateItemInput!): Message!
+  itemDelete(itemId: UniqueIdentifierInput!): Message!
+  itemToggle(itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   signup(signupUserInput: CreateUserInput!): SignupResponse!
@@ -76,8 +101,18 @@ type Mutation {
   validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
 }
 
+type PaginatedEntity {
+  entities: [Entity!]!
+  total: Int!
+}
+
 type PaginatedFile {
   files: [File!]!
+  total: Int!
+}
+
+type PaginatedItem {
+  items: [Item!]!
   total: Int!
 }
 
@@ -89,7 +124,10 @@ input PaginationArgs {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: User!
+  entityListing: PaginatedEntity!
   getpermissions: JSON!
+  itemListing(filterArgs: FilterItemInput): PaginatedItem!
+  itemView(itemId: UniqueIdentifierInput!): Item!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]
@@ -102,6 +140,10 @@ input ResetPasswordInput {
 
 type SignupResponse {
   access_token: String!
+}
+
+input UniqueIdentifierInput {
+  id: ID!
 }
 
 input UpdateProfileInput {

@@ -18,5 +18,5 @@ export class CreateItemInput {
   roomInitial?: string;
 
   @Field(() => ID, { nullable: true })
-  png?: string;
+  image?: string;
 }

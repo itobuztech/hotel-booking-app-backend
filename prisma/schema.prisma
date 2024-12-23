@@ -51,15 +51,16 @@ model Entity {
 }
 
 model Item {
-  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name        String    @db.VarChar(500)
-  description String
-  roomInitial String?   @map("room_initial") @db.VarChar(250)
-  status      Boolean   @default(true)
-  entity      Entity    @relation("EntityItems", fields: [entityId], references: [id])
-  entityId    String    @map("entity_id") @db.Uuid // Removed @unique
-  createdAt   DateTime  @default(now()) @map("created_at")
-  updatedAt   DateTime? @default(now()) @updatedAt @map("updated_at")
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String           @unique @db.VarChar(500)
+  description    String
+  roomInitial    String?          @unique @map("room_initial") @db.VarChar(250)
+  status         Boolean          @default(true)
+  entity         Entity           @relation("EntityItems", fields: [entityId], references: [id])
+  entityId       String           @map("entity_id") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime?        @default(now()) @updatedAt @map("updated_at")
+  uploadRelation UploadRelation[]
 
   @@map("item")
 }
@@ -79,11 +80,13 @@ model Upload {
 }
 
 model UploadRelation {
-  id            String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  upload        Upload?    @relation(fields: imageUploadId, references: id)
-  imageUploadId String?    @map("image_upload_id") @db.Uuid
-  tableId       String?    @map("table_id") @db.Uuid
-  table         TableName?
+  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  upload        Upload @relation(fields: [imageUploadId], references: [id])
+  imageUploadId String @map("image_upload_id") @db.Uuid
+
+  table   TableName
+  item    Item      @relation(fields: [tableId], references: [id])
+  tableId String    @map("table_id") @db.Uuid
 
   @@map("uploadRelation")
 }

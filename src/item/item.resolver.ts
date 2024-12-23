@@ -1,13 +1,18 @@
-import { Args, Context, Mutation, Resolver } from "@nestjs/graphql";
+import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
 import { ItemService } from "./item.service";
 import { CreateItemInput } from "./dto/create-item.input";
-import { createSucess } from "src/types/inputtypes/create-success.entity";
+import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
+import { Item, PaginatedItem } from "./entities/item.entity";
+import { Message } from "src/types/inputtypes/message.entity";
+import { FilterItemInput } from "./dto/filter-item.input";
+import { PaginatedEntity } from "./entities/entity.entity";
 
 @Resolver()
 export class ItemResolver {
   constructor(private readonly itemService: ItemService) { }
 
-  @Mutation(() => createSucess)
+  // Item Creation
+  @Mutation(() => Message)
   // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   // @Roles(UserRole.ADMIN)
   // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.CREATE])
@@ -16,5 +21,74 @@ export class ItemResolver {
     @Args("createItemInput") createItemInput: CreateItemInput
   ) {
     return this.itemService.createItem(ctx, createItemInput);
+  }
+
+  // Entity Listing
+  @Query(() => PaginatedEntity)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  entityListing() {
+    return this.itemService.listEntity();
+  }
+
+  // Item Listing
+  @Query(() => PaginatedItem)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  itemListing(
+    @Args("filterArgs", { nullable: true })
+    filterArgs?: FilterItemInput
+  ) {
+    return this.itemService.listItem(filterArgs);
+  }
+
+  // Item Viewing
+  @Query(() => Item)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  itemView(
+    @Args("itemId")
+    itemId: UniqueIdentifierInput
+  ) {
+    return this.itemService.viewItem(itemId);
+  }
+
+  // Item Delete
+  @Mutation(() => Message)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  itemDelete(
+    @Args("itemId")
+    itemId: UniqueIdentifierInput
+  ) {
+    return this.itemService.deleteItem(itemId);
+  }
+
+  // Entity Delete
+  @Mutation(() => Message)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  entityDelete(
+    @Args("entityId")
+    entityId: UniqueIdentifierInput
+  ) {
+    return this.itemService.deleteEntity(entityId);
+  }
+
+  // Item Toggle
+  @Mutation(() => Message)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
+  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  itemToggle(
+    @Args("itemId")
+    entityId: UniqueIdentifierInput
+  ) {
+    return this.itemService.toggleItem(entityId);
   }
 }

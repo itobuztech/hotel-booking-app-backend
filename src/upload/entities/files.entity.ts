@@ -11,12 +11,6 @@ export class File {
   file?: FileDb["file"];
 
   @Field(() => String, { nullable: true })
-  createdAt?: FileDb["createdAt"];
-
-  @Field(() => String, { nullable: true })
-  updatedAt?: FileDb["updatedAt"];
-
-  @Field(() => String, { nullable: true })
   fileUrl?: String;
 }
 
