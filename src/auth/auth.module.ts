@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { LocalStrategy } from './strategies/local.strategy';
@@ -7,6 +7,7 @@ import { UsersModule } from '../users/users.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { RolesGuard } from './guards/roles.guard';
+import { EmailService } from '../email/email.service';
 
 @Module({
   imports: [
@@ -23,6 +24,8 @@ import { RolesGuard } from './guards/roles.guard';
     LocalStrategy,
     JwtStrategy,
     RolesGuard,
+    EmailService,
+    Logger
   ],
 })
 export class AuthModule { }

@@ -30,6 +30,19 @@ type File {
   updatedAt: String
 }
 
+input ForgotPasswordConfirmationInput {
+  confirmationToken: String!
+  newPassword: String!
+}
+
+input ForgotPasswordInput {
+  email: String!
+}
+
+type ForgotPasswordResponse {
+  token: String!
+}
+
 input GetUploadedFile {
   id: String!
 }
@@ -53,12 +66,14 @@ input LoginUserInput {
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
+  forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemCreate(createItemInput: CreateItemInput!): createSucess!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   signup(signupUserInput: CreateUserInput!): SignupResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
+  validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
 }
 
 type PaginatedFile {
@@ -112,6 +127,10 @@ type User {
   id: String!
   updatedAt: DateTime
   username: String!
+}
+
+type ValidateForgotPasswordResponse {
+  message: String!
 }
 
 type createSucess {

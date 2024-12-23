@@ -1,4 +1,4 @@
-import { UseGuards } from '@nestjs/common';
+import { BadRequestException, UseGuards } from '@nestjs/common';
 import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import JSON from 'graphql-type-json';
 import { CreateUserInput } from '../users/dto/create-user.input';
@@ -12,6 +12,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import { PermissionsGuardOR } from './guards/permissions-or.guard';
 import { SignupResponse } from './dto/signup-response';
+import { ForgotPasswordResponse, ValidateForgotPasswordResponse } from './dto/forgot-password-response';
+import { ForgotPasswordConfirmationInput, ForgotPasswordInput } from './dto/forgot-password';
 @Resolver()
 export class AuthResolver {
   constructor(private authService: AuthService) { }
@@ -32,5 +34,31 @@ export class AuthResolver {
   @Permissions([PrivilegesList.PROFILE.CAPABILITIES.VIEW])
   getpermissions(@Context() ctx: any): Promise<PrivilegesListType> {
     return this.authService.getpermissions(ctx);
+  }
+
+  @Mutation(() => ForgotPasswordResponse)
+  async forgotPassword(
+    @Args('forgotPasswordInput')
+    forgotPasswordInput: ForgotPasswordInput,
+  ) {
+    try {
+      return this.authService.forgotPassword(forgotPasswordInput);
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Mutation(() => ValidateForgotPasswordResponse)
+  async validateForgotPassword(
+    @Args('forgotPasswordInput')
+    forgotPasswordConfirmationInput: ForgotPasswordConfirmationInput,
+  ) {
+    try {
+      return this.authService.validateForgotPasswordToken(
+        forgotPasswordConfirmationInput,
+      );
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 }
