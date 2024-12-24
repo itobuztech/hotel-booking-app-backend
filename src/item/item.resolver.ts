@@ -9,7 +9,7 @@ import { PaginatedEntity } from "./entities/entity.entity";
 
 @Resolver()
 export class ItemResolver {
-  constructor(private readonly itemService: ItemService) { }
+  constructor(private readonly itemService: ItemService) {}
 
   // Item Creation
   @Mutation(() => Message)
