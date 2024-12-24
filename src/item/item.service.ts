@@ -122,10 +122,11 @@ export class ItemService {
       });
 
       items?.map((item): any => {
-        item.uploadRelation[0].upload[
-          "fileUrl"
-        ] = `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
-        item["image"] = item.uploadRelation[0].upload;
+        if (item.uploadRelation[0] && item.uploadRelation[0].upload) {
+          item.uploadRelation[0].upload["fileUrl"] =
+            `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
+          item["image"] = item.uploadRelation[0].upload;
+        }
       });
 
       return { items, total: items.length };

@@ -9,7 +9,10 @@ import { Prisma, User, Role, UserRole } from "@prisma/client";
 
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService, private readonly logger: Logger) { }
+  constructor(
+    private prisma: PrismaService,
+    private readonly logger: Logger
+  ) {}
 
   async findAll(): Promise<User[]> {
     return await this.prisma.user.findMany({});
@@ -90,44 +93,41 @@ export class UsersService {
   }
 
   async findOneByToken(
-    emailConfirmationToken: string,
-  ): Promise<User> {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        emailConfirmationToken,
-        deactivated: false,
-      },
-      include: {
-        role: {
-          select: {
-            privileges: true,
-            userType: true,
-          },
+    emailConfirmationToken: string
+  ): Promise<User & { role: Partial<Role> }> {
+    try {
+      const user = await this.prisma.user.findFirst({
+        where: {
+          emailConfirmationToken,
         },
-      },
-    });
+        include: {
+          role: true,
+        },
+      });
 
-    if (!user) {
-      throw new Error(
-        'Their is no user with this token Or the token has expired Or The user is already confirmed!!',
-      );
+      if (!user) {
+        throw new Error(
+          "Their is no user with this token Or the token has expired Or The user is already confirmed!!"
+        );
+      }
+
+      const confirmingUser = await this.prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          emailConfirmationToken: "",
+          isEmailConfirmed: true,
+        },
+      });
+
+      if (!confirmingUser) {
+        throw new Error("User not confirmed. Please try after some time!");
+      }
+
+      return user;
+    } catch (error) {
+      throw error;
     }
-
-    const confirmingUser = await this.prisma.user.update({
-      where: {
-        id: user.id,
-        deactivated: false,
-      },
-      data: {
-        emailConfirmationToken: '',
-        isEmailConfirmed: true,
-      },
-    });
-
-    if (!confirmingUser) {
-      throw new Error('User not confirmed. Please try after some time!');
-    }
-
-    return user;
   }
 }

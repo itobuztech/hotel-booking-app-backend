@@ -1,22 +1,24 @@
-import { Module, Logger } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthResolver } from './auth.resolver';
-import { LocalStrategy } from './strategies/local.strategy';
-import { PassportModule } from '@nestjs/passport';
-import { UsersModule } from '../users/users.module';
-import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { RolesGuard } from './guards/roles.guard';
-import { EmailService } from '../email/email.service';
+import { Module, Logger } from "@nestjs/common";
+import { AuthService } from "./auth.service";
+import { AuthResolver } from "./auth.resolver";
+import { LocalStrategy } from "./strategies/local.strategy";
+import { PassportModule } from "@nestjs/passport";
+import { UsersModule } from "../users/users.module";
+import { JwtModule } from "@nestjs/jwt";
+import { JwtStrategy } from "./strategies/jwt.strategy";
+import { RolesGuard } from "./guards/roles.guard";
+import { EmailService } from "../email/email.service";
+import { EmailModule } from "../email/email.module";
 
 @Module({
   imports: [
     PassportModule,
     UsersModule,
     JwtModule.register({
-      signOptions: { expiresIn: '3h' },
-      secret: 'secret',
+      signOptions: { expiresIn: "3h" },
+      secret: "secret",
     }),
+    EmailModule,
   ],
   providers: [
     AuthService,
@@ -25,7 +27,7 @@ import { EmailService } from '../email/email.service';
     JwtStrategy,
     RolesGuard,
     EmailService,
-    Logger
+    Logger,
   ],
 })
-export class AuthModule { }
+export class AuthModule {}
