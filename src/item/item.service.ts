@@ -13,7 +13,7 @@ import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Injectable()
 export class ItemService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async createItem(ctx, createItemInput: CreateItemInput) {
     const {
@@ -186,16 +186,16 @@ export class ItemService {
         throw new NotFoundException("No item found with this ID!");
       }
 
-      // Item image realation added
-      if (item.uploadRelation[0] && item.uploadRelation[0].upload) {
-        item.uploadRelation[0].upload["fileUrl"] =
-          `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
-        item["image"] = item.uploadRelation[0].upload;
-      }
-
-      return item;
+      const backendBaseUrl = process.env.BACKEND_BASE_URL;
+      const uploadData = item.uploadRelation?.[0]?.upload;
+      const image = uploadData
+        ? {
+          ...uploadData,
+          fileUrl: `${backendBaseUrl}/uploads/${uploadData.file}`,
+        }
+        : null;
+      return { ...item, image };
     } catch (error) {
-      console.log("Error=", error);
       throw new Error("Internal Server Error. Please try after some time!");
     }
   }
@@ -268,9 +268,8 @@ export class ItemService {
       });
 
       return {
-        message: `Item ${
-          !itemPresence.status === true ? "Enabled" : "Disabled"
-        }!`,
+        message: `Item ${!itemPresence.status === true ? "Enabled" : "Disabled"
+          }!`,
       };
     } catch (error) {
       console.log("Error=", error);
