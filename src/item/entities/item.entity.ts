@@ -26,6 +26,9 @@ export class Item {
 
   @Field(() => String, { nullable: true })
   roomInitial?: ItemDB["roomInitial"];
+
+  @Field(() => String, { nullable: true })
+  parentRoomId?: ItemDB["parentRoomId"];
 }
 
 @ObjectType()
