@@ -8,7 +8,6 @@ import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { CreateItemInput } from "./dto/create-item.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { FilterItemInput } from "./dto/filter-item.input";
-import { Item } from "./entities/item.entity";
 import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Injectable()

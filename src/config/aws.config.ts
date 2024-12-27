@@ -4,9 +4,9 @@ import { SES } from "@aws-sdk/client-ses"; // Import SES client from AWS SDK
 
 @Injectable()
 export class AwsConfigService {
-  private sesClient: SES; // SES client instance
+  private readonly sesClient: SES; // SES client instance
 
-  constructor(private configService: ConfigService) {
+  constructor(private readonly configService: ConfigService) {
     // Initialize SES client with region from environment variable
     this.sesClient = new SES({
       region: this.configService.get<string>("AWS_REGION"),
