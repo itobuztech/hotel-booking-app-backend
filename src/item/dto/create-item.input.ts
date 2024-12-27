@@ -19,4 +19,7 @@ export class CreateItemInput {
 
   @Field(() => ID, { nullable: true })
   image?: string;
+
+  @Field(() => ID, { nullable: true })
+  parentRoomId?: string;
 }

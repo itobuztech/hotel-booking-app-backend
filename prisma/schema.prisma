@@ -55,6 +55,7 @@ model Item {
   name           String           @unique @db.VarChar(500)
   description    String
   roomInitial    String?          @unique @map("room_initial") @db.VarChar(250)
+  parentRoomId   String?          @map("parent_room_id") @db.Uuid
   status         Boolean          @default(true)
   entity         Entity           @relation("EntityItems", fields: [entityId], references: [id])
   entityId       String           @map("entity_id") @db.Uuid
@@ -81,11 +82,11 @@ model Upload {
 
 model UploadRelation {
   id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  upload        Upload @relation(fields: [imageUploadId], references: [id])
+  upload        Upload @relation(fields: [imageUploadId], references: [id], onDelete: Cascade)
   imageUploadId String @map("image_upload_id") @db.Uuid
 
   table   TableName
-  item    Item      @relation(fields: [tableId], references: [id])
+  item    Item      @relation(fields: [tableId], references: [id], onDelete: Cascade)
   tableId String    @map("table_id") @db.Uuid
 
   @@map("uploadRelation")

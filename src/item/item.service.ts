@@ -12,11 +12,18 @@ import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Injectable()
 export class ItemService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createItem(ctx, createItemInput: CreateItemInput) {
-    const { name, description, roomInitial, status, entity, image } =
-      createItemInput;
+    const {
+      name,
+      description,
+      roomInitial,
+      parentRoomId,
+      status,
+      entity,
+      image,
+    } = createItemInput;
 
     // Validate if the entityId exists
     const entityPresence = await this.prisma.entity.findUnique({
@@ -34,6 +41,14 @@ export class ItemService {
       throw new NotFoundException(`Image ID does not exist.`);
     }
 
+    // Validate if the entityId exists
+    const parentRoom = await this.prisma.item.findUnique({
+      where: { id: parentRoomId },
+    });
+    if (!parentRoom) {
+      throw new NotFoundException(`Parent Room ID does not exist.`);
+    }
+
     try {
       let item = null;
       try {
@@ -42,6 +57,7 @@ export class ItemService {
             name,
             description,
             roomInitial,
+            parentRoomId,
             entityId: entity,
             status,
           },
@@ -91,10 +107,10 @@ export class ItemService {
   }
 
   async listItem(filterArgs: FilterItemInput) {
-    let extraWhere = null;
+    let extraWhere = {};
 
     if (filterArgs) {
-      const { entity } = filterArgs;
+      const { entity, parentRoom } = filterArgs;
 
       // Validate if the entityId exists
       const entityPresence = await this.prisma.entity.findUnique({
@@ -102,9 +118,21 @@ export class ItemService {
       });
       if (!entityPresence) {
         throw new NotFoundException(`Entity ID does not exist.`);
-      } else {
-        extraWhere = { entityId: entity };
       }
+
+      if (parentRoom) {
+        // Validate if the entityId exists
+        const parentRoomPresence = await this.prisma.item.findUnique({
+          where: { id: parentRoom },
+        });
+        if (!entityPresence) {
+          throw new NotFoundException(`Entity ID does not exist.`);
+        }
+
+        extraWhere["parentRoomId"] = parentRoom;
+      }
+
+      extraWhere = { entityId: entity, ...extraWhere };
     }
 
     try {
@@ -161,9 +189,9 @@ export class ItemService {
       const uploadData = item.uploadRelation?.[0]?.upload;
       const image = uploadData
         ? {
-          ...uploadData,
-          fileUrl: `${backendBaseUrl}/uploads/${uploadData.file}`,
-        }
+            ...uploadData,
+            fileUrl: `${backendBaseUrl}/uploads/${uploadData.file}`,
+          }
         : null;
       return { ...item, image };
     } catch (error) {
@@ -239,8 +267,9 @@ export class ItemService {
       });
 
       return {
-        message: `Item ${!itemPresence.status === true ? "Enabled" : "Disabled"
-          }!`,
+        message: `Item ${
+          !itemPresence.status === true ? "Enabled" : "Disabled"
+        }!`,
       };
     } catch (error) {
       console.log("Error=", error);
