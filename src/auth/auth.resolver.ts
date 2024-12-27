@@ -2,7 +2,6 @@ import { BadRequestException, UseGuards } from "@nestjs/common";
 import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
 import JSON from "graphql-type-json";
 import { CreateUserInput } from "../users/dto/create-user.input";
-import { User } from "../users/entities/user.entity";
 import { AuthService } from "./auth.service";
 import { LoginResponse } from "./dto/login-response";
 import { LoginUserInput } from "./dto/login-user.input";
@@ -14,7 +13,6 @@ import {
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
 import { Permissions } from "../auth/decorators/permissions.decorator";
 import { PermissionsGuardOR } from "./guards/permissions-or.guard";
-import { SignupResponse } from "./dto/signup-response";
 import {
   ForgotPasswordResponse,
   ValidateForgotPasswordResponse,
@@ -27,7 +25,7 @@ import { TokenConfirmationInput } from "./dto/token-confirmation.input";
 import { Message } from "src/types/inputtypes/message.entity";
 @Resolver()
 export class AuthResolver {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @Mutation(() => LoginResponse)
   @UseGuards(GqlAuthGuard)

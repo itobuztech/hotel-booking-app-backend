@@ -29,10 +29,10 @@ import { TokenConfirmationInput } from "./dto/token-confirmation.input";
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
     private readonly emailService: EmailService
-  ) {}
+  ) { }
 
   async generateAccessToken(userPayload: UserPayload) {
     return this.jwtService.sign(userPayload);
@@ -120,7 +120,7 @@ export class AuthService {
         <p>Thank you for registering. Please click the link below to verify your account:</p>
         <a href="${process.env.FRONTEND_BASE_URL}/token?confirmation_token=${confirmationToken}">Verify Account</a>
         <p>If you didn’t create this account, please ignore this email.</p>
-        <p>Best regards.
+        <p>Best regards.</p>
         `;
 
       const emailSent = await this.emailService.run(

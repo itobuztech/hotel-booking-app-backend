@@ -38,7 +38,7 @@ const createSendEmailCommand = (toAddress, Subject, Body) => {
 
 @Injectable()
 export class EmailService {
-  constructor(private prisma: PrismaService, private readonly logger: Logger) { }
+  constructor(private readonly prisma: PrismaService, private readonly logger: Logger) { }
 
   async run(toAddress: string, Subject: string, Body: string) {
     const sendEmailCommand = createSendEmailCommand(toAddress, Subject, Body);

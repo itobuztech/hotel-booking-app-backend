@@ -3,7 +3,7 @@ import * as dotenv from "dotenv";
 import { Module } from "@nestjs/common";
 import { APP_GUARD, APP_INTERCEPTOR, RouterModule } from "@nestjs/core";
 import { GraphQLModule } from "@nestjs/graphql";
-import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
+import { ApolloDriver } from "@nestjs/apollo";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ThrottlerModule } from "@nestjs/throttler";
 import {
@@ -87,4 +87,4 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
