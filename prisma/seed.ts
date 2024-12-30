@@ -55,17 +55,6 @@ async function main() {
       },
     ],
   });
-
-  await prisma.entity.createMany({
-    data: [
-      {
-        name: "Amenities",
-      },
-      {
-        name: "Room Type",
-      },
-    ],
-  });
 }
 main()
   .then(async () => {

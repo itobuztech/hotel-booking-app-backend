@@ -1,18 +1,19 @@
 import { Field, Float, ID, InputType, Int } from "@nestjs/graphql";
+import { EntityEnum } from "../../types/enums/entity.enum";
 
 @InputType()
 export class CreateItemInput {
-  @Field()
+  @Field(() => String)
   name: string;
 
-  @Field()
+  @Field(() => String)
   description: string;
 
   @Field(() => Boolean, { defaultValue: true })
   status: boolean;
 
-  @Field(() => ID)
-  entity: string;
+  @Field(() => EntityEnum)
+  entity: EntityEnum;
 
   @Field({ nullable: true })
   roomInitial?: string;
