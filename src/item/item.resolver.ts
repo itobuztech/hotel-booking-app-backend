@@ -1,11 +1,19 @@
 import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
+import { UseGuards } from "@nestjs/common";
+import { UserRole } from "@prisma/client";
 import { ItemService } from "./item.service";
 import { CreateItemInput } from "./dto/create-item.input";
 import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
 import { Item, PaginatedItem } from "./entities/item.entity";
-import { Message } from "src/types/inputtypes/message.entity";
+import { Message } from "../types/inputtypes/message.entity";
 import { FilterItemInput } from "./dto/filter-item.input";
 import { PaginatedEntity } from "./entities/entity.entity";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RolesGuard } from "../auth/guards/roles.guard";
+import { PermissionsGuardOR } from "../auth/guards/permissions-or.guard";
+import { Roles } from "../auth/decorators/roles.decorator";
+import { Permissions } from "../auth/decorators/permissions.decorator";
+import { PrivilegesList } from "../privileges/user-privileges";
 
 @Resolver()
 export class ItemResolver {
@@ -13,9 +21,9 @@ export class ItemResolver {
 
   // Item Creation
   @Mutation(() => Message)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.CREATE])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
   itemCreate(
     @Context() ctx,
     @Args("createItemInput") createItemInput: CreateItemInput
@@ -25,18 +33,18 @@ export class ItemResolver {
 
   // Entity Listing
   @Query(() => PaginatedEntity)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ENDUSER)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
   entityListing() {
     return this.itemService.listEntity();
   }
 
   // Item Listing
   @Query(() => PaginatedItem)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.SUPERADMIN, UserRole.ADMIN, UserRole.ENDUSER)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
   itemListing(
     @Args("filterArgs", { nullable: true })
     filterArgs?: FilterItemInput
@@ -46,9 +54,9 @@ export class ItemResolver {
 
   // Item Viewing
   @Query(() => Item)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
   itemView(
     @Args("itemId")
     itemId: UniqueIdentifierInput
@@ -58,9 +66,9 @@ export class ItemResolver {
 
   // Item Delete
   @Mutation(() => Message)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.DELETE])
   itemDelete(
     @Args("itemId")
     itemId: UniqueIdentifierInput
@@ -70,9 +78,9 @@ export class ItemResolver {
 
   // Entity Delete
   @Mutation(() => Message)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.DELETE])
   entityDelete(
     @Args("entityId")
     entityId: UniqueIdentifierInput
@@ -82,9 +90,9 @@ export class ItemResolver {
 
   // Item Toggle
   @Mutation(() => Message)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN, UserRole.ENDUSER)
-  // @Permissions([PrivilegesList.COURSE_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.EDIT])
   itemToggle(
     @Args("itemId")
     entityId: UniqueIdentifierInput
