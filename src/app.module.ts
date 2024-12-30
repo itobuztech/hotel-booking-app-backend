@@ -1,7 +1,12 @@
 import { join } from "path";
 import * as dotenv from "dotenv";
 import { Module } from "@nestjs/common";
-import { APP_GUARD, APP_INTERCEPTOR, RouterModule } from "@nestjs/core";
+import {
+  APP_FILTER,
+  APP_GUARD,
+  APP_INTERCEPTOR,
+  RouterModule,
+} from "@nestjs/core";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver } from "@nestjs/apollo";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -18,6 +23,7 @@ import { GqlThrottlerGuard } from "./util/guards/gql-execution-context.guard";
 import throttle from "./config/throttle.config";
 import { UploadModule } from "./upload/upload.module";
 import { ItemModule } from "./item/item.module";
+import { NotFoundExceptionFilter } from "./util/not-found-exception.filter";
 
 const env = `${(process.env.NODE_ENV || "development").toLowerCase()}`;
 
@@ -82,9 +88,13 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
       useClass: GqlThrottlerGuard,
     },
     {
+      provide: APP_FILTER,
+      useClass: NotFoundExceptionFilter,
+    },
+    {
       provide: APP_INTERCEPTOR,
       useFactory: () => new GraphqlInterceptor(),
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}

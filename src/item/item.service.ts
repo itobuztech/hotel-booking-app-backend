@@ -12,7 +12,7 @@ import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Injectable()
 export class ItemService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async createItem(ctx, createItemInput: CreateItemInput) {
     const {
@@ -126,8 +126,8 @@ export class ItemService {
         const parentRoomPresence = await this.prisma.item.findUnique({
           where: { id: parentRoom },
         });
-        if (!entityPresence) {
-          throw new NotFoundException(`Entity ID does not exist.`);
+        if (!parentRoomPresence) {
+          throw new NotFoundException(`Room ID does not exist.`);
         }
 
         extraWhere["parentRoomId"] = parentRoom;
@@ -189,9 +189,9 @@ export class ItemService {
       const uploadData = item.uploadRelation?.[0]?.upload;
       const image = uploadData
         ? {
-          ...uploadData,
-          fileUrl: `${backendBaseUrl}/uploads/${uploadData.file}`,
-        }
+            ...uploadData,
+            fileUrl: `${backendBaseUrl}/uploads/${uploadData.file}`,
+          }
         : null;
       return { ...item, image };
     } catch (error) {
@@ -267,8 +267,9 @@ export class ItemService {
       });
 
       return {
-        message: `Item ${!itemPresence.status === true ? "Enabled" : "Disabled"
-          }!`,
+        message: `Item ${
+          !itemPresence.status === true ? "Enabled" : "Disabled"
+        }!`,
       };
     } catch (error) {
       console.log("Error=", error);

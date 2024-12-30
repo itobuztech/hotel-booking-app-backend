@@ -15,7 +15,7 @@ async function main() {
         description: "Owner of the hotel.",
         userType: UserRole.ADMIN,
         privileges: [
-          101, 102, 111, 112, 113, 114, 121, 122, 123, 124, 131, 132, 133, 134,
+          101, 102, 111, 112, 113, 114, 131, 132, 133, 134, 141, 142, 143, 144,
         ],
       },
       {

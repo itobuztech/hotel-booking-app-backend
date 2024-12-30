@@ -19,17 +19,17 @@ export class UploadResolver {
   constructor(private readonly uploadService: UploadService) {}
 
   @Mutation(() => UploadFileResponse)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.OWNER)
-  // @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.CREATE])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.CREATE])
   uploadFiles(@Args("uploadFileInput") uploadFileInput: UploadFileInput) {
     return this.uploadService.uploadFiles(uploadFileInput);
   }
 
   @Query(() => PaginatedFile)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.OWNER)
-  // @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.VIEW])
   listFiles(
     @Args("paginationArgs", { nullable: true })
     paginationArgs: PaginationArgs
@@ -38,17 +38,17 @@ export class UploadResolver {
   }
 
   @Query(() => File)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.OWNER)
-  // @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.VIEW])
   File(@Args("getUploadedFile") getUploadedFile: GetUploadedFile) {
     return this.uploadService.file(getUploadedFile);
   }
 
   @Mutation(() => String)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.OWNER)
-  // @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.DELETE])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.DELETE])
   deleteFile(@Args("deleteUploadedFile") deleteUploadedFile: GetUploadedFile) {
     return this.uploadService.deleteFile(deleteUploadedFile);
   }
