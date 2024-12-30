@@ -4,7 +4,7 @@
 
 input CreateItemInput {
   description: String!
-  entity: ID!
+  entity: EntityEnum!
   image: ID
   name: String!
   parentRoomId: ID
@@ -24,8 +24,12 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Entity {
-  id: String!
-  name: String!
+  name: EntityEnum
+}
+
+enum EntityEnum {
+  AMENITIES
+  ROOMTYPE
 }
 
 type File {
@@ -35,7 +39,7 @@ type File {
 }
 
 input FilterItemInput {
-  entity: ID!
+  entity: EntityEnum!
   parentRoom: ID
 }
 
@@ -90,7 +94,6 @@ type Message {
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
-  entityDelete(entityId: UniqueIdentifierInput!): Message!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemCreate(createItemInput: CreateItemInput!): Message!
   itemDelete(itemId: UniqueIdentifierInput!): Message!
@@ -102,11 +105,6 @@ type Mutation {
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
   validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
-}
-
-type PaginatedEntity {
-  entities: [Entity!]!
-  total: Int!
 }
 
 type PaginatedFile {
@@ -127,7 +125,6 @@ input PaginationArgs {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: User!
-  entityListing: PaginatedEntity!
   getpermissions: JSON!
   itemListing(filterArgs: FilterItemInput): PaginatedItem!
   itemView(itemId: UniqueIdentifierInput!): Item!

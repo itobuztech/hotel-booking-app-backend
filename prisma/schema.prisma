@@ -40,34 +40,73 @@ enum UserRole {
   CUSTOMER
 }
 
-model Entity {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String    @db.VarChar(500)
-  createdAt DateTime  @default(now()) @map("created_at")
-  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at")
-  items     Item[]    @relation("EntityItems") // One-to-many relation
-
-  @@map("entity")
-}
-
 model Item {
-  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String           @unique @db.VarChar(500)
-  description    String
-  roomInitial    String?          @unique @map("room_initial") @db.VarChar(250)
-  parentRoomId   String?          @map("parent_room_id") @db.Uuid
-  status         Boolean          @default(true)
-  entity         Entity           @relation("EntityItems", fields: [entityId], references: [id])
-  entityId       String           @map("entity_id") @db.Uuid
-  createdAt      DateTime         @default(now()) @map("created_at")
-  updatedAt      DateTime?        @default(now()) @updatedAt @map("updated_at")
-  uploadRelation UploadRelation[]
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String              @unique @db.VarChar(500)
+  description       String
+  roomInitial       String?             @unique @map("room_initial") @db.VarChar(250)
+  parentRoomId      String?             @map("parent_room_id") @db.Uuid
+  status            Boolean             @default(true)
+  entity            Entity
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at")
+  uploadRelation    UploadRelation[]    @relation("UploadRelation_Item")
+  aminitiesRelation AminitiesRelation[]
+  Room              Room[]
 
   @@map("item")
 }
 
-enum TableName {
+model Branch {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name              String              @unique @db.VarChar(500)
+  address           String
+  contactNumber     BigInt              @map("contact_number")
+  city              String              @db.VarChar(500)
+  areaPincode       BigInt              @map("area_pincode")
+  location          String
+  description       String
+  uploadRelation    UploadRelation[]    @relation("UploadRelation_Branch")
+  aminitiesRelation AminitiesRelation[]
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at")
+  room              Room[]
+
+  @@map("branch")
+}
+
+model Room {
+  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  branch            Branch?             @relation(fields: [branchId], references: [id])
+  branchId          String?             @map("branch_id") @db.Uuid
+  item              Item?               @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  itemId            String?             @map("item_id") @db.Uuid // Optional foreign key for Item
+  roomInitial       String              @unique @map("room_initial") @db.VarChar(500)
+  setPrice          Decimal             @map("set_price")
+  offerPrice        Decimal             @map("offer_price")
+  aminitiesRelation AminitiesRelation[]
+  description       String
+  uploadRelation    UploadRelation[]    @relation("UploadRelation_Room")
+  createdAt         DateTime            @default(now()) @map("created_at")
+  updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at")
+
+  @@map("room")
+}
+
+enum Entity {
+  AMENITIES
+  ROOMTYPE
+}
+
+enum UploadTableName {
   ITEM
+  BRANCH
+  ROOM
+}
+
+enum AminitiesTableName {
+  BRANCH
+  ROOM
 }
 
 model Upload {
@@ -85,9 +124,28 @@ model UploadRelation {
   upload        Upload @relation(fields: [imageUploadId], references: [id], onDelete: Cascade)
   imageUploadId String @map("image_upload_id") @db.Uuid
 
-  table   TableName
-  item    Item      @relation(fields: [tableId], references: [id], onDelete: Cascade)
-  tableId String    @map("table_id") @db.Uuid
+  table UploadTableName
+
+  item     Item?   @relation("UploadRelation_Item", fields: [itemId], references: [id], onDelete: Cascade)
+  itemId   String? @map("item_id") @db.Uuid // Optional foreign key for Item
+  branch   Branch? @relation("UploadRelation_Branch", fields: [branchId], references: [id], onDelete: Cascade)
+  branchId String? @map("branch_id") @db.Uuid // Optional foreign key for Branch
+  room     Room?   @relation("UploadRelation_Room", fields: [roomId], references: [id])
+  roomId   String? @map("room_id") @db.Uuid
 
   @@map("uploadRelation")
+}
+
+model AminitiesRelation {
+  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  item        Item   @relation(fields: [aminitiesId], references: [id], onDelete: Cascade)
+  aminitiesId String @map("aminities_id") @db.Uuid
+
+  table    AminitiesTableName
+  branch   Branch?            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId String?            @map("branch_id") @db.Uuid
+  room     Room?              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId   String?            @map("room_id") @db.Uuid
+
+  @@map("aminitiesRelation")
 }

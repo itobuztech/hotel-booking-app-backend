@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { TableName } from "@prisma/client";
+import { Entity, UploadTableName } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { CreateItemInput } from "./dto/create-item.input";
 import { PrismaService } from "../prisma/prisma.service";
@@ -24,14 +24,6 @@ export class ItemService {
       entity,
       image,
     } = createItemInput;
-
-    // Validate if the entityId exists
-    const entityPresence = await this.prisma.entity.findUnique({
-      where: { id: entity },
-    });
-    if (!entityPresence) {
-      throw new NotFoundException(`Entity ID does not exist.`);
-    }
 
     // Validate if the entityId exists
     const uploadPresence = await this.prisma.upload.findUnique({
@@ -58,7 +50,7 @@ export class ItemService {
             description,
             roomInitial,
             parentRoomId,
-            entityId: entity,
+            entity,
             status,
           },
         });
@@ -83,8 +75,8 @@ export class ItemService {
       await this.prisma.uploadRelation.create({
         data: {
           imageUploadId: image,
-          tableId: item.id,
-          table: TableName.ITEM,
+          itemId: item.id,
+          table: UploadTableName.ITEM,
         },
       });
 
@@ -95,31 +87,22 @@ export class ItemService {
     }
   }
 
-  async listEntity() {
-    try {
-      const entities = await this.prisma.entity.findMany();
+  // async listEntity() {
+  //   try {
+  //     const entities = Entity;
 
-      return { entities, total: entities.length };
-    } catch (error) {
-      console.log("Error=", error);
-      throw new Error("Internal Server Error. Please try after some time!");
-    }
-  }
+  //     return { entities };
+  //   } catch (error) {
+  //     console.log("Error=", error);
+  //     throw new Error("Internal Server Error. Please try after some time!");
+  //   }
+  // }
 
   async listItem(filterArgs: FilterItemInput) {
     let extraWhere = {};
 
     if (filterArgs) {
       const { entity, parentRoom } = filterArgs;
-
-      // Validate if the entityId exists
-      const entityPresence = await this.prisma.entity.findUnique({
-        where: { id: entity },
-      });
-
-      if (!entityPresence) {
-        throw new NotFoundException(`Entity ID does not exist.`);
-      }
 
       if (parentRoom) {
         // Validate if the entityId exists
@@ -140,7 +123,6 @@ export class ItemService {
       const items = await this.prisma.item.findMany({
         where: { status: true, ...extraWhere },
         include: {
-          entity: true,
           uploadRelation: {
             include: {
               upload: true,
@@ -171,7 +153,6 @@ export class ItemService {
       const item = await this.prisma.item.findUnique({
         where: { id, status: true },
         include: {
-          entity: true,
           uploadRelation: {
             include: {
               upload: true,
@@ -217,30 +198,6 @@ export class ItemService {
       });
 
       return { message: `Item deleted succesully with the Id ${id}` };
-    } catch (error) {
-      console.log("Error=", error);
-      throw new Error("Internal Server Error. Please try after some time!");
-    }
-  }
-
-  async deleteEntity(entityId: UniqueIdentifierInput) {
-    const { id } = entityId;
-
-    // Validate if the entityId exists
-    const entityPresence = await this.prisma.entity.findUnique({
-      where: { id },
-    });
-    if (!entityPresence) {
-      throw new NotFoundException(`Entity ID does not exist.`);
-    }
-
-    try {
-      // Fetch item with all necessary relations
-      await this.prisma.entity.delete({
-        where: { id },
-      });
-
-      return { message: `Entity deleted succesully with the Id ${id}` };
     } catch (error) {
       console.log("Error=", error);
       throw new Error("Internal Server Error. Please try after some time!");

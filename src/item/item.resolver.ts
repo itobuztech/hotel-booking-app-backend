@@ -7,7 +7,6 @@ import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
 import { Item, PaginatedItem } from "./entities/item.entity";
 import { Message } from "../types/inputtypes/message.entity";
 import { FilterItemInput } from "./dto/filter-item.input";
-import { PaginatedEntity } from "./entities/entity.entity";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "../auth/guards/roles.guard";
 import { PermissionsGuardOR } from "../auth/guards/permissions-or.guard";
@@ -31,14 +30,14 @@ export class ItemResolver {
     return this.itemService.createItem(ctx, createItemInput);
   }
 
-  // Entity Listing
-  @Query(() => PaginatedEntity)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
-  entityListing() {
-    return this.itemService.listEntity();
-  }
+  // // Entity Listing
+  // @Query(() => Entity)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN)
+  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
+  // entityListing() {
+  //   return this.itemService.listEntity();
+  // }
 
   // Item Listing
   @Query(() => PaginatedItem)
@@ -74,18 +73,6 @@ export class ItemResolver {
     itemId: UniqueIdentifierInput
   ) {
     return this.itemService.deleteItem(itemId);
-  }
-
-  // Entity Delete
-  @Mutation(() => Message)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.DELETE])
-  entityDelete(
-    @Args("entityId")
-    entityId: UniqueIdentifierInput
-  ) {
-    return this.itemService.deleteEntity(entityId);
   }
 
   // Item Toggle
