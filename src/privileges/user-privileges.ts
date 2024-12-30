@@ -10,8 +10,8 @@ export enum UserCapabilities {
 export enum UserPermissionNames {
   PROFILE = "PROFILE",
   USER_MANAGEMENT = "USER_MANAGEMENT",
-  USER_PERMISSION = "USER_PERMISSION",
   FILE_MANAGEMENT = "FILE_MANAGEMENT",
+  ITEM_MANAGEMENT = "ITEM_MANAGEMENT",
 }
 
 export type PrivilegesListType = {
@@ -43,16 +43,6 @@ const PrivilegesList: PrivilegesListType = {
       DELETE: 114,
     },
   },
-  USER_PERMISSION: {
-    LABEL: "User Permissions",
-    ORDER: 3,
-    CAPABILITIES: {
-      VIEW: 121,
-      CREATE: 122,
-      EDIT: 123,
-      DELETE: 124,
-    },
-  },
   FILE_MANAGEMENT: {
     LABEL: "File Permissions",
     ORDER: 4,
@@ -61,6 +51,16 @@ const PrivilegesList: PrivilegesListType = {
       CREATE: 132,
       EDIT: 133,
       DELETE: 134,
+    },
+  },
+  ITEM_MANAGEMENT: {
+    LABEL: "Item Management",
+    ORDER: 5,
+    CAPABILITIES: {
+      VIEW: 141,
+      CREATE: 142,
+      EDIT: 143,
+      DELETE: 144,
     },
   },
 };

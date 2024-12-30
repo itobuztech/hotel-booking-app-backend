@@ -116,6 +116,7 @@ export class ItemService {
       const entityPresence = await this.prisma.entity.findUnique({
         where: { id: entity },
       });
+
       if (!entityPresence) {
         throw new NotFoundException(`Entity ID does not exist.`);
       }
@@ -125,8 +126,8 @@ export class ItemService {
         const parentRoomPresence = await this.prisma.item.findUnique({
           where: { id: parentRoom },
         });
-        if (!entityPresence) {
-          throw new NotFoundException(`Entity ID does not exist.`);
+        if (!parentRoomPresence) {
+          throw new NotFoundException(`Room ID does not exist.`);
         }
 
         extraWhere["parentRoomId"] = parentRoom;
@@ -158,7 +159,6 @@ export class ItemService {
 
       return { items, total: items.length };
     } catch (error) {
-      console.log("Error=", error);
       throw new Error("Internal Server Error. Please try after some time!");
     }
   }
