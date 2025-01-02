@@ -38,11 +38,11 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), "src/schema.gql"),
-      formatError: (error) => {
+      formatError: (error) => {        
         const graphQLFormattedError = {
-          message:
-            error.extensions?.exception?.response?.message || error.message,
+          message: error.extensions?.exception?.response?.message || error.message,
           code: error.extensions?.code || "SERVER_ERROR",
+          originalError: error.extensions?.originalError.error,
           status: error.extensions?.status || error.status,
         };
         return graphQLFormattedError;
