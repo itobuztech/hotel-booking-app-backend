@@ -4,7 +4,6 @@ import { UserRole } from "@prisma/client";
 import { ItemService } from "./item.service";
 import { CreateItemInput } from "./dto/create-item.input";
 import { UniqueIdentifierInput } from "../types/inputtypes/unique-id.input";
-import { Item, PaginatedItem } from "./entities/item.entity";
 import { Message } from "../types/inputtypes/message.entity";
 import { FilterItemInput } from "./dto/filter-item.input";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -27,63 +26,54 @@ export class ItemResolver {
     @Context() ctx,
     @Args("createItemInput") createItemInput: CreateItemInput
   ) {
-    return this.itemService.createItem(ctx, createItemInput);
+    // return this.itemService.createItem(ctx, createItemInput);
   }
 
-  // // Entity Listing
-  // @Query(() => Entity)
+  // // Item Listing
+  // @Query(() => PaginatedItem)
   // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   // @Roles(UserRole.ADMIN)
   // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
-  // entityListing() {
-  //   return this.itemService.listEntity();
+  // itemListing(
+  //   @Args("filterArgs", { nullable: true })
+  //   filterArgs?: FilterItemInput
+  // ) {
+  //   return this.itemService.listItem(filterArgs);
   // }
 
-  // Item Listing
-  @Query(() => PaginatedItem)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
-  itemListing(
-    @Args("filterArgs", { nullable: true })
-    filterArgs?: FilterItemInput
-  ) {
-    return this.itemService.listItem(filterArgs);
-  }
+  // // Item Viewing
+  // @Query(() => Item)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN)
+  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
+  // itemView(
+  //   @Args("itemId")
+  //   itemId: UniqueIdentifierInput
+  // ) {
+  //   return this.itemService.viewItem(itemId);
+  // }
 
-  // Item Viewing
-  @Query(() => Item)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
-  itemView(
-    @Args("itemId")
-    itemId: UniqueIdentifierInput
-  ) {
-    return this.itemService.viewItem(itemId);
-  }
+  // // Item Delete
+  // @Mutation(() => Message)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN)
+  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.DELETE])
+  // itemDelete(
+  //   @Args("itemId")
+  //   itemId: UniqueIdentifierInput
+  // ) {
+  //   return this.itemService.deleteItem(itemId);
+  // }
 
-  // Item Delete
-  @Mutation(() => Message)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.DELETE])
-  itemDelete(
-    @Args("itemId")
-    itemId: UniqueIdentifierInput
-  ) {
-    return this.itemService.deleteItem(itemId);
-  }
-
-  // Item Toggle
-  @Mutation(() => Message)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.EDIT])
-  itemToggle(
-    @Args("itemId")
-    entityId: UniqueIdentifierInput
-  ) {
-    return this.itemService.toggleItem(entityId);
-  }
+  // // Item Toggle
+  // @Mutation(() => Message)
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN)
+  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.EDIT])
+  // itemToggle(
+  //   @Args("itemId")
+  //   entityId: UniqueIdentifierInput
+  // ) {
+  //   return this.itemService.toggleItem(entityId);
+  // }
 }
