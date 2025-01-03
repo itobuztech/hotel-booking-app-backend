@@ -7,23 +7,33 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email                  String    @unique
-  password               String
-  name                   String?
-  username               String?
-  emailConfirmationToken String?   @map("email_confirmation_token")
-  isEmailConfirmed       Boolean   @default(false) @map("is_email_confirmed")
-  status                 Boolean   @default(false)
-  createdAt              DateTime  @default(now()) @map("created_at")
-  updatedAt              DateTime? @default(now()) @updatedAt @map("updated_at")
-  roleId                 String    @map("role_id") @db.Uuid
-  role                   Role      @relation(fields: [roleId], references: [id])
-
-  @@map("users")
+// ENUMS
+enum UserRole {
+  ADMIN
+  CUSTOMER
 }
 
+enum UploadTableName {
+  AMINITIES
+  BRANCH
+  ROOM
+}
+
+enum AmenitiesTableName {
+  BRANCH
+  ROOM
+}
+
+enum BookingStatus {
+  BOOKED
+  CANCELLED
+  RESERVED
+  CHECKEDIN
+  CHECKDOUT
+  OVERDUE
+}
+
+// MASTER TABLES
 model Role {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name        String
@@ -35,83 +45,122 @@ model Role {
   @@map("roles")
 }
 
-enum UserRole {
-  ADMIN
-  CUSTOMER
+model User {
+  id                     String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email                  String                 @unique
+  name                   String?
+  username               String?
+  password               String
+  emailConfirmationToken String?                @map("email_confirmation_token")
+  isEmailConfirmed       Boolean                @default(false) @map("is_email_confirmed")
+  status                 Boolean                @default(true)
+  role                   Role                   @relation(fields: [roleId], references: [id])
+  roleId                 String                 @map("role_id") @db.Uuid
+  createdAt              DateTime               @default(now()) @map("created_at")
+  updatedAt              DateTime?              @default(now()) @updatedAt @map("updated_at")
+  Booking                Booking[]
+  BookingStatusHistory   BookingStatusHistory[]
+
+  @@map("users")
 }
 
-model Item {
+model Amenities {
   id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name              String              @unique @db.VarChar(500)
-  description       String
-  roomInitial       String?             @unique @map("room_initial") @db.VarChar(250)
-  parentRoomId      String?             @map("parent_room_id") @db.Uuid
+  name              String              @unique
+  description       String?
   status            Boolean             @default(true)
-  entity            Entity
+  roomType          RoomType            @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  roomTypeId        String              @map("room_type_id") @db.Uuid
   createdAt         DateTime            @default(now()) @map("created_at")
   updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at")
-  uploadRelation    UploadRelation[]    @relation("UploadRelation_Item")
-  aminitiesRelation AminitiesRelation[]
-  Room              Room[]
+  UploadRelation    UploadRelation[]
+  AmenitiesRelation AmenitiesRelation[]
 
-  @@map("item")
+  @@map("amenities")
+}
+
+model RoomType {
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String                   @unique
+  description            String?
+  status                 Boolean                  @default(true)
+  roomInitial            String                   @map("room_initial")
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime?                @default(now()) @updatedAt @map("updated_at")
+  Amenities              Amenities[]
+  BranchRoomTypeRelation BranchRoomTypeRelation[]
+
+  @@map("roomType")
 }
 
 model Branch {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name              String              @unique @db.VarChar(500)
-  address           String
-  contactNumber     BigInt              @map("contact_number")
-  city              String              @db.VarChar(500)
-  areaPincode       BigInt              @map("area_pincode")
-  location          String
-  description       String
-  uploadRelation    UploadRelation[]    @relation("UploadRelation_Branch")
-  aminitiesRelation AminitiesRelation[]
-  createdAt         DateTime            @default(now()) @map("created_at")
-  updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at")
-  room              Room[]
+  id                     String                   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                   String                   @unique
+  address                String
+  contactNumber          String                   @map("contact_number")
+  city                   String
+  areaPincode            String                   @map("area_pincode")
+  location               String
+  description            String?
+  status                 Boolean                  @default(true)
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime?                @default(now()) @updatedAt @map("updated_at")
+  UploadRelation         UploadRelation[]
+  BranchRoomTypeRelation BranchRoomTypeRelation[]
+  AmenitiesRelation      AmenitiesRelation[]
+  Booking                Booking[]
+  Room                   Room[]
 
   @@map("branch")
 }
 
 model Room {
-  id                String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  branch            Branch?             @relation(fields: [branchId], references: [id])
-  branchId          String?             @map("branch_id") @db.Uuid
-  item              Item?               @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  itemId            String?             @map("item_id") @db.Uuid // Optional foreign key for Item
-  roomInitial       String              @unique @map("room_initial") @db.VarChar(500)
-  setPrice          Decimal             @map("set_price")
-  offerPrice        Decimal             @map("offer_price")
-  aminitiesRelation AminitiesRelation[]
-  description       String
-  uploadRelation    UploadRelation[]    @relation("UploadRelation_Room")
-  createdAt         DateTime            @default(now()) @map("created_at")
-  updatedAt         DateTime?           @default(now()) @updatedAt @map("updated_at")
+  id                String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomName          String
+  setPrice          String                 @map("set_price")
+  offerPrice        String                 @map("offer_price")
+  description       String?
+  status            Boolean                @default(true)
+  branch            Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId          String                 @map("branch_id") @db.Uuid
+  branchRoomType    BranchRoomTypeRelation @relation(fields: [branchRoomTypeId], references: [id], onDelete: Cascade)
+  branchRoomTypeId  String                 @map("branch_room_type_id") @db.Uuid
+  createdAt         DateTime               @default(now()) @map("created_at")
+  updatedAt         DateTime?              @default(now()) @updatedAt @map("updated_at")
+  UploadRelation    UploadRelation[]
+  AmenitiesRelation AmenitiesRelation[]
+  Booking           Booking[]
 
   @@map("room")
 }
 
-enum Entity {
-  AMENITIES
-  ROOMTYPE
-}
+model Booking {
+  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  user                 User?                  @relation(fields: [userId], references: [id])
+  userId               String?                @map("user_id") @db.Uuid
+  fullName             String                 @map("full_name")
+  contactNumber        String                 @map("contact_number")
+  roomNumber           String                 @map("room_number")
+  source               String
+  finalPrice           Decimal
+  checkInDate          DateTime               @map("check_in_date")
+  checkOutDate         DateTime               @map("check_out_date")
+  description          String?
+  bookingStatus        BookingStatus
+  branch               Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId             String                 @map("branch_id") @db.Uuid
+  room                 Room                   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId               String                 @map("room_id") @db.Uuid
+  createdAt            DateTime               @default(now()) @map("created_at")
+  updatedAt            DateTime?              @default(now()) @updatedAt @map("updated_at")
+  BookingStatusHistory BookingStatusHistory[]
 
-enum UploadTableName {
-  ITEM
-  BRANCH
-  ROOM
-}
-
-enum AminitiesTableName {
-  BRANCH
-  ROOM
+  @@map("booking")
 }
 
 model Upload {
   id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  file           String           @db.VarChar(500)
+  file           String
   createdAt      DateTime         @default(now()) @map("created_at")
   updatedAt      DateTime?        @default(now()) @updatedAt @map("updated_at")
   UploadRelation UploadRelation[]
@@ -119,33 +168,55 @@ model Upload {
   @@map("upload")
 }
 
+model BookingStatusHistory {
+  id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bookingStatus BookingStatus
+  booking       Booking       @relation(fields: [bookingId], references: [id])
+  bookingId     String        @map("booking_id") @db.Uuid
+  user          User          @relation(fields: [userId], references: [id])
+  userId        String        @map("user_id") @db.Uuid
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  @@map("bookingStatusHistory")
+}
+
+// RELATIONAL TABLES
+
 model UploadRelation {
-  id            String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  upload        Upload @relation(fields: [imageUploadId], references: [id], onDelete: Cascade)
-  imageUploadId String @map("image_upload_id") @db.Uuid
-
-  table UploadTableName
-
-  item     Item?   @relation("UploadRelation_Item", fields: [itemId], references: [id], onDelete: Cascade)
-  itemId   String? @map("item_id") @db.Uuid // Optional foreign key for Item
-  branch   Branch? @relation("UploadRelation_Branch", fields: [branchId], references: [id], onDelete: Cascade)
-  branchId String? @map("branch_id") @db.Uuid // Optional foreign key for Branch
-  room     Room?   @relation("UploadRelation_Room", fields: [roomId], references: [id])
-  roomId   String? @map("room_id") @db.Uuid
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  upload      Upload          @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  uploadId    String          @map("upload_id") @db.Uuid
+  table       UploadTableName
+  amenities   Amenities?      @relation(fields: [amenitiesId], references: [id], onDelete: Cascade)
+  amenitiesId String?         @map("amenities_id") @db.Uuid
+  branch      Branch?         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId    String?         @map("branch_id") @db.Uuid
+  room        Room?           @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId      String?         @map("room_id") @db.Uuid
 
   @@map("uploadRelation")
 }
 
-model AminitiesRelation {
-  id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  item        Item   @relation(fields: [aminitiesId], references: [id], onDelete: Cascade)
-  aminitiesId String @map("aminities_id") @db.Uuid
+model BranchRoomTypeRelation {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomType   RoomType @relation(fields: [roomTypeId], references: [id], onDelete: Cascade)
+  roomTypeId String   @map("room_type_id") @db.Uuid
+  branch     Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId   String   @map("branch_id") @db.Uuid
+  Room       Room[]
 
-  table    AminitiesTableName
-  branch   Branch?            @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  branchId String?            @map("branch_id") @db.Uuid
-  room     Room?              @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId   String?            @map("room_id") @db.Uuid
+  @@map("branchRoomTypeRelation")
+}
 
-  @@map("aminitiesRelation")
+model AmenitiesRelation {
+  id          String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  table       AmenitiesTableName
+  amenities   Amenities?         @relation(fields: [amenitiesId], references: [id])
+  amenitiesId String?            @map("amenities_id") @db.Uuid
+  branch      Branch?            @relation(fields: [branchId], references: [id])
+  branchId    String?            @map("branch_id") @db.Uuid
+  room        Room?              @relation(fields: [roomId], references: [id])
+  roomId      String?            @map("room_id") @db.Uuid
+
+  @@map("amenitiesRelation")
 }
