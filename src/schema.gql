@@ -2,13 +2,18 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input CreateItemInput {
-  description: String!
-  entity: EntityEnum!
+input CreateAmenityInput {
+  description: String
   image: ID
   name: String!
-  parentRoomId: ID
-  roomInitial: String
+  roomTypeId: ID
+  status: Boolean! = true
+}
+
+input CreateRoomTypeInput {
+  description: String
+  name: String!
+  roomInitial: String!
   status: Boolean! = true
 }
 
@@ -22,11 +27,6 @@ input CreateUserInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
-
-enum EntityEnum {
-  AMENITIES
-  ROOMTYPE
-}
 
 type File {
   file: String
@@ -72,12 +72,13 @@ type Message {
 }
 
 type Mutation {
+  amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
-  itemCreate(createItemInput: CreateItemInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!

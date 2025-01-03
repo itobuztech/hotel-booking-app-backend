@@ -1,4 +1,4 @@
-import { Field, Float, ID, InputType, Int } from "@nestjs/graphql";
+import { Field, ID, InputType } from "@nestjs/graphql";
 import { EntityEnum } from "../../types/enums/entity.enum";
 
 @InputType()
@@ -7,5 +7,5 @@ export class FilterItemInput {
   entity: EntityEnum;
 
   @Field(() => ID, { nullable: true })
-  parentRoom?: string;
+  roomTypeId?: string;
 }
