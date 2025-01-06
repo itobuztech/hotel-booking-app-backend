@@ -9,10 +9,7 @@ export class RoomService {
 
   async create(createRoomInput: CreateRoomInput) {
     console.log("createRoomInput:", createRoomInput);
-
     const { roomName, branchRoomTypeId, status } = createRoomInput;
-    console.log("createRoomInput :", createRoomInput);
-
     return await this.prisma.room.create({
       data: {
         roomName,
