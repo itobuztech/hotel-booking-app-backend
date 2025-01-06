@@ -12,6 +12,18 @@ input CreateItemInput {
   status: Boolean! = true
 }
 
+input CreateRoomInput {
+  branchRoomTypeId: String!
+  roomName: String!
+  status: Boolean!
+}
+
+type CreateRoomResponse {
+  branchRoomTypeId: String!
+  roomName: String!
+  status: Boolean!
+}
+
 input CreateUserInput {
   email: String!
   password: String!
@@ -73,13 +85,16 @@ type Message {
 
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
+  createRoom(createRoomInput: CreateRoomInput!): CreateRoomResponse!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemCreate(createItemInput: CreateItemInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
+  removeRoom(id: Int!): Room!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
+  updateRoom(updateRoomInput: UpdateRoomInput!): Room!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
   validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
@@ -100,6 +115,7 @@ type Query {
   account: User!
   getpermissions: JSON!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
+  room(id: Int!): Room!
   user(email: String!): User!
   users: [User!]
 }
@@ -109,6 +125,15 @@ input ResetPasswordInput {
   oldPassword: String!
 }
 
+type Room {
+  branchRoomTypeId: String!
+  createdAt: DateTime!
+  id: String!
+  roomName: String!
+  status: Boolean!
+  updatedAt: DateTime
+}
+
 input TokenConfirmationInput {
   token: String!
 }
@@ -116,6 +141,13 @@ input TokenConfirmationInput {
 input UpdateProfileInput {
   name: String!
   username: String!
+}
+
+input UpdateRoomInput {
+  branchRoomTypeId: String
+  id: Int!
+  roomName: String
+  status: Boolean
 }
 
 """The `Upload` scalar type represents a file upload."""

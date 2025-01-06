@@ -24,6 +24,7 @@ import throttle from "./config/throttle.config";
 import { UploadModule } from "./upload/upload.module";
 import { ItemModule } from "./item/item.module";
 import { NotFoundExceptionFilter } from "./util/not-found-exception.filter";
+import { RoomModule } from "./room/room.module";
 
 const env = `${(process.env.NODE_ENV || "development").toLowerCase()}`;
 
@@ -38,9 +39,10 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
     GraphQLModule.forRoot({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), "src/schema.gql"),
-      formatError: (error) => {        
+      formatError: (error) => {
         const graphQLFormattedError = {
-          message: error.extensions?.exception?.response?.message || error.message,
+          message:
+            error.extensions?.exception?.response?.message || error.message,
           code: error.extensions?.code || "SERVER_ERROR",
           originalError: error.extensions?.originalError.error,
           status: error.extensions?.status || error.status,
@@ -64,6 +66,7 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
     AccountModule,
     LoggerModule,
     ItemModule,
+    RoomModule,
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
