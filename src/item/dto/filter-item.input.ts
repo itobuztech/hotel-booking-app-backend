@@ -5,7 +5,4 @@ import { EntityEnum } from "../../types/enums/entity.enum";
 export class FilterItemInput {
   @Field(() => EntityEnum)
   entity: EntityEnum;
-
-  @Field(() => ID, { nullable: true })
-  roomTypeId?: string;
 }

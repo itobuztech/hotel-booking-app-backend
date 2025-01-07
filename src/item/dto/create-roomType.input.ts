@@ -9,9 +9,6 @@ export class CreateRoomTypeInput {
   @Field(() => String, { nullable: true })
   description?: string;
 
-  @Field(() => Boolean, { defaultValue: true })
-  status: boolean;
-
-  @Field()
+  @Field(() => String)
   roomInitial: string;
 }

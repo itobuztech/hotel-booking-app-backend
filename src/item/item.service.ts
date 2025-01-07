@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from "@nestjs/common";
-import { UploadTableName } from "@prisma/client";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { PrismaService } from "../prisma/prisma.service";
 import { FilterItemInput } from "./dto/filter-item.input";
@@ -16,7 +15,7 @@ export class ItemService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createAmenity(createAmenityInput: CreateAmenityInput) {
-    const { name, description, status, image, roomTypeId } = createAmenityInput;
+    const { name, description, image } = createAmenityInput;
 
     // Validate if the entityId exists
     const uploadPresence = await this.prisma.upload.findUnique({
@@ -26,14 +25,6 @@ export class ItemService {
       throw new NotFoundException(`Image ID does not exist.`);
     }
 
-    // Validate if the entityId exists
-    const roomType = await this.prisma.roomType.findUnique({
-      where: { id: roomTypeId },
-    });
-    if (!roomType) {
-      throw new NotFoundException(`Parent Room ID does not exist.`);
-    }
-
     try {
       let amenity = null;
       try {
@@ -41,8 +32,6 @@ export class ItemService {
           data: {
             name,
             description,
-            status,
-            roomTypeId,
           },
         });
       } catch (error) {
@@ -64,7 +53,6 @@ export class ItemService {
         data: {
           uploadId: image,
           amenitiesId: amenity.id,
-          table: UploadTableName.AMENITIES,
         },
       });
 
@@ -78,7 +66,7 @@ export class ItemService {
   }
 
   async createRoomType(createRoomTypeInput: CreateRoomTypeInput) {
-    const { name, description, roomInitial, status } = createRoomTypeInput;
+    const { name, description, roomInitial } = createRoomTypeInput;
 
     try {
       let roomType = null;
@@ -88,7 +76,6 @@ export class ItemService {
             name,
             description,
             roomInitial,
-            status,
           },
         });
       } catch (error) {
@@ -115,63 +102,42 @@ export class ItemService {
     }
   }
 
-  // async listEntity() {
-  //   try {
-  //     const entities = Entity;
+  async listItems(filterArg: FilterItemInput) {
+    const { entity } = filterArg;
 
-  //     return { entities };
-  //   } catch (error) {
-  //     console.log("Error=", error);
-  //     throw new Error("Internal Server Error. Please try after some time!");
-  //   }
-  // }
+    try {
+      if (entity === "ROOMTYPE") {
+        const roomTypes = await this.prisma.roomType.findMany({
+          where: { status: true },
+        });
 
-  // async listItem(filterArgs: FilterItemInput) {
-  //   let extraWhere = {};
+        return { roomTypes, total: roomTypes.length };
+      } else {
+        const aminities = await this.prisma.amenities.findMany({
+          where: { status: true },
+          include: {
+            UploadRelation: {
+              include: {
+                upload: true,
+              },
+            },
+          },
+        });
 
-  //   if (filterArgs) {
-  //     const { entity, parentRoom } = filterArgs;
+        aminities?.map((item): any => {
+          if (item.UploadRelation[0] && item.UploadRelation[0].upload) {
+            item.UploadRelation[0].upload["fileUrl"] =
+              `${process.env.BACKEND_BASE_URL}/uploads/${item.UploadRelation[0].upload.file}`;
+            item["image"] = item.UploadRelation[0].upload;
+          }
+        });
 
-  //     if (parentRoom) {
-  //       // Validate if the entityId exists
-  //       const parentRoomPresence = await this.prisma.item.findUnique({
-  //         where: { id: parentRoom },
-  //       });
-  //       if (!parentRoomPresence) {
-  //         throw new NotFoundException(`Room ID does not exist.`);
-  //       }
-
-  //       extraWhere["parentRoomId"] = parentRoom;
-  //     }
-
-  //     extraWhere = { entityId: entity, ...extraWhere };
-  //   }
-
-  //   try {
-  //     const items = await this.prisma.item.findMany({
-  //       where: { status: true, ...extraWhere },
-  //       include: {
-  //         uploadRelation: {
-  //           include: {
-  //             upload: true,
-  //           },
-  //         },
-  //       },
-  //     });
-
-  //     items?.map((item): any => {
-  //       if (item.uploadRelation[0] && item.uploadRelation[0].upload) {
-  //         item.uploadRelation[0].upload["fileUrl"] =
-  //           `${process.env.BACKEND_BASE_URL}/uploads/${item.uploadRelation[0].upload.file}`;
-  //         item["image"] = item.uploadRelation[0].upload;
-  //       }
-  //     });
-
-  //     return { items, total: items.length };
-  //   } catch (error) {
-  //     throw new Error("Internal Server Error. Please try after some time!");
-  //   }
-  // }
+        return { aminities, total: aminities.length };
+      }
+    } catch (error) {
+      throw new Error("Internal Server Error. Please try after some time!");
+    }
+  }
 
   // async viewItem(itemId: UniqueIdentifierInput) {
   //   const { id } = itemId;
@@ -232,33 +198,55 @@ export class ItemService {
   //   }
   // }
 
-  // async toggleItem(itemId: UniqueIdentifierInput) {
-  //   const { id } = itemId;
+  async toggleItems(itemArg: FilterItemInput, itemId: UniqueIdentifierInput) {
+    const { entity } = itemArg;
+    const { id } = itemId;
 
-  //   // Validate if the entityId exists
-  //   const itemPresence = await this.prisma.item.findUnique({
-  //     select: { status: true },
-  //     where: { id },
-  //   });
-  //   if (!itemPresence) {
-  //     throw new NotFoundException(`Item ID does not exist.`);
-  //   }
+    try {
+      if (entity === "ROOMTYPE") {
+        // Validate if the entityId exists
+        const roomTypePresence = await this.prisma.roomType.findUnique({
+          select: { status: true },
+          where: { id },
+        });
+        if (!roomTypePresence) {
+          throw new NotFoundException(`Roomtype ID does not exist.`);
+        }
 
-  //   try {
-  //     // Fetch item with all necessary relations
-  //     await this.prisma.item.update({
-  //       where: { id },
-  //       data: { status: !itemPresence.status },
-  //     });
+        await this.prisma.roomType.update({
+          where: { id },
+          data: { status: !roomTypePresence.status },
+        });
 
-  //     return {
-  //       message: `Item ${
-  //         !itemPresence.status === true ? "Enabled" : "Disabled"
-  //       }!`,
-  //     };
-  //   } catch (error) {
-  //     console.log("Error=", error);
-  //     throw new Error("Internal Server Error. Please try after some time!");
-  //   }
-  // }
+        return {
+          message: `Roomtype ${
+            !roomTypePresence.status === true ? "Enabled" : "Disabled"
+          }!`,
+        };
+      } else {
+        // Validate if the aminityId exists
+        const amenityPresence = await this.prisma.amenities.findUnique({
+          select: { status: true },
+          where: { id },
+        });
+        if (!amenityPresence) {
+          throw new NotFoundException(`Amenity ID does not exist.`);
+        }
+
+        await this.prisma.amenities.update({
+          where: { id },
+          data: { status: !amenityPresence.status },
+        });
+
+        return {
+          message: `Amenity ${
+            !amenityPresence.status === true ? "Enabled" : "Disabled"
+          }!`,
+        };
+      }
+    } catch (error) {
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
+    }
+  }
 }

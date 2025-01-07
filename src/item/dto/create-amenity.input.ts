@@ -8,12 +8,6 @@ export class CreateAmenityInput {
   @Field(() => String, { nullable: true })
   description?: string;
 
-  @Field(() => Boolean, { defaultValue: true })
-  status: boolean;
-
   @Field(() => ID, { nullable: true })
   image?: string;
-
-  @Field(() => ID, { nullable: true })
-  roomTypeId?: string;
 }

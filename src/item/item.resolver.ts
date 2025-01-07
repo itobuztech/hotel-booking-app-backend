@@ -13,6 +13,7 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { Permissions } from "../auth/decorators/permissions.decorator";
 import { PrivilegesList } from "../privileges/user-privileges";
 import { CreateAmenityInput } from "./dto/create-amenity.input";
+import { PaginatedAminityOrRoomType } from "./entities/items.entity";
 
 @Resolver()
 export class ItemResolver {
@@ -20,9 +21,9 @@ export class ItemResolver {
 
   // Amenity Creation
   @Mutation(() => Message)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN)
+  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
   amenityCreate(
     @Args("createAmenityInput") createAmenityInput: CreateAmenityInput
   ) {
@@ -31,26 +32,26 @@ export class ItemResolver {
 
   // RoomType Creation
   @Mutation(() => Message)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
+  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  // @Roles(UserRole.ADMIN)
+  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
   roomTypeCreate(
     @Args("createRoomTypeInput") createRoomTypeInput: CreateRoomTypeInput
   ) {
     return this.itemService.createRoomType(createRoomTypeInput);
   }
 
-  // // Item Listing
-  // @Query(() => PaginatedItem)
+  // Items Listing
+  @Query(() => PaginatedAminityOrRoomType)
   // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   // @Roles(UserRole.ADMIN)
   // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
-  // itemListing(
-  //   @Args("filterArgs", { nullable: true })
-  //   filterArgs?: FilterItemInput
-  // ) {
-  //   return this.itemService.listItem(filterArgs);
-  // }
+  itemsListing(
+    @Args("filterArg")
+    filterArg: FilterItemInput
+  ) {
+    return this.itemService.listItems(filterArg);
+  }
 
   // // Item Viewing
   // @Query(() => Item)
@@ -76,15 +77,17 @@ export class ItemResolver {
   //   return this.itemService.deleteItem(itemId);
   // }
 
-  // // Item Toggle
-  // @Mutation(() => Message)
+  // Item Toggle
+  @Mutation(() => Message)
   // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   // @Roles(UserRole.ADMIN)
   // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.EDIT])
-  // itemToggle(
-  //   @Args("itemId")
-  //   entityId: UniqueIdentifierInput
-  // ) {
-  //   return this.itemService.toggleItem(entityId);
-  // }
+  itemsToggle(
+    @Args("itemArg")
+    itemArg: FilterItemInput,
+    @Args("itemId")
+    itemId: UniqueIdentifierInput
+  ) {
+    return this.itemService.toggleItems(itemArg, itemId);
+  }
 }
