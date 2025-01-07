@@ -12,6 +12,7 @@ export enum UserPermissionNames {
   USER_MANAGEMENT = "USER_MANAGEMENT",
   FILE_MANAGEMENT = "FILE_MANAGEMENT",
   ITEM_MANAGEMENT = "ITEM_MANAGEMENT",
+  BRANCH_MANAGEMENT = "BRANCH_MANAGEMENT",
 }
 
 export type PrivilegesListType = {
@@ -61,6 +62,16 @@ const PrivilegesList: PrivilegesListType = {
       CREATE: 142,
       EDIT: 143,
       DELETE: 144,
+    },
+  },
+  BRANCH_MANAGEMENT: {
+    LABEL: "Branch Management",
+    ORDER: 6,
+    CAPABILITIES: {
+      VIEW: 151,
+      CREATE: 152,
+      EDIT: 153,
+      DELETE: 154,
     },
   },
 };

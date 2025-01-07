@@ -91,17 +91,27 @@ type Message {
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   create(createUserInput: CreateUserInput!): User!
+  createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
-  forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
-  itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
+  forgotPassword(
+    forgotPasswordInput: ForgotPasswordInput!
+  ): ForgotPasswordResponse!
+  itemsToggle(
+    itemArg: FilterItemInput!
+    itemId: UniqueIdentifierInput!
+  ): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
-  tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
+  tokenConfirmation(
+    tokenConfirmationInput: TokenConfirmationInput!
+  ): LoginResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
-  validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
+  validateForgotPassword(
+    forgotPasswordInput: ForgotPasswordConfirmationInput!
+  ): ValidateForgotPasswordResponse!
 }
 
 type PaginatedAminity {
@@ -165,7 +175,9 @@ input UpdateProfileInput {
   username: String!
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload
 
 input UploadFileInput {
