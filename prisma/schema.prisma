@@ -84,7 +84,7 @@ model Branch {
   id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name                    String                    @unique
   address                 String
-  contactNumber           String                    @map("contact_number") @unique
+  contactNumber           String                    @map("contact_number")
   city                    String                    @db.VarChar(255)
   areaPincode             String                    @map("area_pincode")
   location                String                    @db.VarChar(500)
@@ -163,7 +163,6 @@ model BookingStatusHistory {
 }
 
 // RELATIONAL TABLES
-
 model UploadRelation {
   id               String                  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   upload           Upload                  @relation(fields: [uploadId], references: [id], onDelete: Cascade)

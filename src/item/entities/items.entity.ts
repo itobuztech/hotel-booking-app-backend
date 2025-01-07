@@ -17,9 +17,6 @@ export class Aminity {
   @Field(() => String, { nullable: true })
   description?: AmenitiesDb["description"];
 
-  @Field(() => Boolean)
-  status: AmenitiesDb["status"];
-
   @Field(() => String, { nullable: true })
   createdAt?: AmenitiesDb["createdAt"];
 
@@ -52,9 +49,6 @@ export class RoomType {
 
   @Field(() => String)
   roomInitial: RoomTypeDb["roomInitial"];
-
-  @Field(() => Boolean)
-  status: RoomTypeDb["status"];
 
   @Field(() => String, { nullable: true })
   createdAt?: RoomTypeDb["createdAt"];

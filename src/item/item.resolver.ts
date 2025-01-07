@@ -21,9 +21,9 @@ export class ItemResolver {
 
   // Amenity Creation
   @Mutation(() => Message)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
   amenityCreate(
     @Args("createAmenityInput") createAmenityInput: CreateAmenityInput
   ) {
@@ -32,9 +32,9 @@ export class ItemResolver {
 
   // RoomType Creation
   @Mutation(() => Message)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
   roomTypeCreate(
     @Args("createRoomTypeInput") createRoomTypeInput: CreateRoomTypeInput
   ) {
@@ -43,9 +43,9 @@ export class ItemResolver {
 
   // Items Listing
   @Query(() => PaginatedAminityOrRoomType)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
   itemsListing(
     @Args("filterArg")
     filterArg: FilterItemInput
@@ -53,35 +53,11 @@ export class ItemResolver {
     return this.itemService.listItems(filterArg);
   }
 
-  // // Item Viewing
-  // @Query(() => Item)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
-  // itemView(
-  //   @Args("itemId")
-  //   itemId: UniqueIdentifierInput
-  // ) {
-  //   return this.itemService.viewItem(itemId);
-  // }
-
-  // // Item Delete
-  // @Mutation(() => Message)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.DELETE])
-  // itemDelete(
-  //   @Args("itemId")
-  //   itemId: UniqueIdentifierInput
-  // ) {
-  //   return this.itemService.deleteItem(itemId);
-  // }
-
   // Item Toggle
   @Mutation(() => Message)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.EDIT])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.EDIT])
   itemsToggle(
     @Args("itemArg")
     itemArg: FilterItemInput,
