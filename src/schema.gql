@@ -114,16 +114,25 @@ type Mutation {
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
-  forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
-  itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
+  forgotPassword(
+    forgotPasswordInput: ForgotPasswordInput!
+  ): ForgotPasswordResponse!
+  itemsToggle(
+    itemArg: FilterItemInput!
+    itemId: UniqueIdentifierInput!
+  ): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
-  tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
+  tokenConfirmation(
+    tokenConfirmationInput: TokenConfirmationInput!
+  ): LoginResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
-  validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
+  validateForgotPassword(
+    forgotPasswordInput: ForgotPasswordConfirmationInput!
+  ): ValidateForgotPasswordResponse!
 }
 
 type PaginatedAminity {
@@ -152,7 +161,10 @@ type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: User!
   getpermissions: JSON!
-  itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
+  listBranches(
+    paginationArgs: PaginationArgs
+    searchInput: SearchInput
+  ): [BranchResponse!]!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]
@@ -163,14 +175,8 @@ input ResetPasswordInput {
   oldPassword: String!
 }
 
-type RoomType {
-  createdAt: String
-  deletedAt: String
-  description: String
-  id: String
-  name: String!
-  roomInitial: String!
-  updatedAt: String
+input SearchInput {
+  search: String
 }
 
 input TokenConfirmationInput {
@@ -186,7 +192,9 @@ input UpdateProfileInput {
   username: String!
 }
 
-"""The `Upload` scalar type represents a file upload."""
+"""
+The `Upload` scalar type represents a file upload.
+"""
 scalar Upload
 
 input UploadFileInput {

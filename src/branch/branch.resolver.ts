@@ -9,6 +9,8 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "src/auth/guards/roles.guard";
+import { PaginationArgs } from "../types/inputtypes/pagination.input";
+import { SearchInput } from "../types/inputtypes/search-input";
 
 @Resolver(() => Branch)
 export class BranchResolver {
@@ -21,5 +23,15 @@ export class BranchResolver {
     @Args("createBranchInput") createBranchInput: CreateBranchInput
   ) {
     return this.branchService.create(createBranchInput);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
+  @Query(() => [BranchResponse])
+  listBranches(
+    @Args("paginationArgs", { nullable: true }) paginationArgs: PaginationArgs,
+    @Args("searchInput", { nullable: true }) searchInput: SearchInput
+  ) {
+    return this.branchService.list(paginationArgs, searchInput);
   }
 }
