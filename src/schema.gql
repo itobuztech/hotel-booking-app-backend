@@ -2,6 +2,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Aminity {
+  createdAt: String
+  deletedAt: String
+  description: String
+  id: String
+  image: File!
+  name: String!
+  updatedAt: String
+}
+
 type BranchResponse {
   address: String!
   areaPincode: String!
@@ -11,6 +21,12 @@ type BranchResponse {
   location: String!
   name: String!
   status: Boolean!
+}
+
+input CreateAmenityInput {
+  description: String
+  image: ID
+  name: String!
 }
 
 input CreateBranchInput {
@@ -24,14 +40,10 @@ input CreateBranchInput {
   status: Boolean!
 }
 
-input CreateItemInput {
-  description: String!
-  entity: EntityEnum!
-  image: ID
+input CreateRoomTypeInput {
+  description: String
   name: String!
-  parentRoomId: ID
-  roomInitial: String
-  status: Boolean! = true
+  roomInitial: String!
 }
 
 input CreateUserInput {
@@ -46,7 +58,7 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 enum EntityEnum {
-  AMENITIES
+  AMENITY
   ROOMTYPE
 }
 
@@ -54,6 +66,10 @@ type File {
   file: String
   fileUrl: String
   id: String
+}
+
+input FilterItemInput {
+  entity: EntityEnum!
 }
 
 input ForgotPasswordConfirmationInput {
@@ -94,13 +110,15 @@ type Message {
 }
 
 type Mutation {
+  amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
-  itemCreate(createItemInput: CreateItemInput!): Message!
+  itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
@@ -108,8 +126,20 @@ type Mutation {
   validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
 }
 
+type PaginatedAminity {
+  aminities: [Aminity!]!
+  total: Int!
+}
+
+union PaginatedAminityOrRoomType = PaginatedAminity | PaginatedRoomType
+
 type PaginatedFile {
   files: [File!]!
+  total: Int!
+}
+
+type PaginatedRoomType {
+  roomTypes: [RoomType!]!
   total: Int!
 }
 
@@ -122,6 +152,7 @@ type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: User!
   getpermissions: JSON!
+  itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]
@@ -132,8 +163,22 @@ input ResetPasswordInput {
   oldPassword: String!
 }
 
+type RoomType {
+  createdAt: String
+  deletedAt: String
+  description: String
+  id: String
+  name: String!
+  roomInitial: String!
+  updatedAt: String
+}
+
 input TokenConfirmationInput {
   token: String!
+}
+
+input UniqueIdentifierInput {
+  id: ID!
 }
 
 input UpdateProfileInput {
