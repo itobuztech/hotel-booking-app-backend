@@ -1,5 +1,5 @@
 {
-  "name": "auth-rabc-template",
+  "name": "hotel-management",
   "version": "0.0.9",
   "description": "Backend system for a hotel chain management app with NestJS, Prisma, and GraphQL",
   "author": "Palash Chanda",
@@ -19,7 +19,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "dotenv -e .env.test -- jest --verbose --config ./test/jest-e2e.json",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "prisma": "prisma"
   },
   "dependencies": {
     "@apollo/server": "^4.11.2",
@@ -117,5 +118,6 @@
     "reservation-system",
     "booking-api",
     "admin-dashboard"
-  ]
+  ],
+  "packageManager": "yarn@4.6.0"
 }
