@@ -2,6 +2,28 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type BranchResponse {
+  address: String!
+  areaPincode: String!
+  city: String!
+  contactNumber: String!
+  description: String!
+  location: String!
+  name: String!
+  status: Boolean!
+}
+
+input CreateBranchInput {
+  address: String!
+  areaPincode: String!
+  city: String!
+  contactNumber: String!
+  description: String!
+  location: String!
+  name: String!
+  status: Boolean!
+}
+
 input CreateItemInput {
   description: String!
   entity: EntityEnum!
@@ -73,6 +95,7 @@ type Message {
 
 type Mutation {
   create(createUserInput: CreateUserInput!): User!
+  createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemCreate(createItemInput: CreateItemInput!): Message!
