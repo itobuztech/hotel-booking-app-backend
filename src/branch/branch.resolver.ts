@@ -2,8 +2,7 @@ import { Resolver, Query, Mutation, Args, Int } from "@nestjs/graphql";
 import { BranchService } from "./branch.service";
 import { Branch } from "./entities/branch.entity";
 import { CreateBranchInput } from "./dto/create-branch.input";
-import { UpdateBranchInput } from "./dto/update-branch.input";
-import { BranchResponse } from "./dto/branch-response";
+import { BranchListResponse, BranchResponse } from "./dto/branch-response";
 import { UseGuards } from "@nestjs/common";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
@@ -27,7 +26,7 @@ export class BranchResolver {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
-  @Query(() => [BranchResponse])
+  @Query(() => BranchListResponse)
   listBranches(
     @Args("paginationArgs", { nullable: true }) paginationArgs: PaginationArgs,
     @Args("searchInput", { nullable: true }) searchInput: SearchInput
