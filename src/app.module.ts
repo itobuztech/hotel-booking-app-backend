@@ -40,6 +40,7 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), "src/schema.gql"),
       formatError: (error) => {
+        return error;
         const graphQLFormattedError = {
           message:
             error.extensions?.exception?.response?.message || error.message,
@@ -100,4 +101,4 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
     },
   ],
 })
-export class AppModule {}
+export class AppModule { }
