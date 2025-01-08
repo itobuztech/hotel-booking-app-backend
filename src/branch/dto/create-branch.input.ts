@@ -23,7 +23,4 @@ export class CreateBranchInput {
 
   @Field(() => String)
   description?: string;
-
-  @Field(() => Boolean)
-  status: boolean;
 }
