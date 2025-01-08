@@ -1,7 +1,7 @@
 import { registerEnumType } from "@nestjs/graphql";
 
 export enum EntityEnum {
-  AMENITIES = "AMENITIES",
+  AMENITY = "AMENITY",
   ROOMTYPE = "ROOMTYPE",
 }
 

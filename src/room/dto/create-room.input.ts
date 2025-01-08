@@ -7,7 +7,4 @@ export class CreateRoomInput {
 
   @Field(() => String)
   branchRoomTypeId: string;
-
-  @Field(() => Boolean)
-  status: boolean;
 }
