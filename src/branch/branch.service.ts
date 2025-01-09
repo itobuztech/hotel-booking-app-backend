@@ -3,11 +3,21 @@ import { CreateBranchInput } from "./dto/create-branch.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { PaginationArgs } from "../types/inputtypes/pagination.input";
 import { SearchInput } from "../types/inputtypes/search-input";
+import { GetBranchInput } from "./dto/get-branch.input";
 import { BranchListResponse } from "./dto/branch-response";
 
 @Injectable()
 export class BranchService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) { }
+
+  async get(getBranchInput: GetBranchInput) {
+    const { id } = getBranchInput;
+    return await this.prisma.branch.findUnique({
+      where: {
+        id: id,
+      }
+    });
+  }
 
   async create(createBranchInput: CreateBranchInput) {
     const branchNameExists = await this.prisma.branch.findUnique({

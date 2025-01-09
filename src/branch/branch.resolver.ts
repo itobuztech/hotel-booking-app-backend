@@ -10,10 +10,11 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { RolesGuard } from "src/auth/guards/roles.guard";
 import { PaginationArgs } from "../types/inputtypes/pagination.input";
 import { SearchInput } from "../types/inputtypes/search-input";
+import { GetBranchInput } from "./dto/get-branch.input";
 
 @Resolver(() => Branch)
 export class BranchResolver {
-  constructor(private readonly branchService: BranchService) {}
+  constructor(private readonly branchService: BranchService) { }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -32,5 +33,14 @@ export class BranchResolver {
     @Args("searchInput", { nullable: true }) searchInput: SearchInput
   ) {
     return this.branchService.list(paginationArgs, searchInput);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
+  @Query(() => BranchResponse)
+  getBranch(
+    @Args("getBranchInput") getBranchInput: GetBranchInput
+  ) {
+    return this.branchService.get(getBranchInput);
   }
 }

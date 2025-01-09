@@ -100,6 +100,11 @@ type ForgotPasswordResponse {
   token: String!
 }
 
+input GetBranchInput {
+  """Branch ID"""
+  id: String!
+}
+
 input GetUploadedFile {
   id: String!
 }
@@ -173,6 +178,7 @@ type PaginationResponse {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: User!
+  getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
   listBranches(paginationArgs: PaginationArgs, searchInput: SearchInput): BranchListResponse!
