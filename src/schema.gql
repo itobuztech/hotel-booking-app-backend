@@ -12,15 +12,20 @@ type Aminity {
   updatedAt: String
 }
 
+type BranchListResponse {
+  branches: [BranchResponse!]!
+  pagination: PaginationResponse!
+}
+
 type BranchResponse {
   address: String!
   areaPincode: String!
   city: String!
   contactNumber: String!
   description: String!
+  id: String!
   location: String!
   name: String!
-  status: Boolean!
 }
 
 input CreateAmenityInput {
@@ -37,6 +42,16 @@ input CreateBranchInput {
   description: String!
   location: String!
   name: String!
+}
+
+input CreateRoomInput {
+  branchRoomTypeId: String!
+  roomName: String!
+}
+
+type CreateRoomResponse {
+  branchRoomTypeId: String!
+  roomName: String!
   status: Boolean!
 }
 
@@ -56,6 +71,11 @@ input CreateUserInput {
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+input DeleteBranchInput {
+  """Branch ID"""
+  id: String!
+}
 
 enum EntityEnum {
   AMENITY
@@ -83,6 +103,11 @@ input ForgotPasswordInput {
 
 type ForgotPasswordResponse {
   token: String!
+}
+
+input GetBranchInput {
+  """Branch ID"""
+  id: String!
 }
 
 input GetUploadedFile {
@@ -113,6 +138,8 @@ type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
+  createRoom(createRoomInput: CreateRoomInput!): CreateRoomResponse!
+  deleteBranch(deleteBranchInput: DeleteBranchInput!): String!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
@@ -148,11 +175,19 @@ input PaginationArgs {
   skip: Int
 }
 
+type PaginationResponse {
+  currentPage: Int!
+  totalPages: Int!
+  totalRecords: Int!
+}
+
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: User!
+  getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
+  listBranches(paginationArgs: PaginationArgs, searchInput: SearchInput): BranchListResponse!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]
@@ -171,6 +206,10 @@ type RoomType {
   name: String!
   roomInitial: String!
   updatedAt: String
+}
+
+input SearchInput {
+  search: String
 }
 
 input TokenConfirmationInput {
