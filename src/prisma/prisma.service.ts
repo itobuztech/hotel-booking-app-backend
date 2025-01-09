@@ -48,11 +48,6 @@ export class PrismaService
         handleFindQuery();
       }
 
-      // Handle `findMany` queries (same logic as find queries)
-      if (action === "findMany") {
-        handleFindQuery();
-      }
-
       // Handle `delete` action (convert to soft delete)
       if (action === "delete") {
         params.action = "update"; // Convert delete to update

@@ -41,11 +41,11 @@ export class ItemService {
         ) {
           const target = (error.meta?.target as string[]) || [];
           if (target.includes("name")) {
-            throw new ConflictException("The amenity name must be unique.");
+            return new ConflictException("The amenity name must be unique.");
           }
         } else {
           console.log("Error=", error);
-          throw new Error("Amenity could not be created!");
+          return new Error("Amenity could not be created!");
         }
       }
 
@@ -85,11 +85,11 @@ export class ItemService {
         ) {
           const target = (error.meta?.target as string[]) || [];
           if (target.includes("name")) {
-            throw new ConflictException("The roomtype name must be unique.");
+            return new ConflictException("The roomtype name must be unique.");
           }
         } else {
           console.log("Error=", error);
-          throw new Error("Roomtype could not be created!");
+          return new Error("Roomtype could not be created!");
         }
       }
 
@@ -132,6 +132,7 @@ export class ItemService {
         return { aminities, total: aminities.length };
       }
     } catch (error) {
+      console.log("Error=", error);
       throw new Error("Internal Server Error. Please try after some time!");
     }
   }
