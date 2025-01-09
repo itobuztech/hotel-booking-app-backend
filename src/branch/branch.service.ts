@@ -7,7 +7,7 @@ import { BranchListResponse } from "./dto/branch-response";
 
 @Injectable()
 export class BranchService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(createBranchInput: CreateBranchInput) {
     const branchNameExists = await this.prisma.branch.findUnique({
@@ -35,61 +35,58 @@ export class BranchService {
 
   async list(paginationArgs: PaginationArgs, searchInput: SearchInput) {
     const { search = "" } = searchInput;
-    const allBranches = await this.prisma.branch.findMany({});
-
-    let conditions: any = {};
-    if (search !== "") {
-      conditions["where"] = {
+    const { limit = 10, skip = 0 } = paginationArgs;
+    const currentPage = Math.floor(skip / limit) + 1;
+    const recordCount = await this.prisma.branch.count();
+    const filteredBranches = await this.prisma.branch.findMany({
+      skip: skip,
+      take: limit,
+      where: {
         OR: [
           {
             name: {
-              contains: searchInput.search,
+              contains: search,
               mode: "insensitive",
             },
           },
           {
             address: {
-              contains: searchInput.search,
+              contains: search,
               mode: "insensitive",
             },
           },
           {
             city: {
-              contains: searchInput.search,
+              contains: search,
               mode: "insensitive",
             },
           },
           {
             location: {
-              contains: searchInput.search,
+              contains: search,
               mode: "insensitive",
             },
           },
           {
             description: {
-              contains: searchInput.search,
+              contains: search,
               mode: "insensitive",
             },
           },
-        ],
-      };
-    }
-
-    const filteredBranches = await this.prisma.branch.findMany({
-      skip: (paginationArgs.skip - 1) * paginationArgs.limit || 0,
-      take: paginationArgs.limit || 10,
-      where: conditions.where,
+        ]
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
     });
 
-    const branchInfo: BranchListResponse = {
+    return {
       branches: filteredBranches,
       pagination: {
-        totalRecords: allBranches.length,
-        totalPages: Math.ceil(allBranches.length / paginationArgs.limit),
-        currentPage: paginationArgs.skip,
+        totalRecords: recordCount,
+        totalPages: Math.ceil(recordCount / limit),
+        currentPage: currentPage,
       },
     };
-
-    return branchInfo;
   }
 }
