@@ -12,9 +12,35 @@ type Aminity {
   updatedAt: String
 }
 
+type BranchListResponse {
+  branches: [BranchResponse!]!
+  pagination: PaginationResponse!
+}
+
+type BranchResponse {
+  address: String!
+  areaPincode: String!
+  city: String!
+  contactNumber: String!
+  description: String!
+  id: String!
+  location: String!
+  name: String!
+}
+
 input CreateAmenityInput {
   description: String
   image: ID
+  name: String!
+}
+
+input CreateBranchInput {
+  address: String!
+  areaPincode: String!
+  city: String!
+  contactNumber: String!
+  description: String!
+  location: String!
   name: String!
 }
 
@@ -101,6 +127,7 @@ type Message {
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   create(createUserInput: CreateUserInput!): User!
+  createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
   createRoom(createRoomInput: CreateRoomInput!): CreateRoomResponse!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
@@ -137,11 +164,18 @@ input PaginationArgs {
   skip: Int
 }
 
+type PaginationResponse {
+  currentPage: Int!
+  totalPages: Int!
+  totalRecords: Int!
+}
+
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: User!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
+  listBranches(paginationArgs: PaginationArgs, searchInput: SearchInput): BranchListResponse!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   user(email: String!): User!
   users: [User!]
@@ -160,6 +194,10 @@ type RoomType {
   name: String!
   roomInitial: String!
   updatedAt: String
+}
+
+input SearchInput {
+  search: String
 }
 
 input TokenConfirmationInput {
