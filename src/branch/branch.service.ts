@@ -1,9 +1,10 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import { NotFoundException, ConflictException, Injectable } from "@nestjs/common";
 import { CreateBranchInput } from "./dto/create-branch.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { PaginationArgs } from "../types/inputtypes/pagination.input";
 import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
+import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { BranchListResponse } from "./dto/branch-response";
 
 @Injectable()
@@ -12,11 +13,13 @@ export class BranchService {
 
   async get(getBranchInput: GetBranchInput) {
     const { id } = getBranchInput;
-    return await this.prisma.branch.findUnique({
+    const branch = await this.prisma.branch.findUnique({
       where: {
         id: id,
       }
     });
+    if (!branch) throw new NotFoundException("Branch not found.");
+    return branch;
   }
 
   async create(createBranchInput: CreateBranchInput) {
@@ -98,5 +101,15 @@ export class BranchService {
         currentPage: currentPage,
       },
     };
+  }
+
+  async delete(deleteBranchInput: DeleteBranchInput): Promise<string> {
+    const { id } = deleteBranchInput;
+    await this.prisma.branch.delete({
+      where: {
+        id: id,
+      }
+    });
+    return 'Branch deleted successfully';
   }
 }

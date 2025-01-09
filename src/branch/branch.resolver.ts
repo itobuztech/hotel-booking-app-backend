@@ -11,6 +11,7 @@ import { RolesGuard } from "src/auth/guards/roles.guard";
 import { PaginationArgs } from "../types/inputtypes/pagination.input";
 import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
+import { DeleteBranchInput } from "./dto/delete-branch.input";
 
 @Resolver(() => Branch)
 export class BranchResolver {
@@ -42,5 +43,14 @@ export class BranchResolver {
     @Args("getBranchInput") getBranchInput: GetBranchInput
   ) {
     return this.branchService.get(getBranchInput);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Mutation(() => String)
+  deleteBranch(
+    @Args("deleteBranchInput") deleteBranchInput: DeleteBranchInput
+  ) {
+    return this.branchService.delete(deleteBranchInput);
   }
 }
