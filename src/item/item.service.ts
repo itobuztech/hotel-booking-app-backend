@@ -57,7 +57,7 @@ export class ItemService {
       });
 
       return {
-        message: `Amenity created succesully with the Id ${amenity.id}`,
+        message: `Amenity created succesully!`,
       };
     } catch (error) {
       console.log("Error=", error);
@@ -94,7 +94,7 @@ export class ItemService {
       }
 
       return {
-        message: `Roomtype created succesully with the Id ${roomType.id}`,
+        message: `Roomtype created succesully!`,
       };
     } catch (error) {
       console.log("Error=", error);
