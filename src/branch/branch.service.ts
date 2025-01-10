@@ -9,7 +9,6 @@ import { PaginationArgs } from "../types/inputtypes/pagination.input";
 import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
-import { BranchListResponse } from "./dto/branch-response";
 import { UpdateBranchInput } from "./dto/update-branch.input";
 
 @Injectable()

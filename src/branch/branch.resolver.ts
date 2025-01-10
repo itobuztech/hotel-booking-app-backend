@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int, Context } from "@nestjs/graphql";
+import { Resolver, Query, Mutation, Args } from "@nestjs/graphql";
 import { BranchService } from "./branch.service";
 import { Branch } from "./entities/branch.entity";
 import { CreateBranchInput } from "./dto/create-branch.input";
