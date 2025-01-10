@@ -16,12 +16,12 @@ import { PaginationArgs } from "src/types/inputtypes/pagination.input";
 
 @Resolver("Video")
 export class UploadResolver {
-  constructor(private readonly uploadService: UploadService) {}
+  constructor(private readonly uploadService: UploadService) { }
 
   @Mutation(() => UploadFileResponse)
-  // @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  // @Roles(UserRole.ADMIN)
-  // @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.CREATE])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.CREATE])
   uploadFiles(@Args("uploadFileInput") uploadFileInput: UploadFileInput) {
     return this.uploadService.uploadFiles(uploadFileInput);
   }
