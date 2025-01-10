@@ -1,17 +1,17 @@
-import { Field, ObjectType } from "@nestjs/graphql";
+import { Field, ObjectType, ID } from "@nestjs/graphql";
 import { Upload as FileDb } from "@prisma/client";
 import { TotalCount } from "../../types/inputtypes/toalCount.entity";
 
 @ObjectType()
 export class File {
-  @Field(() => String, { nullable: true })
-  id?: FileDb["id"];
+  @Field(() => ID, { nullable: false })
+  id: FileDb["id"];
 
-  @Field(() => String, { nullable: true })
-  file?: FileDb["file"];
+  @Field(() => String, { nullable: false })
+  file: FileDb["file"];
 
-  @Field(() => String, { nullable: true })
-  fileUrl?: String;
+  @Field(() => String, { nullable: false })
+  fileUrl: string;
 }
 
 @ObjectType()

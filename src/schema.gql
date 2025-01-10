@@ -92,9 +92,9 @@ enum EntityEnum {
 }
 
 type File {
-  file: String
-  fileUrl: String
-  id: String
+  file: String!
+  fileUrl: String!
+  id: ID!
 }
 
 input FilterItemInput {
