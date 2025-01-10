@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Account {
+  createdAt: DateTime!
+  email: String!
+  id: String!
+  role: Role!
+  updatedAt: DateTime
+  username: String!
+}
+
 type Aminity {
   createdAt: String
   deletedAt: String
@@ -183,7 +192,7 @@ type PaginationResponse {
 
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
-  account: User!
+  account: Account!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
@@ -196,6 +205,11 @@ type Query {
 input ResetPasswordInput {
   newPassword: String!
   oldPassword: String!
+}
+
+type Role {
+  privileges: [Int!]!
+  userType: UserRole!
 }
 
 type RoomType {
@@ -243,6 +257,12 @@ type User {
   id: String!
   updatedAt: DateTime
   username: String!
+}
+
+"""The roles available for users"""
+enum UserRole {
+  ADMIN
+  CUSTOMER
 }
 
 type ValidateForgotPasswordResponse {

@@ -6,11 +6,11 @@ import { UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { User } from "./entities/user.entity";
-import { UserRole } from "@prisma/client";
+import { UserRole, Role } from "@prisma/client";
 
 @Resolver(() => User)
 export class UsersResolver {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Query(() => [User], { name: "users", nullable: true })
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -1,6 +1,20 @@
-import { Field, ObjectType } from '@nestjs/graphql';
-import { User as UserDB } from '@prisma/client';
+import { Field, ObjectType, registerEnumType, Int } from '@nestjs/graphql';
+import { User as UserDB, UserRole } from '@prisma/client';
 import { Exclude } from 'class-transformer';
+
+registerEnumType(UserRole, {
+    name: 'UserRole',
+    description: 'The roles available for users',
+});
+
+@ObjectType()
+class Role {
+    @Field(() => UserRole)
+    userType: UserRole;
+
+    @Field(() => [Int])
+    privileges: number[];
+}
 
 @ObjectType()
 export class User {
@@ -21,4 +35,11 @@ export class User {
 
     @Field(() => Date, { nullable: true })
     updatedAt: UserDB['updatedAt'] | null;
+}
+
+@ObjectType()
+export class Account extends User {
+
+    @Field(() => Role)
+    role: Role;
 }
