@@ -1,4 +1,8 @@
-import { NotFoundException, ConflictException, Injectable } from "@nestjs/common";
+import {
+  NotFoundException,
+  ConflictException,
+  Injectable,
+} from "@nestjs/common";
 import { CreateBranchInput } from "./dto/create-branch.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { PaginationArgs } from "../types/inputtypes/pagination.input";
@@ -6,17 +10,18 @@ import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { BranchListResponse } from "./dto/branch-response";
+import { UpdateBranchInput } from "./dto/update-branch.input";
 
 @Injectable()
 export class BranchService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async get(getBranchInput: GetBranchInput) {
     const { id } = getBranchInput;
     const branch = await this.prisma.branch.findUnique({
       where: {
         id: id,
-      }
+      },
     });
     if (!branch) throw new NotFoundException("Branch not found.");
     return branch;
@@ -86,7 +91,7 @@ export class BranchService {
               mode: "insensitive",
             },
           },
-        ]
+        ],
       },
       orderBy: {
         createdAt: "desc",
@@ -108,8 +113,21 @@ export class BranchService {
     await this.prisma.branch.delete({
       where: {
         id: id,
-      }
+      },
     });
-    return 'Branch deleted successfully';
+    return "Branch deleted successfully";
+  }
+
+  async update(
+    getBranchInput: GetBranchInput,
+    updateBranchInput: UpdateBranchInput
+  ) {
+    const { id } = getBranchInput;
+    return await this.prisma.branch.update({
+      where: {
+        id: id,
+      },
+      data: updateBranchInput,
+    });
   }
 }
