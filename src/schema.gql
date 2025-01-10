@@ -157,6 +157,7 @@ type Mutation {
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
+  updateBranch(getBranchInput: GetBranchInput!, updateBranchInput: UpdateBranchInput!): BranchResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
   validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
@@ -232,6 +233,16 @@ input TokenConfirmationInput {
 
 input UniqueIdentifierInput {
   id: ID!
+}
+
+input UpdateBranchInput {
+  address: String
+  areaPincode: String
+  city: String
+  contactNumber: String
+  description: String
+  location: String
+  name: String
 }
 
 input UpdateProfileInput {
