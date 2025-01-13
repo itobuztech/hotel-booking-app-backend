@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateRoomInput } from "./dto/create-room.input";
 import { PrismaService } from "../prisma/prisma.service";
+import { UpdateRoomNumberInput } from "./dto/update-room-number.input";
+import { log } from "node:console";
 
 @Injectable()
 export class RoomService {
@@ -172,6 +174,67 @@ export class RoomService {
       return {
         message: `Room created successfully!`,
       };
+    } catch (error) {
+      console.log("Error=", error);
+      throw new Error("Internal Server Error. Please try after some time!");
+    }
+  }
+
+  async roomNumberUpdateService(
+    updateRoomNumberInput: UpdateRoomNumberInput[]
+  ) {
+    const updatingRoomNumbersObjArr = [];
+
+    try {
+      for (const roomNumberObj of updateRoomNumberInput) {
+        const { room, roomNumber } = roomNumberObj;
+
+        // Validate if room exists
+        const roomPresence = await this.prisma.room.findUnique({
+          where: { id: room },
+          include: {
+            branchRoomType: true,
+          },
+        });
+
+        if (!roomPresence) {
+          throw new NotFoundException(`Room does not exist.`);
+        }
+
+        // Separate text from number in roomName
+        const roomName = roomPresence.roomName.replace(/\d+$/, "") + roomNumber;
+
+        // Validate if room number is unique
+        const roomNumberPresence = await this.prisma.room.count({
+          where: {
+            roomName,
+            branchRoomType: {
+              branchId: roomPresence.branchRoomType.branchId,
+            },
+          },
+        });
+
+        if (roomNumberPresence) {
+          throw new NotFoundException(`Room number already exists.`);
+        } else {
+          updatingRoomNumbersObjArr.push({
+            id: room,
+            roomName,
+          });
+        }
+      }
+
+      // Update all room numbers at once
+      await this.prisma.$transaction(
+        updatingRoomNumbersObjArr.map((room) =>
+          this.prisma.room.update({
+            where: { id: room.id },
+            data: { roomName: room.roomName },
+          })
+        )
+      );
+
+      return { message: "Room numbers updated successfully!" };
     } catch (error) {
       console.log("Error=", error);
       throw new Error("Internal Server Error. Please try after some time!");
