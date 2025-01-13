@@ -12,7 +12,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private readonly logger: Logger
-  ) {}
+  ) { }
 
   async findAll(): Promise<User[]> {
     return await this.prisma.user.findMany({});

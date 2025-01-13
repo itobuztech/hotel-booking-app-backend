@@ -2,6 +2,15 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Account {
+  createdAt: DateTime!
+  email: String!
+  id: String!
+  role: Role!
+  updatedAt: DateTime
+  username: String!
+}
+
 type Aminity {
   createdAt: String
   deletedAt: String
@@ -83,9 +92,9 @@ enum EntityEnum {
 }
 
 type File {
-  file: String
-  fileUrl: String
-  id: String
+  file: String!
+  fileUrl: String!
+  id: ID!
 }
 
 input FilterItemInput {
@@ -148,6 +157,7 @@ type Mutation {
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
+  updateBranch(getBranchInput: GetBranchInput!, updateBranchInput: UpdateBranchInput!): BranchResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
   validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
@@ -183,7 +193,7 @@ type PaginationResponse {
 
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
-  account: User!
+  account: Account!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
@@ -196,6 +206,11 @@ type Query {
 input ResetPasswordInput {
   newPassword: String!
   oldPassword: String!
+}
+
+type Role {
+  privileges: [Int!]!
+  userType: UserRole!
 }
 
 type RoomType {
@@ -218,6 +233,16 @@ input TokenConfirmationInput {
 
 input UniqueIdentifierInput {
   id: ID!
+}
+
+input UpdateBranchInput {
+  address: String
+  areaPincode: String
+  city: String
+  contactNumber: String
+  description: String
+  location: String
+  name: String
 }
 
 input UpdateProfileInput {
@@ -243,6 +268,12 @@ type User {
   id: String!
   updatedAt: DateTime
   username: String!
+}
+
+"""The roles available for users"""
+enum UserRole {
+  ADMIN
+  CUSTOMER
 }
 
 type ValidateForgotPasswordResponse {

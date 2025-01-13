@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Args, Int } from "@nestjs/graphql";
+import { Resolver, Query, Mutation, Args } from "@nestjs/graphql";
 import { BranchService } from "./branch.service";
 import { Branch } from "./entities/branch.entity";
 import { CreateBranchInput } from "./dto/create-branch.input";
@@ -12,10 +12,11 @@ import { PaginationArgs } from "../types/inputtypes/pagination.input";
 import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
+import { UpdateBranchInput } from "./dto/update-branch.input";
 
 @Resolver(() => Branch)
 export class BranchResolver {
-  constructor(private readonly branchService: BranchService) { }
+  constructor(private readonly branchService: BranchService) {}
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
@@ -39,9 +40,7 @@ export class BranchResolver {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
   @Query(() => BranchResponse)
-  getBranch(
-    @Args("getBranchInput") getBranchInput: GetBranchInput
-  ) {
+  getBranch(@Args("getBranchInput") getBranchInput: GetBranchInput) {
     return this.branchService.get(getBranchInput);
   }
 
@@ -52,5 +51,15 @@ export class BranchResolver {
     @Args("deleteBranchInput") deleteBranchInput: DeleteBranchInput
   ) {
     return this.branchService.delete(deleteBranchInput);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @Mutation(() => BranchResponse)
+  updateBranch(
+    @Args("getBranchInput") getBranchInput: GetBranchInput,
+    @Args("updateBranchInput") updateBranchInput: UpdateBranchInput
+  ) {
+    return this.branchService.update(getBranchInput, updateBranchInput);
   }
 }
