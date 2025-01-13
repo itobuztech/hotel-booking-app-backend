@@ -154,6 +154,7 @@ type Mutation {
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   roomCreate(createRoomInput: CreateRoomInput!): Message!
+  roomNumberUpdate(updateRoomNumberInput: [UpdateRoomNumberInput!]!): Message!
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
@@ -248,6 +249,11 @@ input UpdateBranchInput {
 input UpdateProfileInput {
   name: String!
   username: String!
+}
+
+input UpdateRoomNumberInput {
+  room: ID!
+  roomNumber: Int!
 }
 
 """The `Upload` scalar type represents a file upload."""
