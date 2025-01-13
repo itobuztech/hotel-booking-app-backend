@@ -54,14 +54,14 @@ input CreateBranchInput {
 }
 
 input CreateRoomInput {
-  branchRoomTypeId: String!
-  roomName: String!
-}
-
-type CreateRoomResponse {
-  branchRoomTypeId: String!
-  roomName: String!
-  status: Boolean!
+  amenities: [ID!]
+  branchId: ID!
+  description: String
+  images: [ID!]!
+  numberOfRooms: Int!
+  offerPrice: Int!
+  roomTypeId: ID!
+  setPrice: Int!
 }
 
 input CreateRoomTypeInput {
@@ -147,13 +147,13 @@ type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
-  createRoom(createRoomInput: CreateRoomInput!): CreateRoomResponse!
   deleteBranch(deleteBranchInput: DeleteBranchInput!): String!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  roomCreate(createRoomInput: CreateRoomInput!): Message!
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
