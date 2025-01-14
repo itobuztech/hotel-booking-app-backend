@@ -7,6 +7,8 @@ const excludedModels = [
   "Upload",
   "BookingStatusHistory",
   "UploadRelation",
+  "BranchRoomTypeAmenitiesRelation",
+  "BranchAmenitiesRelation",
 ];
 
 const excludedMasterModels = ["RoomType", "Amenities"];
