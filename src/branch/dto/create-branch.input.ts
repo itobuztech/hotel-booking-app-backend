@@ -23,4 +23,7 @@ export class CreateBranchInput {
 
   @Field(() => String)
   description?: string;
+
+  @Field(() => [String], { nullable: true })
+  amenityIds: string[];
 }
