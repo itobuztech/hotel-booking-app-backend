@@ -3,7 +3,6 @@ import {
   UnprocessableEntityException,
   Logger,
 } from "@nestjs/common";
-import { CreateUserInput } from "./dto/create-user.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { Prisma, User, Role, UserRole } from "@prisma/client";
 
