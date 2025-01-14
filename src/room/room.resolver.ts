@@ -1,9 +1,9 @@
-import { Resolver, Mutation, Args } from "@nestjs/graphql";
+import { Resolver, Mutation, Args, Query } from "@nestjs/graphql";
 import { UseGuards } from "@nestjs/common";
 import { UserRole } from "@prisma/client";
 
 import { RoomService } from "./room.service";
-import { Room } from "./entities/room.entity";
+import { RoomsOverAllOrRoomsWithInitial } from "./entities/room.entity";
 import { CreateRoomInput } from "./dto/create-room.input";
 import { Message } from "../types/inputtypes/message.entity";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -13,8 +13,10 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { Permissions } from "../auth/decorators/permissions.decorator";
 import { PrivilegesList } from "../privileges/user-privileges";
 import { UpdateRoomNumberInput } from "./dto/update-room-number.input";
+import { FilterBranchRoomTypeInput } from "./dto/filter-branch-room-type.input";
+import { SearchInput } from "../types/inputtypes/search-input";
 
-@Resolver(() => Room)
+@Resolver()
 export class RoomResolver {
   constructor(private readonly roomService: RoomService) {}
 
@@ -40,5 +42,19 @@ export class RoomResolver {
     updateRoomNumberInput: UpdateRoomNumberInput[]
   ) {
     return this.roomService.roomNumberUpdateService(updateRoomNumberInput);
+  }
+
+  // Items Listing
+  @Query(() => RoomsOverAllOrRoomsWithInitial)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
+  branchRoomTypeListing(
+    @Args("filterArgs")
+    filterArgs: FilterBranchRoomTypeInput,
+    @Args("search", { nullable: true })
+    search?: SearchInput
+  ) {
+    return this.roomService.branchRoomTypeListingService(filterArgs, search);
   }
 }
