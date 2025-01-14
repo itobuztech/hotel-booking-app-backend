@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateRoomInput } from "./dto/create-room.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateRoomNumberInput } from "./dto/update-room-number.input";
-import { log } from "node:console";
+import { FilterBranchRoomTypeInput } from "./dto/filter-branch-room-type.input";
+import { SearchInput } from "../types/inputtypes/search-input";
 
 @Injectable()
 export class RoomService {
@@ -33,14 +34,14 @@ export class RoomService {
       where: { id: roomTypeId },
     });
     if (!roomTypePresence) {
-      throw new NotFoundException(`Room type does not exist.`);
+      return new NotFoundException(`Room type does not exist.`);
     }
 
     // Validate if amenities exist
     if (amenities.length > 0) {
       for (const amenity of amenities) {
         if (!amenity) {
-          throw new NotFoundException(`Amenities should not be blank!`);
+          return new NotFoundException(`Amenities should not be blank!`);
         }
 
         const amenityPresence = await this.prisma.amenities.count({
@@ -48,7 +49,7 @@ export class RoomService {
         });
 
         if (!amenityPresence) {
-          throw new NotFoundException(`Some amenity does not exist.`);
+          return new NotFoundException(`Some amenity does not exist.`);
         }
       }
     }
@@ -60,7 +61,7 @@ export class RoomService {
       });
 
       if (!imagePresence) {
-        throw new NotFoundException(`Some image does not exist.`);
+        return new NotFoundException(`Some image does not exist.`);
       }
     }
 
@@ -198,7 +199,7 @@ export class RoomService {
         });
 
         if (!roomPresence) {
-          throw new NotFoundException(`Room does not exist.`);
+          return new NotFoundException(`Room does not exist.`);
         }
 
         // Separate text from number in roomName
@@ -215,7 +216,7 @@ export class RoomService {
         });
 
         if (roomNumberPresence) {
-          throw new NotFoundException(`Room number already exists.`);
+          return new NotFoundException(`Room number already exists.`);
         } else {
           updatingRoomNumbersObjArr.push({
             id: room,
@@ -238,6 +239,78 @@ export class RoomService {
     } catch (error) {
       console.log("Error=", error);
       throw new Error("Internal Server Error. Please try after some time!");
+    }
+  }
+
+  async branchRoomTypeListingService(
+    filterArgs: FilterBranchRoomTypeInput,
+    search: SearchInput
+  ) {
+    const { branchId, roomTypeId = null } = filterArgs;
+
+    // Validate if branch exists
+    const branchPresence = await this.prisma.branch.count({
+      where: { id: branchId },
+    });
+    if (!branchPresence) {
+      return new NotFoundException(`Branch does not exist.`);
+    }
+
+    let searchInput = "";
+    if (roomTypeId) {
+      // Validate if Room type exists
+      const roomPresence = await this.prisma.roomType.count({
+        where: { id: roomTypeId },
+      });
+      if (!roomPresence) {
+        return new NotFoundException(`Roomtype does not exist.`);
+      }
+      if (search) {
+        const { search: searchString = "" } = search;
+
+        searchInput = searchString.trim().toLowerCase();
+      }
+    }
+
+    const branchRoomTypeRelation =
+      await this.prisma.branchRoomTypeRelation.findMany({
+        where: {
+          branchId,
+          roomTypeId: roomTypeId || undefined,
+        },
+        include: {
+          roomType: { select: { name: true, roomInitial: true } },
+          Room: {
+            select: { id: true, roomName: true },
+            where: {
+              roomName: {
+                contains: searchInput || undefined,
+                mode: "insensitive",
+              },
+            },
+          },
+        },
+      });
+
+    if (!roomTypeId) {
+      branchRoomTypeRelation?.map((branchRoomType) => {
+        branchRoomType["type"] = branchRoomType.roomType.name;
+        branchRoomType["total"] = branchRoomType.Room.length;
+        branchRoomType["rooms"] = branchRoomType.Room.map(
+          (room) => room.roomName
+        );
+      });
+
+      return { roomsOverAlls: branchRoomTypeRelation || [] };
+    } else {
+      const roomsWithInitials = branchRoomTypeRelation[0]?.Room;
+
+      roomsWithInitials?.map((room) => {
+        room["roomNumber"] = parseInt(room.roomName.replace(/\D/g, ""));
+        room["roomInitial"] = branchRoomTypeRelation[0].roomType.roomInitial;
+      });
+
+      return { roomsWithInitials: roomsWithInitials || [] };
     }
   }
 }

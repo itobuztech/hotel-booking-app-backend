@@ -97,6 +97,11 @@ type File {
   id: ID!
 }
 
+input FilterBranchRoomTypeInput {
+  branchId: ID!
+  roomTypeId: ID
+}
+
 input FilterItemInput {
   entity: EntityEnum!
 }
@@ -195,6 +200,7 @@ type PaginationResponse {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
+  branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
@@ -224,8 +230,31 @@ type RoomType {
   updatedAt: String
 }
 
+type RoomsOverAll {
+  id: ID!
+  rooms: [String!]!
+  total: Int!
+  type: String!
+}
+
+type RoomsOverAllArr {
+  roomsOverAlls: [RoomsOverAll!]!
+}
+
+union RoomsOverAllOrRoomsWithInitial = RoomsOverAllArr | RoomsWithInitialArr
+
+type RoomsWithInitial {
+  id: ID!
+  roomInitial: String!
+  roomNumber: Int!
+}
+
+type RoomsWithInitialArr {
+  roomsWithInitials: [RoomsWithInitial!]!
+}
+
 input SearchInput {
-  search: String
+  search: String!
 }
 
 input TokenConfirmationInput {
