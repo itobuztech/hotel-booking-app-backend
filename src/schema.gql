@@ -21,12 +21,19 @@ type Aminity {
   updatedAt: String
 }
 
+type BranchAmenitiesRelationResponse {
+  amenitiesId: String!
+  branchId: String!
+  id: String!
+}
+
 type BranchListResponse {
   branches: [BranchResponse!]!
   pagination: PaginationResponse!
 }
 
 type BranchResponse {
+  BranchAmenitiesRelation: [BranchAmenitiesRelationResponse!]
   address: String!
   areaPincode: String!
   city: String!
@@ -45,6 +52,7 @@ input CreateAmenityInput {
 
 input CreateBranchInput {
   address: String!
+  amenityIds: [String!]
   areaPincode: String!
   city: String!
   contactNumber: String!
@@ -267,6 +275,7 @@ input UniqueIdentifierInput {
 
 input UpdateBranchInput {
   address: String
+  amenityIds: [String!]
   areaPincode: String
   city: String
   contactNumber: String
