@@ -12,7 +12,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private readonly logger: Logger
-  ) { }
+  ) {}
 
   async findAll(): Promise<User[]> {
     return await this.prisma.user.findMany({});
@@ -34,7 +34,9 @@ export class UsersService {
     });
   }
 
-  async create(createUserInput: CreateUserInput) {
+  async create(createUserInput) {
+    console.log("createUserInput", createUserInput);
+
     const defaultRole = await this.prisma.role.findFirst({
       where: {
         userType: UserRole.CUSTOMER,
@@ -52,6 +54,7 @@ export class UsersService {
         email: createUserInput.email,
         username: createUserInput.username,
         password: createUserInput.password,
+        emailConfirmationToken: createUserInput.confirmationToken,
         roleId: defaultRole.id,
       },
       include: {
