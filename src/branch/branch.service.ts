@@ -22,7 +22,7 @@ export class BranchService {
         id: id,
       },
     });
-    if (!branch) throw new NotFoundException("Branch not found.");
+    if (!branch) throw new NotFoundException("Branch not found!");
     return branch;
   }
 
