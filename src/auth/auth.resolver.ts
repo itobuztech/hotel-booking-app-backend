@@ -25,7 +25,7 @@ import { TokenConfirmationInput } from "./dto/token-confirmation.input";
 import { Message } from "src/types/inputtypes/message.entity";
 @Resolver()
 export class AuthResolver {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Mutation(() => LoginResponse)
   @UseGuards(GqlAuthGuard)

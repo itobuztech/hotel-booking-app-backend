@@ -32,7 +32,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly emailService: EmailService
-  ) { }
+  ) {}
 
   async generateAccessToken(userPayload: UserPayload) {
     return this.jwtService.sign(userPayload);
@@ -109,6 +109,7 @@ export class AuthService {
         password,
         confirmationToken,
       });
+
       if (!newUser) {
         throw new Error(
           "No User is Created. Please try again after some time!"
@@ -153,6 +154,11 @@ export class AuthService {
 
       return {
         access_token: this.jwtService.sign({
+          email: user.email,
+          sub: user.id,
+          role: user.role,
+        }),
+        refresh_token: await this.generateRefreshToken({
           email: user.email,
           sub: user.id,
           role: user.role,
