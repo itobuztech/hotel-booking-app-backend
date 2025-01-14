@@ -47,11 +47,11 @@ export class BranchService {
     });
 
     if (branchNameExists) {
-      throw new ConflictException("Branch name already exists.");
+      throw new ConflictException("Branch name already exists!");
     }
 
     if (contactNumberExists) {
-      throw new ConflictException("Contact number already exists.");
+      throw new ConflictException("Contact number already exists!");
     }
 
     const amenityIdsExist = await this.prisma.amenities.findMany({
