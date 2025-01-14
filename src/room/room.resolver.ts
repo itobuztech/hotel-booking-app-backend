@@ -4,7 +4,10 @@ import { UserRole } from "@prisma/client";
 
 import { RoomService } from "./room.service";
 import { RoomsOverAllOrRoomsWithInitial } from "./entities/room.entity";
-import { CreateRoomInput } from "./dto/create-room.input";
+import {
+  CreateOrUpdateRoomInput,
+  ActionTypeInput,
+} from "./dto/create-or-update-room.input";
 import { Message } from "../types/inputtypes/message.entity";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { PermissionsGuardOR } from "../auth/guards/permissions-or.guard";
@@ -25,8 +28,16 @@ export class RoomResolver {
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
   @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
-  roomCreate(@Args("createRoomInput") createRoomInput: CreateRoomInput) {
-    return this.roomService.roomCreateService(createRoomInput);
+  roomCreateOrUpdate(
+    @Args("createOrUpdateRoomInput")
+    createOrUpdateRoomInput: CreateOrUpdateRoomInput,
+    @Args("actionTypeInput")
+    actionTypeInput: ActionTypeInput
+  ) {
+    return this.roomService.roomCreateOrUpdateService(
+      createOrUpdateRoomInput,
+      actionTypeInput
+    );
   }
 
   // Room Number Update
@@ -44,7 +55,7 @@ export class RoomResolver {
     return this.roomService.roomNumberUpdateService(updateRoomNumberInput);
   }
 
-  // Items Listing
+  // Branch Roomtypes Listing
   @Query(() => RoomsOverAllOrRoomsWithInitial)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)

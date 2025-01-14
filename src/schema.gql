@@ -11,6 +11,15 @@ type Account {
   username: String!
 }
 
+enum ActionEnum {
+  CREATE
+  UPDATE
+}
+
+input ActionTypeInput {
+  action: ActionEnum!
+}
+
 type Aminity {
   createdAt: String
   deletedAt: String
@@ -53,8 +62,8 @@ input CreateBranchInput {
   name: String!
 }
 
-input CreateRoomInput {
-  amenities: [ID!]
+input CreateOrUpdateRoomInput {
+  amenities: [ID!]!
   branchId: ID!
   description: String
   images: [ID!]!
@@ -158,7 +167,7 @@ type Mutation {
   itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
-  roomCreate(createRoomInput: CreateRoomInput!): Message!
+  roomCreateOrUpdate(actionTypeInput: ActionTypeInput!, createOrUpdateRoomInput: CreateOrUpdateRoomInput!): Message!
   roomNumberUpdate(updateRoomNumberInput: [UpdateRoomNumberInput!]!): Message!
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!

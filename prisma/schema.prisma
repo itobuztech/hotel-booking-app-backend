@@ -206,7 +206,6 @@ model BranchRoomTypeAmenitiesRelation {
   branchRoomTypeId String                 @map("branch_room_type_id") @db.Uuid
   createdAt        DateTime               @default(now()) @map("created_at")
   updatedAt        DateTime?              @default(now()) @updatedAt @map("updated_at")
-  deletedAt        DateTime?              @map("deleted_at")
 
   @@map("branchRoomTypeAmenitiesRelation")
 }
@@ -219,7 +218,6 @@ model BranchAmenitiesRelation {
   branchId    String?    @map("branch_id") @db.Uuid
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime?  @default(now()) @updatedAt @map("updated_at")
-  deletedAt   DateTime?  @map("deleted_at")
 
   @@map("branchAmenitiesRelation")
 }

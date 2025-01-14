@@ -1,5 +1,12 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
-import { CreateRoomInput } from "./dto/create-room.input";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
+import {
+  ActionTypeInput,
+  CreateOrUpdateRoomInput,
+} from "./dto/create-or-update-room.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateRoomNumberInput } from "./dto/update-room-number.input";
 import { FilterBranchRoomTypeInput } from "./dto/filter-branch-room-type.input";
@@ -9,125 +16,12 @@ import { SearchInput } from "../types/inputtypes/search-input";
 export class RoomService {
   constructor(private prisma: PrismaService) {}
 
-  async roomCreateService(createRoomInput: CreateRoomInput) {
-    const {
-      numberOfRooms,
-      branchId,
-      roomTypeId,
-      setPrice,
-      offerPrice,
-      description,
-      amenities = [],
-      images,
-    } = createRoomInput;
-
-    // Validate if branch exists
-    const branchPresence = await this.prisma.branch.count({
-      where: { id: branchId },
-    });
-    if (!branchPresence) {
-      throw new NotFoundException(`Branch does not exist.`);
-    }
-
-    // Validate if room type exists
-    const roomTypePresence = await this.prisma.roomType.findUnique({
-      where: { id: roomTypeId },
-    });
-    if (!roomTypePresence) {
-      return new NotFoundException(`Room type does not exist.`);
-    }
-
-    // Validate if amenities exist
-    if (amenities.length > 0) {
-      for (const amenity of amenities) {
-        if (!amenity) {
-          return new NotFoundException(`Amenities should not be blank!`);
-        }
-
-        const amenityPresence = await this.prisma.amenities.count({
-          where: { id: amenity },
-        });
-
-        if (!amenityPresence) {
-          return new NotFoundException(`Some amenity does not exist.`);
-        }
-      }
-    }
-
-    // Validate if images exist
-    for (const image of images) {
-      const imagePresence = await this.prisma.upload.findUnique({
-        where: { id: image },
-      });
-
-      if (!imagePresence) {
-        return new NotFoundException(`Some image does not exist.`);
-      }
-    }
-
-    // Check if the "branchRoomTypeRelation" is already present or not.
-    let branchRoomTypeRelation =
-      await this.prisma.branchRoomTypeRelation.findFirst({
-        where: { branchId, roomTypeId },
-      });
-
-    if (!branchRoomTypeRelation) {
-      // Creating relation between branch and room type!
-      branchRoomTypeRelation = await this.prisma.branchRoomTypeRelation.create({
-        data: {
-          branchId,
-          roomTypeId,
-          setPrice,
-          offerPrice,
-          description: description || null,
-        },
-      });
-    } else {
-      // Updating relation between branch and room type!
-      branchRoomTypeRelation = await this.prisma.branchRoomTypeRelation.update({
-        where: {
-          id: branchRoomTypeRelation.id,
-        },
-
-        data: {
-          setPrice,
-          offerPrice,
-          description: description || null,
-        },
-      });
-    }
-
-    const amenitiesCreateArr = await Promise.all(
-      amenities.map(async (amenity) => {
-        const branchRoomTypeAmenitiesRelationPresent =
-          await this.prisma.branchRoomTypeAmenitiesRelation.count({
-            where: {
-              amenitiesId: amenity,
-              branchRoomTypeId: branchRoomTypeRelation.id,
-            },
-          });
-
-        if (!branchRoomTypeAmenitiesRelationPresent) {
-          return {
-            amenitiesId: amenity,
-            branchRoomTypeId: branchRoomTypeRelation.id,
-          };
-        }
-        return null; // Return null for amenities that don't need to be created
-      })
-    );
-
-    // Filter out null values from the array
-    const filteredAmenitiesCreateArr = amenitiesCreateArr.filter(
-      (item) => item !== null
-    );
-
-    if (filteredAmenitiesCreateArr.length > 0) {
-      await this.prisma.branchRoomTypeAmenitiesRelation.createMany({
-        data: filteredAmenitiesCreateArr,
-      });
-    }
-
+  private async roomCreation(
+    numberOfRooms: number,
+    roomTypePresence,
+    branchId,
+    branchRoomTypeRelation
+  ) {
     for (let i = 1; i <= numberOfRooms; i++) {
       // Loop from 1 to numberOfRooms
       let roomName: string;
@@ -170,14 +64,198 @@ export class RoomService {
         },
       });
     }
+  }
+
+  async roomCreateOrUpdateService(
+    createOrUpdateRoomInput: CreateOrUpdateRoomInput,
+    actionTypeInput: ActionTypeInput
+  ) {
+    const { action } = actionTypeInput;
+
+    const {
+      numberOfRooms,
+      branchId,
+      roomTypeId,
+      setPrice,
+      offerPrice,
+      description,
+      amenities = [],
+      images,
+    } = createOrUpdateRoomInput;
 
     try {
-      return {
-        message: `Room created successfully!`,
-      };
+      // Validate if branch exists
+      const branchPresence = await this.prisma.branch.count({
+        where: { id: branchId },
+      });
+      if (!branchPresence) {
+        throw new NotFoundException(`Branch does not exist.`);
+      }
+
+      // Validate if room type exists
+      const roomTypePresence = await this.prisma.roomType.findUnique({
+        where: { id: roomTypeId },
+      });
+      if (!roomTypePresence) {
+        throw new NotFoundException(`Room type does not exist.`);
+      }
+
+      // Validate if amenities exist
+      if (amenities.length > 0) {
+        for (const amenity of amenities) {
+          const amenityPresence = await this.prisma.amenities.count({
+            where: { id: amenity },
+          });
+
+          if (!amenityPresence) {
+            throw new NotFoundException(`Some amenity does not exist.`);
+          }
+        }
+      }
+
+      // Validate if images exist
+      for (const image of images) {
+        const imagePresence = await this.prisma.upload.findUnique({
+          where: { id: image },
+        });
+
+        if (!imagePresence) {
+          throw new NotFoundException(`Some image does not exist.`);
+        }
+      }
+
+      // Check if the "branchRoomTypeRelation" is already present or not.
+      let branchRoomTypeRelation =
+        await this.prisma.branchRoomTypeRelation.findFirst({
+          where: { branchId, roomTypeId },
+        });
+
+      if (branchRoomTypeRelation && action === "CREATE") {
+        throw new BadRequestException(
+          `Room type already exists for this branch.`
+        );
+      } else if (action === "CREATE") {
+        // Creating relation between branch and room type!
+        branchRoomTypeRelation =
+          await this.prisma.branchRoomTypeRelation.create({
+            data: {
+              branchId,
+              roomTypeId,
+              setPrice,
+              offerPrice,
+              description: description || null,
+            },
+          });
+      } else if (action === "UPDATE") {
+        // Updating relation between branch and room type!
+        await this.prisma.branchRoomTypeRelation.update({
+          where: {
+            id: branchRoomTypeRelation.id,
+          },
+          data: {
+            setPrice,
+            offerPrice,
+            description: description || null,
+          },
+        });
+      }
+
+      if (amenities.length > 0) {
+        const amenitiesCreateArr = await Promise.all(
+          amenities.map(async (amenity) => {
+            const branchRoomTypeAmenitiesRelationPresent =
+              await this.prisma.branchRoomTypeAmenitiesRelation.count({
+                where: {
+                  amenitiesId: amenity,
+                  branchRoomTypeId: branchRoomTypeRelation.id,
+                },
+              });
+
+            if (!branchRoomTypeAmenitiesRelationPresent) {
+              return {
+                amenitiesId: amenity,
+                branchRoomTypeId: branchRoomTypeRelation.id,
+              };
+            }
+            return null; // Return null for amenities that don't need to be created
+          })
+        );
+
+        // Filter out null values from the array
+        const filteredAmenitiesCreateArr = amenitiesCreateArr.filter(
+          (item) => item !== null
+        );
+
+        if (filteredAmenitiesCreateArr.length > 0) {
+          await this.prisma.branchRoomTypeAmenitiesRelation.createMany({
+            data: filteredAmenitiesCreateArr,
+          });
+        }
+      } else if (amenities.length === 0 && action === "UPDATE") {
+        await this.prisma.branchRoomTypeAmenitiesRelation.deleteMany({
+          where: {
+            branchRoomTypeId: branchRoomTypeRelation.id,
+          },
+        });
+      }
+
+      if (action === "CREATE") {
+        await this.roomCreation(
+          numberOfRooms,
+          roomTypePresence,
+          branchId,
+          branchRoomTypeRelation
+        );
+
+        return {
+          message: `Room created successfully!`,
+        };
+      } else if (action === "UPDATE") {
+        const rooms = await this.prisma.room.findMany({
+          select: { id: true, roomName: true, createdAt: true },
+          where: {
+            branchRoomTypeId: branchRoomTypeRelation.id,
+          },
+        });
+
+        const roomsCount = rooms.length;
+
+        if (roomsCount > numberOfRooms) {
+          const unnecessaryRooms = roomsCount - numberOfRooms;
+          // Delete extra rooms
+          await this.prisma.room.deleteMany({
+            where: {
+              branchRoomTypeId: branchRoomTypeRelation.id,
+              createdAt: {
+                lte: rooms[unnecessaryRooms - 1].createdAt,
+              },
+            },
+          });
+        } else if (roomsCount < numberOfRooms) {
+          const extraRooms = numberOfRooms - roomsCount;
+
+          await this.roomCreation(
+            extraRooms,
+            roomTypePresence,
+            branchId,
+            branchRoomTypeRelation
+          );
+        }
+
+        return {
+          message: `Room updated successfully!`,
+        };
+      }
     } catch (error) {
-      console.log("Error=", error);
-      throw new Error("Internal Server Error. Please try after some time!");
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
     }
   }
 
@@ -199,7 +277,7 @@ export class RoomService {
         });
 
         if (!roomPresence) {
-          return new NotFoundException(`Room does not exist.`);
+          throw new NotFoundException(`Room does not exist.`);
         }
 
         // Separate text from number in roomName
@@ -216,7 +294,7 @@ export class RoomService {
         });
 
         if (roomNumberPresence) {
-          return new NotFoundException(`Room number already exists.`);
+          throw new NotFoundException(`Room number already exists.`);
         } else {
           updatingRoomNumbersObjArr.push({
             id: room,
@@ -238,7 +316,11 @@ export class RoomService {
       return { message: "Room numbers updated successfully!" };
     } catch (error) {
       console.log("Error=", error);
-      throw new Error("Internal Server Error. Please try after some time!");
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try after some time!");
+      }
     }
   }
 
@@ -248,69 +330,79 @@ export class RoomService {
   ) {
     const { branchId, roomTypeId = null } = filterArgs;
 
-    // Validate if branch exists
-    const branchPresence = await this.prisma.branch.count({
-      where: { id: branchId },
-    });
-    if (!branchPresence) {
-      return new NotFoundException(`Branch does not exist.`);
-    }
-
-    let searchInput = "";
-    if (roomTypeId) {
-      // Validate if Room type exists
-      const roomPresence = await this.prisma.roomType.count({
-        where: { id: roomTypeId },
+    try {
+      // Validate if branch exists
+      const branchPresence = await this.prisma.branch.count({
+        where: { id: branchId },
       });
-      if (!roomPresence) {
-        return new NotFoundException(`Roomtype does not exist.`);
+      if (!branchPresence) {
+        throw new NotFoundException(`Branch does not exist.`);
       }
-      if (search) {
-        const { search: searchString = "" } = search;
 
-        searchInput = searchString.trim().toLowerCase();
+      let searchInput = "";
+      if (roomTypeId) {
+        // Validate if Room type exists
+        const roomPresence = await this.prisma.roomType.count({
+          where: { id: roomTypeId },
+        });
+        if (!roomPresence) {
+          throw new NotFoundException(`Roomtype does not exist.`);
+        }
+        if (search) {
+          const { search: searchString = "" } = search;
+
+          searchInput = searchString.trim().toLowerCase();
+        }
       }
-    }
 
-    const branchRoomTypeRelation =
-      await this.prisma.branchRoomTypeRelation.findMany({
-        where: {
-          branchId,
-          roomTypeId: roomTypeId || undefined,
-        },
-        include: {
-          roomType: { select: { name: true, roomInitial: true } },
-          Room: {
-            select: { id: true, roomName: true },
-            where: {
-              roomName: {
-                contains: searchInput || undefined,
-                mode: "insensitive",
+      const branchRoomTypeRelation =
+        await this.prisma.branchRoomTypeRelation.findMany({
+          where: {
+            branchId,
+            roomTypeId: roomTypeId || undefined,
+          },
+          include: {
+            roomType: { select: { name: true, roomInitial: true } },
+            Room: {
+              select: { id: true, roomName: true },
+              where: {
+                roomName: {
+                  contains: searchInput || undefined,
+                  mode: "insensitive",
+                },
+                deletedAt: null,
               },
             },
           },
-        },
-      });
+        });
 
-    if (!roomTypeId) {
-      branchRoomTypeRelation?.map((branchRoomType) => {
-        branchRoomType["type"] = branchRoomType.roomType.name;
-        branchRoomType["total"] = branchRoomType.Room.length;
-        branchRoomType["rooms"] = branchRoomType.Room.map(
-          (room) => room.roomName
-        );
-      });
+      if (!roomTypeId) {
+        branchRoomTypeRelation?.map((branchRoomType) => {
+          branchRoomType["type"] = branchRoomType.roomType.name;
+          branchRoomType["total"] = branchRoomType.Room.length;
+          branchRoomType["rooms"] = branchRoomType.Room.map(
+            (room) => room.roomName
+          );
+        });
 
-      return { roomsOverAlls: branchRoomTypeRelation || [] };
-    } else {
-      const roomsWithInitials = branchRoomTypeRelation[0]?.Room;
+        return { roomsOverAlls: branchRoomTypeRelation || [] };
+      } else {
+        const roomsWithInitials = branchRoomTypeRelation[0]?.Room;
 
-      roomsWithInitials?.map((room) => {
-        room["roomNumber"] = parseInt(room.roomName.replace(/\D/g, ""));
-        room["roomInitial"] = branchRoomTypeRelation[0].roomType.roomInitial;
-      });
+        roomsWithInitials?.map((room) => {
+          room["roomNumber"] = parseInt(room.roomName.replace(/\D/g, ""));
+          room["roomInitial"] = branchRoomTypeRelation[0].roomType.roomInitial;
+        });
 
-      return { roomsWithInitials: roomsWithInitials || [] };
+        return { roomsWithInitials: roomsWithInitials || [] };
+      }
+    } catch (error) {
+      console.log("Error=", error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try after some time!");
+      }
     }
   }
 }

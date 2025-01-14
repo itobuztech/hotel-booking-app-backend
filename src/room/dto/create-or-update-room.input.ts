@@ -1,7 +1,8 @@
 import { InputType, Field, ID, Int } from "@nestjs/graphql";
+import { ActionEnum } from "../../types/enums/action-types.enum";
 
 @InputType()
-export class CreateRoomInput {
+export class CreateOrUpdateRoomInput {
   @Field(() => Int)
   numberOfRooms: number;
 
@@ -22,10 +23,16 @@ export class CreateRoomInput {
   description?: string;
 
   // Data to be filled in the "BranchRoomTypeAmenitiesRelation" table
-  @Field(() => [ID], { nullable: true })
-  amenities?: string[];
+  @Field(() => [ID])
+  amenities: string[];
 
   // Data to be filled in the "UploadRelation" table
   @Field(() => [ID])
   images: string[];
+}
+
+@InputType()
+export class ActionTypeInput {
+  @Field(() => ActionEnum)
+  action: string;
 }
