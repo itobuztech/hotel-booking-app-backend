@@ -2,7 +2,56 @@ import { ObjectType, Field, ID, createUnionType, Int } from "@nestjs/graphql";
 import {
   BranchRoomTypeRelation as BranchRoomTypeRelationDB,
   Room as RoomDB,
+  Branch as BranchDB,
+  RoomType as RoomTypeDB,
+  Amenities as AmenitiesDB,
 } from "@prisma/client";
+import { File } from "../../upload/entities/files.entity";
+
+@ObjectType()
+export class BranchRoomTypeAmenitiesUsed {
+  @Field(() => ID)
+  id: AmenitiesDB["id"];
+
+  @Field(() => String)
+  name: AmenitiesDB["name"];
+}
+
+@ObjectType()
+export class BranchRoomType {
+  @Field(() => ID)
+  roomTypeId: BranchRoomTypeRelationDB["roomTypeId"];
+
+  @Field(() => ID)
+  branchId: BranchRoomTypeRelationDB["branchId"];
+
+  @Field(() => String)
+  branchName: BranchDB["name"];
+
+  @Field(() => String)
+  roomTypeName: RoomTypeDB["name"];
+
+  @Field(() => String)
+  roomTypeInitial: RoomTypeDB["roomInitial"];
+
+  @Field(() => Int)
+  setPriceEditable: number;
+
+  @Field(() => Int)
+  offerPriceEditable: number;
+
+  @Field(() => String, { nullable: true })
+  description?: BranchRoomTypeRelationDB["description"];
+
+  @Field(() => Int)
+  totalRooms: number;
+
+  @Field(() => [File])
+  image: File[];
+
+  @Field(() => [BranchRoomTypeAmenitiesUsed])
+  amenities: BranchRoomTypeAmenitiesUsed[];
+}
 
 @ObjectType()
 export class RoomsOverAll {

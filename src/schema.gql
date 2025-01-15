@@ -53,6 +53,25 @@ type BranchResponse {
   name: String!
 }
 
+type BranchRoomType {
+  amenities: [BranchRoomTypeAmenitiesUsed!]!
+  branchId: ID!
+  branchName: String!
+  description: String
+  image: [File!]!
+  offerPriceEditable: Int!
+  roomTypeId: ID!
+  roomTypeInitial: String!
+  roomTypeName: String!
+  setPriceEditable: Int!
+  totalRooms: Int!
+}
+
+type BranchRoomTypeAmenitiesUsed {
+  id: ID!
+  name: String!
+}
+
 input CreateAmenityInput {
   description: String
   image: ID
@@ -217,6 +236,7 @@ type PaginationResponse {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
+  branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
   branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
