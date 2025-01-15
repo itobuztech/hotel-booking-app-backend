@@ -3,7 +3,10 @@ import { UseGuards } from "@nestjs/common";
 import { UserRole } from "@prisma/client";
 
 import { RoomService } from "./room.service";
-import { RoomsOverAllOrRoomsWithInitial } from "./entities/room.entity";
+import {
+  BranchRoomType,
+  RoomsOverAllOrRoomsWithInitial,
+} from "./entities/room.entity";
 import {
   CreateOrUpdateRoomInput,
   ActionTypeInput,
@@ -18,12 +21,13 @@ import { PrivilegesList } from "../privileges/user-privileges";
 import { UpdateRoomNumberInput } from "./dto/update-room-number.input";
 import { FilterBranchRoomTypeInput } from "./dto/filter-branch-room-type.input";
 import { SearchInput } from "../types/inputtypes/search-input";
+import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Resolver()
 export class RoomResolver {
   constructor(private readonly roomService: RoomService) {}
 
-  // Room Creation
+  // Room Creation or Update
   @Mutation(() => Message)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
@@ -67,5 +71,17 @@ export class RoomResolver {
     search?: SearchInput
   ) {
     return this.roomService.branchRoomTypeListingService(filterArgs, search);
+  }
+
+  // Branch Roomtype Detail
+  @Query(() => BranchRoomType)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
+  branchRoomTypeDetails(
+    @Args("branchRoomTypeId")
+    branchRoomTypeId: UniqueIdentifierInput
+  ) {
+    return this.roomService.branchRoomTypeDetailsService(branchRoomTypeId);
   }
 }

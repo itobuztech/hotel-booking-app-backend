@@ -11,6 +11,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { UpdateRoomNumberInput } from "./dto/update-room-number.input";
 import { FilterBranchRoomTypeInput } from "./dto/filter-branch-room-type.input";
 import { SearchInput } from "../types/inputtypes/search-input";
+import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Injectable()
 export class RoomService {
@@ -22,6 +23,7 @@ export class RoomService {
     branchId,
     branchRoomTypeRelation
   ) {
+    const roomCreateArr = [];
     for (let i = 1; i <= numberOfRooms; i++) {
       // Loop from 1 to numberOfRooms
       let roomName: string;
@@ -56,14 +58,20 @@ export class RoomService {
         });
       }
 
-      // Create the room after finding a unique room name
-      await this.prisma.room.create({
-        data: {
-          roomName,
-          branchRoomTypeId: branchRoomTypeRelation.id,
-        },
-      });
+      roomCreateArr.push({
+        roomName,
+        branchRoomTypeId: branchRoomTypeRelation.id,
+      }); // Push the room name to the array
     }
+
+    return roomCreateArr;
+  }
+
+  private async getNotIdenticalElements<T>(
+    array1: T[],
+    array2: T[]
+  ): Promise<T[]> {
+    return array1.filter((item) => !array2.includes(item));
   }
 
   async roomCreateOrUpdateService(
@@ -130,14 +138,14 @@ export class RoomService {
           where: { branchId, roomTypeId },
         });
 
-      if (branchRoomTypeRelation && action === "CREATE") {
-        throw new BadRequestException(
-          `Room type already exists for this branch.`
-        );
-      } else if (action === "CREATE") {
-        // Creating relation between branch and room type!
-        branchRoomTypeRelation =
-          await this.prisma.branchRoomTypeRelation.create({
+      const result = await this.prisma.$transaction(async (prisma) => {
+        if (branchRoomTypeRelation && action === "CREATE") {
+          throw new BadRequestException(
+            `Room type already exists for this branch.`
+          );
+        } else if (action === "CREATE") {
+          // Creating relation between branch and room type!
+          branchRoomTypeRelation = await prisma.branchRoomTypeRelation.create({
             data: {
               branchId,
               roomTypeId,
@@ -146,106 +154,200 @@ export class RoomService {
               description: description || null,
             },
           });
-      } else if (action === "UPDATE") {
-        // Updating relation between branch and room type!
-        await this.prisma.branchRoomTypeRelation.update({
-          where: {
-            id: branchRoomTypeRelation.id,
-          },
-          data: {
-            setPrice,
-            offerPrice,
-            description: description || null,
-          },
-        });
-      }
 
-      if (amenities.length > 0) {
-        const amenitiesCreateArr = await Promise.all(
-          amenities.map(async (amenity) => {
-            const branchRoomTypeAmenitiesRelationPresent =
-              await this.prisma.branchRoomTypeAmenitiesRelation.count({
-                where: {
-                  amenitiesId: amenity,
-                  branchRoomTypeId: branchRoomTypeRelation.id,
-                },
-              });
+          const imageCreateArr = images.map((image) => {
+            return {
+              uploadId: image,
+              branchRoomTypeId: branchRoomTypeRelation.id,
+            };
+          });
 
-            if (!branchRoomTypeAmenitiesRelationPresent) {
+          await prisma.uploadRelation.createMany({
+            data: imageCreateArr,
+          });
+        } else if (action === "UPDATE") {
+          // Updating relation between branch and room type!
+          await prisma.branchRoomTypeRelation.update({
+            where: {
+              id: branchRoomTypeRelation.id,
+            },
+            data: {
+              setPrice,
+              offerPrice,
+              description: description || null,
+            },
+          });
+
+          const branchRoomTypesImages = await prisma.uploadRelation.findMany({
+            select: { uploadId: true },
+            where: {
+              branchRoomTypeId: branchRoomTypeRelation.id,
+            },
+          });
+
+          const branchRoomTypesImagesIdArr = branchRoomTypesImages.map(
+            (item) => item.uploadId
+          );
+
+          const imagesToCreate = await this.getNotIdenticalElements(
+            images,
+            branchRoomTypesImagesIdArr
+          );
+          const imagesToDelete = await this.getNotIdenticalElements(
+            branchRoomTypesImagesIdArr,
+            images
+          );
+
+          // Create Images
+          if (imagesToCreate.length > 0) {
+            const imageCreateArr = imagesToCreate.map((image) => {
+              return {
+                uploadId: image,
+                branchRoomTypeId: branchRoomTypeRelation.id,
+              };
+            });
+
+            await prisma.uploadRelation.createMany({
+              data: imageCreateArr,
+            });
+          }
+          // Delete Images
+          if (imagesToDelete.length > 0) {
+            const imageDeleteArr = imagesToDelete.map((image) => {
+              return {
+                uploadId: image,
+                branchRoomTypeId: branchRoomTypeRelation.id,
+              };
+            });
+
+            await prisma.uploadRelation.deleteMany({
+              where: {
+                OR: imageDeleteArr,
+              },
+            });
+          }
+        }
+
+        if (amenities.length > 0) {
+          const branchRoomTypesAmenities =
+            await prisma.branchRoomTypeAmenitiesRelation.findMany({
+              select: { amenitiesId: true },
+              where: {
+                branchRoomTypeId: branchRoomTypeRelation.id,
+              },
+            });
+
+          const branchRoomTypesAmenitiesIdArr = branchRoomTypesAmenities.map(
+            (item) => item.amenitiesId
+          );
+
+          const amenitiesToCreate = await this.getNotIdenticalElements(
+            amenities,
+            branchRoomTypesAmenitiesIdArr
+          );
+          const amenitiesToDelete = await this.getNotIdenticalElements(
+            branchRoomTypesAmenitiesIdArr,
+            amenities
+          );
+
+          // Create Amenity
+          if (amenitiesToCreate.length > 0) {
+            const amenitiesCreateArr = amenitiesToCreate.map((amenity) => {
               return {
                 amenitiesId: amenity,
                 branchRoomTypeId: branchRoomTypeRelation.id,
               };
-            }
-            return null; // Return null for amenities that don't need to be created
-          })
-        );
+            });
 
-        // Filter out null values from the array
-        const filteredAmenitiesCreateArr = amenitiesCreateArr.filter(
-          (item) => item !== null
-        );
+            await prisma.branchRoomTypeAmenitiesRelation.createMany({
+              data: amenitiesCreateArr,
+            });
+          }
+          // Delete Amenity
+          if (amenitiesToDelete.length > 0) {
+            const amenitiesDeleteArr = amenitiesToDelete.map((amenity) => {
+              return {
+                amenitiesId: amenity,
+                branchRoomTypeId: branchRoomTypeRelation.id,
+              };
+            });
 
-        if (filteredAmenitiesCreateArr.length > 0) {
-          await this.prisma.branchRoomTypeAmenitiesRelation.createMany({
-            data: filteredAmenitiesCreateArr,
-          });
-        }
-      } else if (amenities.length === 0 && action === "UPDATE") {
-        await this.prisma.branchRoomTypeAmenitiesRelation.deleteMany({
-          where: {
-            branchRoomTypeId: branchRoomTypeRelation.id,
-          },
-        });
-      }
-
-      if (action === "CREATE") {
-        await this.roomCreation(
-          numberOfRooms,
-          roomTypePresence,
-          branchId,
-          branchRoomTypeRelation
-        );
-
-        return {
-          message: `Room created successfully!`,
-        };
-      } else if (action === "UPDATE") {
-        const rooms = await this.prisma.room.findMany({
-          select: { id: true, roomName: true, createdAt: true },
-          where: {
-            branchRoomTypeId: branchRoomTypeRelation.id,
-          },
-        });
-
-        const roomsCount = rooms.length;
-
-        if (roomsCount > numberOfRooms) {
-          const unnecessaryRooms = roomsCount - numberOfRooms;
-          // Delete extra rooms
-          await this.prisma.room.deleteMany({
+            await prisma.branchRoomTypeAmenitiesRelation.deleteMany({
+              where: {
+                OR: amenitiesDeleteArr,
+              },
+            });
+          }
+        } else if (amenities.length === 0 && action === "UPDATE") {
+          await prisma.branchRoomTypeAmenitiesRelation.deleteMany({
             where: {
               branchRoomTypeId: branchRoomTypeRelation.id,
-              createdAt: {
-                lte: rooms[unnecessaryRooms - 1].createdAt,
-              },
             },
           });
-        } else if (roomsCount < numberOfRooms) {
-          const extraRooms = numberOfRooms - roomsCount;
+        }
 
-          await this.roomCreation(
-            extraRooms,
+        if (action === "CREATE") {
+          const roomCreateArr = await this.roomCreation(
+            numberOfRooms,
             roomTypePresence,
             branchId,
             branchRoomTypeRelation
           );
-        }
 
-        return {
-          message: `Room updated successfully!`,
-        };
-      }
+          await prisma.room.createMany({
+            data: roomCreateArr,
+          });
+
+          return {
+            message: `Room created successfully!`,
+          };
+        } else if (action === "UPDATE") {
+          const rooms = await prisma.room.findMany({
+            select: { id: true, roomName: true, createdAt: true },
+            where: {
+              branchRoomTypeId: branchRoomTypeRelation.id,
+            },
+            orderBy: {
+              createdAt: "asc", // Order by createdAt in ascending order
+            },
+          });
+
+          const roomsCount = rooms.length;
+
+          if (roomsCount > numberOfRooms) {
+            const unnecessaryRooms = roomsCount - numberOfRooms;
+
+            // Delete extra rooms
+            await this.prisma.room.deleteMany({
+              where: {
+                id: {
+                  in: rooms.slice(0, unnecessaryRooms).map((room) => room.id), // Select the first unnecessaryRooms rooms to delete
+                },
+              },
+            });
+          }
+          if (roomsCount < numberOfRooms) {
+            const extraRooms = numberOfRooms - roomsCount;
+
+            const roomCreateArr = await this.roomCreation(
+              extraRooms,
+              roomTypePresence,
+              branchId,
+              branchRoomTypeRelation
+            );
+
+            await prisma.room.createMany({
+              data: roomCreateArr,
+            });
+          }
+
+          return {
+            message: `Room updated successfully!`,
+          };
+        }
+      });
+
+      return result;
     } catch (error) {
       console.error("Error=", error);
 
@@ -396,6 +498,88 @@ export class RoomService {
 
         return { roomsWithInitials: roomsWithInitials || [] };
       }
+    } catch (error) {
+      console.log("Error=", error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try after some time!");
+      }
+    }
+  }
+
+  async branchRoomTypeDetailsService(branchRoomTypeId: UniqueIdentifierInput) {
+    try {
+      // Validate if branchRoomTypeRelation exists
+      const branchRoomTypeRelationPresence =
+        await this.prisma.branchRoomTypeRelation.findUnique({
+          where: { id: branchRoomTypeId.id },
+          include: {
+            branch: {
+              select: { id: true, name: true },
+            },
+            Room: {
+              select: { id: true, roomName: true },
+              where: {
+                deletedAt: null,
+              },
+            },
+            roomType: {
+              select: { name: true, roomInitial: true },
+            },
+            BranchRoomTypeAmenitiesRelation: {
+              include: {
+                amenities: {
+                  select: { id: true, name: true },
+                  where: {
+                    deletedAt: null,
+                  },
+                },
+              },
+            },
+            UploadRelation: {
+              include: {
+                upload: true,
+              },
+            },
+          },
+        });
+
+      if (branchRoomTypeRelationPresence) {
+        const offerPriceVal = Number(branchRoomTypeRelationPresence.offerPrice);
+        const setPriceVal = Number(branchRoomTypeRelationPresence.setPrice);
+
+        branchRoomTypeRelationPresence["offerPriceEditable"] = offerPriceVal;
+        branchRoomTypeRelationPresence["setPriceEditable"] = setPriceVal;
+        branchRoomTypeRelationPresence.setPrice;
+        branchRoomTypeRelationPresence["branchName"] =
+          branchRoomTypeRelationPresence.branch.name;
+        branchRoomTypeRelationPresence["roomTypeName"] =
+          branchRoomTypeRelationPresence.roomType.name;
+        branchRoomTypeRelationPresence["roomTypeInitial"] =
+          branchRoomTypeRelationPresence.roomType.roomInitial;
+        branchRoomTypeRelationPresence["totalRooms"] =
+          branchRoomTypeRelationPresence.Room.length;
+        branchRoomTypeRelationPresence["amenities"] =
+          branchRoomTypeRelationPresence.BranchRoomTypeAmenitiesRelation.map(
+            (item) => {
+              return {
+                id: item.amenities.id,
+                name: item.amenities.name,
+              };
+            }
+          );
+        branchRoomTypeRelationPresence["image"] =
+          branchRoomTypeRelationPresence.UploadRelation.map((item) => {
+            return {
+              id: item.upload.id,
+              file: item.upload.file,
+              fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${item.upload.file}`,
+            };
+          });
+      }
+
+      return branchRoomTypeRelationPresence;
     } catch (error) {
       console.log("Error=", error);
       if (error instanceof NotFoundException) {
