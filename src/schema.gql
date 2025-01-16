@@ -43,6 +43,7 @@ type BranchListResponse {
 
 type BranchResponse {
   BranchAmenitiesRelation: [BranchAmenitiesRelationResponse!]
+  UploadRelation: [BranchUploadFilesRelationResponse!]
   address: String!
   areaPincode: String!
   city: String!
@@ -72,6 +73,12 @@ type BranchRoomTypeAmenitiesUsed {
   name: String!
 }
 
+type BranchUploadFilesRelationResponse {
+  branchId: String!
+  id: String!
+  uploadId: String!
+}
+
 input CreateAmenityInput {
   description: String
   image: ID
@@ -87,6 +94,7 @@ input CreateBranchInput {
   description: String!
   location: String!
   name: String!
+  uploadFileIds: [ID!]
 }
 
 input CreateOrUpdateRoomInput {
@@ -314,6 +322,7 @@ input UpdateBranchInput {
   description: String
   location: String
   name: String
+  uploadFileIds: [ID!]
 }
 
 input UpdateProfileInput {

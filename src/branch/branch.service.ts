@@ -36,6 +36,7 @@ export class BranchService {
       description,
       location,
       amenityIds,
+      uploadFileIds,
     } = createBranchInput;
 
     const amenityIdsExist = await this.prisma.amenities.findMany({
@@ -48,18 +49,45 @@ export class BranchService {
 
     if (amenityIdsExist.length !== amenityIds.length) {
       const foundAmenityIds = amenityIdsExist.map((amenityId) => amenityId.id);
-      const missingIds = amenityIds.filter(
+      const missingAmenityIds = amenityIds.filter(
         (id) => !foundAmenityIds.includes(id)
       );
 
       throw new NotFoundException(
-        `Amenities not found : ${missingIds.join(", ")}`
+        `Amenities not found : ${missingAmenityIds.join(", ")}`
       );
     }
 
     const amenityIdsArr = amenityIds.map((amenitiesId) => {
       return {
         amenitiesId,
+      };
+    });
+
+    if (uploadFileIds.length < 4) {
+      throw new NotFoundException("Upload atleast 4 files");
+    }
+
+    const selectedFiles: any = await this.prisma.upload.findMany({
+      where: {
+        id: { in: uploadFileIds },
+      },
+    });
+
+    if (selectedFiles.length !== uploadFileIds.length) {
+      const foundFileIds = selectedFiles.map((fileId) => fileId.id);
+      const missingFileIds = uploadFileIds.filter(
+        (id) => !foundFileIds.includes(id)
+      );
+
+      throw new NotFoundException(
+        `Files not found : ${missingFileIds.join(", ")}`
+      );
+    }
+
+    const fileIdsArr = uploadFileIds.map((fileId) => {
+      return {
+        uploadId: fileId,
       };
     });
 
@@ -77,15 +105,15 @@ export class BranchService {
             data: amenityIdsArr,
           },
         },
-      },
-      include: {
-        BranchAmenitiesRelation: {
-          select: {
-            id: true,
-            amenitiesId: true,
-            branchId: true,
+        UploadRelation: {
+          createMany: {
+            data: fileIdsArr,
           },
         },
+      },
+      include: {
+        BranchAmenitiesRelation: true,
+        UploadRelation: true,
       },
     });
   }
@@ -134,6 +162,10 @@ export class BranchService {
       },
       orderBy: {
         createdAt: "desc",
+      },
+      include: {
+        BranchAmenitiesRelation: true,
+        UploadRelation: true,
       },
     });
 
