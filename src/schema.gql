@@ -186,6 +186,7 @@ type Message {
 
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
+  branchRoomTypeDelete(branchRoomTypeId: UniqueIdentifierInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
   deleteBranch(deleteBranchInput: DeleteBranchInput!): String!
@@ -195,6 +196,7 @@ type Mutation {
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   roomCreateOrUpdate(actionTypeInput: ActionTypeInput!, createOrUpdateRoomInput: CreateOrUpdateRoomInput!): Message!
+  roomDelete(roomId: UniqueIdentifierInput!): Message!
   roomNumberUpdate(updateRoomNumberInput: [UpdateRoomNumberInput!]!): Message!
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
@@ -269,6 +271,7 @@ type RoomType {
 
 type RoomsOverAll {
   id: ID!
+  offerPriceShown: Int!
   rooms: [String!]!
   total: Int!
   type: String!

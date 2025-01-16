@@ -23,15 +23,14 @@ export class RoomService {
     branchId,
     branchRoomTypeRelation
   ) {
-    const roomCreateArr = [];
+    const roomNameArr = [];
     for (let i = 1; i <= numberOfRooms; i++) {
-      // Loop from 1 to numberOfRooms
       let roomName: string;
+      // Loop from 1 to numberOfRooms
       let roomNamePresent: number;
 
       // Generate room name using sequential number
       roomName = roomTypePresence.roomInitial + i; // Append the loop index to the room type initial
-
       // Check if the generated roomName already exists in the database
       roomNamePresent = await this.prisma.room.count({
         where: {
@@ -43,8 +42,8 @@ export class RoomService {
       });
 
       // If room name is taken, keep generating the next number
-      let j = i;
-      while (roomNamePresent > 0) {
+      let j = 0;
+      while (roomNamePresent > 0 || roomNameArr.length !== numberOfRooms) {
         j++; // Increment the number for uniqueness
         roomName = roomTypePresence.roomInitial + j; // Update room name with the new sequential number
 
@@ -56,13 +55,19 @@ export class RoomService {
             },
           },
         });
-      }
 
-      roomCreateArr.push({
+        if (roomNamePresent === 0 && !roomNameArr.includes(roomName)) {
+          roomNameArr.push(roomName);
+        }
+      }
+    }
+
+    const roomCreateArr = roomNameArr.map((roomName) => {
+      return {
         roomName,
         branchRoomTypeId: branchRoomTypeRelation.id,
-      }); // Push the room name to the array
-    }
+      };
+    });
 
     return roomCreateArr;
   }
@@ -480,6 +485,9 @@ export class RoomService {
 
       if (!roomTypeId) {
         branchRoomTypeRelation?.map((branchRoomType) => {
+          const offerPriceVal = Number(branchRoomType.offerPrice);
+
+          branchRoomType["offerPriceShown"] = offerPriceVal;
           branchRoomType["type"] = branchRoomType.roomType.name;
           branchRoomType["total"] = branchRoomType.Room.length;
           branchRoomType["rooms"] = branchRoomType.Room.map(
@@ -577,9 +585,83 @@ export class RoomService {
               fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${item.upload.file}`,
             };
           });
+      } else {
+        throw new NotFoundException(`Branch room type does not exist.`);
       }
 
       return branchRoomTypeRelationPresence;
+    } catch (error) {
+      console.log("Error=", error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try after some time!");
+      }
+    }
+  }
+
+  /**
+   * Deletes a branch room type and its related entities from the database.
+   *
+   * @param {UniqueIdentifierInput} branchRoomTypeId - The unique identifier of the branch room type to be deleted.
+   * @returns {Promise<{ message: string }>} A promise that resolves to an object containing a success message.
+   * @throws {NotFoundException} If the branch room type does not exist.
+   * @throws {Error} If an internal server error occurs.
+   */
+  async branchRoomTypeDeleteService(branchRoomTypeId: UniqueIdentifierInput) {
+    try {
+      // Validate if branchRoomTypeRelation exists
+      const branchRoomTypeRelationPresence =
+        await this.prisma.branchRoomTypeRelation.findUnique({
+          where: { id: branchRoomTypeId.id },
+        });
+
+      if (!branchRoomTypeRelationPresence) {
+        throw new NotFoundException(`Branch room type does not exist.`);
+      }
+
+      await this.prisma.$transaction([
+        this.prisma.branchRoomTypeRelation.delete({
+          where: { id: branchRoomTypeId.id },
+        }),
+        this.prisma.room.deleteMany({
+          where: { branchRoomTypeId: branchRoomTypeId.id },
+        }),
+        this.prisma.uploadRelation.deleteMany({
+          where: { branchRoomTypeId: branchRoomTypeId.id },
+        }),
+        this.prisma.branchRoomTypeAmenitiesRelation.deleteMany({
+          where: { branchRoomTypeId: branchRoomTypeId.id },
+        }),
+      ]);
+
+      return { message: "Branch room type deleted successfully!" };
+    } catch (error) {
+      console.log("Error=", error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try after some time!");
+      }
+    }
+  }
+
+  async roomDeleteService(roomId: UniqueIdentifierInput) {
+    try {
+      // Validate if room exists
+      const roomPresence = await this.prisma.room.findUnique({
+        where: { id: roomId.id },
+      });
+
+      if (!roomPresence) {
+        throw new NotFoundException(`Room does not exist.`);
+      }
+
+      await this.prisma.room.delete({
+        where: { id: roomId.id },
+      });
+
+      return { message: "Room deleted successfully!" };
     } catch (error) {
       console.log("Error=", error);
       if (error instanceof NotFoundException) {
