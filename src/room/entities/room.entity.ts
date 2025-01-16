@@ -66,6 +66,9 @@ export class RoomsOverAll {
 
   @Field(() => Int)
   total: number;
+
+  @Field(() => Int)
+  offerPriceShown: number;
 }
 
 @ObjectType()

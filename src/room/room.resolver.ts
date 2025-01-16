@@ -84,4 +84,28 @@ export class RoomResolver {
   ) {
     return this.roomService.branchRoomTypeDetailsService(branchRoomTypeId);
   }
+
+  // Branch Roomtype Delete
+  @Mutation(() => Message)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.DELETE])
+  branchRoomTypeDelete(
+    @Args("branchRoomTypeId")
+    branchRoomTypeId: UniqueIdentifierInput
+  ) {
+    return this.roomService.branchRoomTypeDeleteService(branchRoomTypeId);
+  }
+
+  // Rooms Delete
+  @Mutation(() => Message)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.DELETE])
+  roomDelete(
+    @Args("roomId")
+    roomId: UniqueIdentifierInput
+  ) {
+    return this.roomService.roomDeleteService(roomId);
+  }
 }
