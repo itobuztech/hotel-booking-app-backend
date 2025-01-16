@@ -13,6 +13,7 @@ import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
+import { checkIfExists } from "../helpers/custom-decorators/checkIfExists-decorators";
 
 @Resolver(() => Branch)
 export class BranchResolver {
@@ -22,7 +23,9 @@ export class BranchResolver {
   @Roles(UserRole.ADMIN)
   @Mutation(() => BranchResponse)
   createBranch(
-    @Args("createBranchInput") createBranchInput: CreateBranchInput
+    @Args("createBranchInput") createBranchInput: CreateBranchInput,
+    @checkIfExists("createBranchInputData")
+    createBranchInputData: CreateBranchInput
   ) {
     return this.branchService.create(createBranchInput);
   }

@@ -38,22 +38,6 @@ export class BranchService {
       amenityIds,
     } = createBranchInput;
 
-    const branchNameExists = await this.prisma.branch.findUnique({
-      where: { name },
-    });
-
-    const contactNumberExists = await this.prisma.branch.findUnique({
-      where: { contactNumber },
-    });
-
-    if (branchNameExists) {
-      throw new ConflictException("Branch name already exists!");
-    }
-
-    if (contactNumberExists) {
-      throw new ConflictException("Contact number already exists!");
-    }
-
     const amenityIdsExist = await this.prisma.amenities.findMany({
       where: {
         id: {
