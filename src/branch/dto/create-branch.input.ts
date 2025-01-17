@@ -1,4 +1,4 @@
-import { InputType, Int, Field } from "@nestjs/graphql";
+import { InputType, Int, Field, ID } from "@nestjs/graphql";
 
 @InputType()
 export class CreateBranchInput {
@@ -25,4 +25,7 @@ export class CreateBranchInput {
 
   @Field(() => [String], { nullable: true })
   amenityIds: string[];
+
+  @Field(() => [ID], { nullable: true })
+  uploadFileIds: string[];
 }
