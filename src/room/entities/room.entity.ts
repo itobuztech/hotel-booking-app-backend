@@ -7,10 +7,10 @@ export class Room {
   id: RoomDB["id"];
 
   @Field(() => String)
-  roomName: String;
+  roomName: string;
 
   @Field(() => String)
-  branchRoomTypeId: String;
+  branchRoomTypeId: string;
 
   @Field(() => Boolean)
   status: boolean;
