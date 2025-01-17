@@ -1,5 +1,6 @@
 import { ObjectType, Field } from "@nestjs/graphql";
 import { PaginationResponse } from "src/types/response-types/pagination-response";
+import { BranchAmenitiesRelationResponse } from "./branchAmenitiesRelation-response";
 
 @ObjectType()
 export class BranchResponse {
@@ -26,6 +27,9 @@ export class BranchResponse {
 
   @Field(() => String)
   description?: string;
+
+  @Field(() => [BranchAmenitiesRelationResponse], { nullable: true })
+  BranchAmenitiesRelation?: BranchAmenitiesRelationResponse[];
 }
 
 @ObjectType()

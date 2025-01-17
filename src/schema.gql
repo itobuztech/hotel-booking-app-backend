@@ -11,6 +11,15 @@ type Account {
   username: String!
 }
 
+enum ActionEnum {
+  CREATE
+  UPDATE
+}
+
+input ActionTypeInput {
+  action: ActionEnum!
+}
+
 type Aminity {
   createdAt: String
   deletedAt: String
@@ -21,12 +30,19 @@ type Aminity {
   updatedAt: String
 }
 
+type BranchAmenitiesRelationResponse {
+  amenitiesId: String!
+  branchId: String!
+  id: String!
+}
+
 type BranchListResponse {
   branches: [BranchResponse!]!
   pagination: PaginationResponse!
 }
 
 type BranchResponse {
+  BranchAmenitiesRelation: [BranchAmenitiesRelationResponse!]
   address: String!
   areaPincode: String!
   city: String!
@@ -34,6 +50,25 @@ type BranchResponse {
   description: String!
   id: String!
   location: String!
+  name: String!
+}
+
+type BranchRoomType {
+  amenities: [BranchRoomTypeAmenitiesUsed!]!
+  branchId: ID!
+  branchName: String!
+  description: String
+  image: [File!]!
+  offerPriceEditable: Int!
+  roomTypeId: ID!
+  roomTypeInitial: String!
+  roomTypeName: String!
+  setPriceEditable: Int!
+  totalRooms: Int!
+}
+
+type BranchRoomTypeAmenitiesUsed {
+  id: ID!
   name: String!
 }
 
@@ -45,6 +80,7 @@ input CreateAmenityInput {
 
 input CreateBranchInput {
   address: String!
+  amenityIds: [String!]
   areaPincode: String!
   city: String!
   contactNumber: String!
@@ -53,15 +89,15 @@ input CreateBranchInput {
   name: String!
 }
 
-input CreateRoomInput {
-  branchRoomTypeId: String!
-  roomName: String!
-}
-
-type CreateRoomResponse {
-  branchRoomTypeId: String!
-  roomName: String!
-  status: Boolean!
+input CreateOrUpdateRoomInput {
+  amenities: [ID!]!
+  branchId: ID!
+  description: String
+  images: [ID!]!
+  numberOfRooms: Int!
+  offerPrice: Int!
+  roomTypeId: ID!
+  setPrice: Int!
 }
 
 input CreateRoomTypeInput {
@@ -95,6 +131,11 @@ type File {
   file: String!
   fileUrl: String!
   id: ID!
+}
+
+input FilterBranchRoomTypeInput {
+  branchId: ID!
+  roomTypeId: ID
 }
 
 input FilterItemInput {
@@ -145,15 +186,18 @@ type Message {
 
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
+  branchRoomTypeDelete(branchRoomTypeId: UniqueIdentifierInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
-  createRoom(createRoomInput: CreateRoomInput!): CreateRoomResponse!
   deleteBranch(deleteBranchInput: DeleteBranchInput!): String!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
+  roomCreateOrUpdate(actionTypeInput: ActionTypeInput!, createOrUpdateRoomInput: CreateOrUpdateRoomInput!): Message!
+  roomDelete(roomId: UniqueIdentifierInput!): Message!
+  roomNumberUpdate(updateRoomNumberInput: [UpdateRoomNumberInput!]!): Message!
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
@@ -194,6 +238,8 @@ type PaginationResponse {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
+  branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
+  branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
@@ -223,8 +269,32 @@ type RoomType {
   updatedAt: String
 }
 
+type RoomsOverAll {
+  id: ID!
+  offerPriceShown: Int!
+  rooms: [String!]!
+  total: Int!
+  type: String!
+}
+
+type RoomsOverAllArr {
+  roomsOverAlls: [RoomsOverAll!]!
+}
+
+union RoomsOverAllOrRoomsWithInitial = RoomsOverAllArr | RoomsWithInitialArr
+
+type RoomsWithInitial {
+  id: ID!
+  roomInitial: String!
+  roomNumber: Int!
+}
+
+type RoomsWithInitialArr {
+  roomsWithInitials: [RoomsWithInitial!]!
+}
+
 input SearchInput {
-  search: String
+  search: String!
 }
 
 input TokenConfirmationInput {
@@ -237,6 +307,7 @@ input UniqueIdentifierInput {
 
 input UpdateBranchInput {
   address: String
+  amenityIds: [String!]
   areaPincode: String
   city: String
   contactNumber: String
@@ -248,6 +319,11 @@ input UpdateBranchInput {
 input UpdateProfileInput {
   name: String!
   username: String!
+}
+
+input UpdateRoomNumberInput {
+  room: ID!
+  roomNumber: Int!
 }
 
 """The `Upload` scalar type represents a file upload."""

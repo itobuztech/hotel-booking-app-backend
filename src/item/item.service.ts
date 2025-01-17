@@ -22,7 +22,7 @@ export class ItemService {
       where: { id: image },
     });
     if (!uploadPresence) {
-      throw new NotFoundException(`Image ID does not exist.`);
+      return new NotFoundException(`Image does not exist.`);
     }
 
     try {

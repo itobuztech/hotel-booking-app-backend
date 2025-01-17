@@ -22,30 +22,70 @@ export class BranchService {
         id: id,
       },
     });
-    if (!branch) throw new NotFoundException("Branch not found.");
+    if (!branch) throw new NotFoundException("Branch not found!");
     return branch;
   }
 
   async create(createBranchInput: CreateBranchInput) {
-    const branchNameExists = await this.prisma.branch.findUnique({
-      where: { name: createBranchInput.name },
+    const {
+      name,
+      address,
+      areaPincode,
+      city,
+      contactNumber,
+      description,
+      location,
+      amenityIds,
+    } = createBranchInput;
+
+    const amenityIdsExist = await this.prisma.amenities.findMany({
+      where: {
+        id: {
+          in: amenityIds,
+        },
+      },
     });
 
-    const contactNumberExists = await this.prisma.branch.findUnique({
-      where: { contactNumber: createBranchInput.contactNumber },
+    if (amenityIdsExist.length !== amenityIds.length) {
+      const foundAmenityIds = amenityIdsExist.map((amenityId) => amenityId.id);
+      const missingIds = amenityIds.filter(
+        (id) => !foundAmenityIds.includes(id)
+      );
+
+      throw new NotFoundException(
+        `Amenities not found : ${missingIds.join(", ")}`
+      );
+    }
+
+    const amenityIdsArr = amenityIds.map((amenitiesId) => {
+      return {
+        amenitiesId,
+      };
     });
-
-    if (branchNameExists) {
-      throw new ConflictException("Branch name already exists.");
-    }
-
-    if (contactNumberExists) {
-      throw new ConflictException("Contact number already exists.");
-    }
 
     return await this.prisma.branch.create({
       data: {
-        ...createBranchInput,
+        name,
+        address,
+        areaPincode,
+        city,
+        contactNumber,
+        description,
+        location,
+        BranchAmenitiesRelation: {
+          createMany: {
+            data: amenityIdsArr,
+          },
+        },
+      },
+      include: {
+        BranchAmenitiesRelation: {
+          select: {
+            id: true,
+            amenitiesId: true,
+            branchId: true,
+          },
+        },
       },
     });
   }

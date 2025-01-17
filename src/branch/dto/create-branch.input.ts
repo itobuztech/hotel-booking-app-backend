@@ -1,5 +1,4 @@
 import { InputType, Int, Field } from "@nestjs/graphql";
-import { IsPhoneNumber, IsNotEmpty, IsString } from "class-validator";
 
 @InputType()
 export class CreateBranchInput {
@@ -23,4 +22,7 @@ export class CreateBranchInput {
 
   @Field(() => String)
   description?: string;
+
+  @Field(() => [String], { nullable: true })
+  amenityIds: string[];
 }
