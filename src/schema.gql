@@ -32,10 +32,15 @@ type Aminity {
   updatedAt: String
 }
 
-type BranchAmenitiesRelationResponse {
-  amenitiesId: String!
-  branchId: String!
-  id: String!
+type BranchAmenitiesUsed {
+  createdAt: String
+  deletedAt: String
+  description: String
+  id: String
+  image: File!
+  name: String!
+  selected: Boolean!
+  updatedAt: String
 }
 
 type BranchListResponse {
@@ -44,16 +49,17 @@ type BranchListResponse {
 }
 
 type BranchResponse {
-  BranchAmenitiesRelation: [BranchAmenitiesRelationResponse!]
-  UploadRelation: [BranchUploadFilesRelationResponse!]
   address: String!
+  amenities: [BranchAmenitiesUsed!]
   areaPincode: String!
   city: String!
   contactNumber: String!
   description: String!
   id: String!
+  image: [File!]!
   location: String!
   name: String!
+  startingPrice: Float!
 }
 
 type BranchRoomType {
@@ -73,12 +79,6 @@ type BranchRoomType {
 type BranchRoomTypeAmenitiesUsed {
   id: ID!
   name: String!
-}
-
-type BranchUploadFilesRelationResponse {
-  branchId: String!
-  id: String!
-  uploadId: String!
 }
 
 input CreateAmenityInput {

@@ -1,8 +1,4 @@
-import {
-  NotFoundException,
-  ConflictException,
-  Injectable,
-} from "@nestjs/common";
+import { NotFoundException, Injectable } from "@nestjs/common";
 import { CreateBranchInput } from "./dto/create-branch.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { PaginationArgs } from "../types/inputtypes/pagination.input";
@@ -10,6 +6,7 @@ import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
+import { log } from "console";
 
 @Injectable()
 export class BranchService {
@@ -17,13 +14,95 @@ export class BranchService {
 
   async get(getBranchInput: GetBranchInput) {
     const { id } = getBranchInput;
-    const branch = await this.prisma.branch.findUnique({
-      where: {
-        id: id,
-      },
-    });
-    if (!branch) throw new NotFoundException("Branch not found!");
-    return branch;
+
+    try {
+      const branch = await this.prisma.branch.findUnique({
+        where: {
+          id: id,
+        },
+        include: {
+          BranchAmenitiesRelation: {
+            include: {
+              amenities: true,
+            },
+          },
+          UploadRelation: {
+            include: {
+              upload: true,
+            },
+          },
+          BranchRoomTypeRelation: {
+            select: {
+              id: true,
+              offerPrice: true,
+            },
+            orderBy: {
+              offerPrice: "asc",
+            },
+          },
+        },
+      });
+
+      if (!branch) {
+        throw new NotFoundException("Branch not found!");
+      } else {
+        const branchAmenitiesIdArr = branch?.BranchAmenitiesRelation?.map(
+          (item) => {
+            return item?.amenities.id;
+          }
+        );
+
+        if (branchAmenitiesIdArr.length > 0) {
+          const amenities = await this.prisma.amenities.findMany({
+            include: {
+              UploadRelation: {
+                include: {
+                  upload: true,
+                },
+              },
+            },
+          });
+
+          amenities?.map((item) => {
+            if (item?.UploadRelation[0] && item?.UploadRelation[0].upload) {
+              item.UploadRelation[0].upload["fileUrl"] =
+                `${process.env.BACKEND_BASE_URL}/uploads/${item?.UploadRelation[0]?.upload?.file}`;
+              item["image"] = item?.UploadRelation[0]?.upload;
+            }
+            if (branchAmenitiesIdArr?.includes(item.id)) {
+              item["selected"] = true;
+            } else {
+              item["selected"] = false;
+            }
+          });
+
+          branch["amenities"] = amenities;
+        } else {
+          branch["amenities"] = null;
+        }
+
+        branch["image"] = branch?.UploadRelation?.map((item) => {
+          return {
+            id: item.upload.id,
+            file: item.upload.file,
+            fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${item.upload.file}`,
+          };
+        });
+
+        branch["startingPrice"] = Number(
+          branch?.BranchRoomTypeRelation?.[0]?.offerPrice
+        );
+      }
+
+      return branch;
+    } catch (error) {
+      console.log("Error=", error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try after some time!");
+      }
+    }
   }
 
   async create(createBranchInput: CreateBranchInput) {
@@ -164,10 +243,40 @@ export class BranchService {
         createdAt: "desc",
       },
       include: {
-        BranchAmenitiesRelation: true,
-        UploadRelation: true,
+        UploadRelation: {
+          include: {
+            upload: true,
+          },
+        },
+        BranchRoomTypeRelation: {
+          select: {
+            id: true,
+            offerPrice: true,
+          },
+          orderBy: {
+            offerPrice: "asc",
+          },
+        },
       },
     });
+
+    if (filteredBranches.length > 0) {
+      filteredBranches.map((branch) => {
+        branch["image"] = branch?.UploadRelation?.map((item) => {
+          return {
+            id: item.upload.id,
+            file: item.upload.file,
+            fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${item.upload.file}`,
+          };
+        });
+
+        delete branch.UploadRelation;
+
+        branch["startingPrice"] = Number(
+          branch?.BranchRoomTypeRelation?.[0]?.offerPrice
+        );
+      });
+    }
 
     return {
       branches: filteredBranches,
