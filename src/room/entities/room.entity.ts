@@ -83,7 +83,7 @@ export class RoomsWithInitial {
   id: RoomDB["id"];
 
   @Field(() => String)
-  roomInitial: String;
+  roomInitial: string;
 
   @Field(() => Int)
   roomNumber: number;

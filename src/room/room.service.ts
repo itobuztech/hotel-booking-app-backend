@@ -15,7 +15,7 @@ import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Injectable()
 export class RoomService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   private async roomCreation(
     numberOfRooms: number,

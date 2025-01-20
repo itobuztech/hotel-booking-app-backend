@@ -1,7 +1,6 @@
 import { Resolver, Mutation, Args, Query } from "@nestjs/graphql";
 import { UseGuards } from "@nestjs/common";
 import { UserRole } from "@prisma/client";
-
 import { RoomService } from "./room.service";
 import {
   BranchRoomType,
@@ -25,7 +24,7 @@ import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Resolver()
 export class RoomResolver {
-  constructor(private readonly roomService: RoomService) {}
+  constructor(private readonly roomService: RoomService) { }
 
   // Room Creation or Update
   @Mutation(() => Message)
