@@ -1,7 +1,13 @@
-import { ObjectType, Field } from "@nestjs/graphql";
+import { ObjectType, Field, ID } from "@nestjs/graphql";
 import { PaginationResponse } from "src/types/response-types/pagination-response";
-import { BranchAmenitiesRelationResponse } from "./branchAmenitiesRelation-response";
-import { BranchUploadFilesRelationResponse } from "./branchUploadFilesRelation-response";
+import { File } from "../../upload/entities/files.entity";
+import { Aminity } from "../../item/entities/items.entity";
+
+@ObjectType()
+export class BranchAmenitiesUsed extends Aminity {
+  @Field(() => Boolean)
+  selected: boolean;
+}
 
 @ObjectType()
 export class BranchResponse {
@@ -29,11 +35,14 @@ export class BranchResponse {
   @Field(() => String)
   description?: string;
 
-  @Field(() => [BranchAmenitiesRelationResponse], { nullable: true })
-  BranchAmenitiesRelation?: BranchAmenitiesRelationResponse[];
+  @Field(() => [File])
+  image: File[];
 
-  @Field(() => [BranchUploadFilesRelationResponse], { nullable: true })
-  UploadRelation?: BranchUploadFilesRelationResponse[];
+  @Field(() => [BranchAmenitiesUsed], { nullable: true })
+  amenities: BranchAmenitiesUsed[];
+
+  @Field(() => Number)
+  startingPrice: number;
 }
 
 @ObjectType()
