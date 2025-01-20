@@ -53,6 +53,7 @@ export class UsersService {
         email: createUserInput.email,
         username: createUserInput.username,
         password: createUserInput.password,
+        contactNumber: createUserInput.contactNumber,
         emailConfirmationToken: createUserInput.confirmationToken,
         roleId: defaultRole.id,
       },

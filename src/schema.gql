@@ -3,9 +3,11 @@
 # ------------------------------------------------------
 
 type Account {
+  contactNumber: String!
   createdAt: DateTime!
   email: String!
   id: String!
+  image: File
   role: Role!
   updatedAt: DateTime
   username: String!
@@ -317,6 +319,8 @@ input UpdateBranchInput {
 }
 
 input UpdateProfileInput {
+  contactNumber: String!
+  image: ID!
   name: String!
   username: String!
 }
@@ -339,9 +343,11 @@ type UploadFileResponse {
 }
 
 type User {
+  contactNumber: String!
   createdAt: DateTime!
   email: String!
   id: String!
+  image: File
   updatedAt: DateTime
   username: String!
 }
