@@ -97,7 +97,7 @@ input CreateBookingInput {
   branch: ID!
   checkInDate: DateTime!
   checkOutDate: DateTime!
-  contactNumber: Int!
+  contactNumber: String!
   description: String!
   fullName: String!
   image: ID

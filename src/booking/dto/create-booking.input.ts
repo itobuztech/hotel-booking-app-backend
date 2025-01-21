@@ -6,8 +6,8 @@ export class CreateBookingInput {
   fullName: string;
 
   // Data to be filled in the "BranchRoomTypeRelation" table
-  @Field(() => Int)
-  contactNumber: number;
+  @Field(() => String)
+  contactNumber: string;
 
   @Field(() => ID, { nullable: true })
   image?: string;
