@@ -21,11 +21,13 @@ export class AccountService {
   async findOne(ctx: any): Promise<any> {
     const user = await this.usersService.findOneById(ctx.req.user.userId);
 
-    user["image"] = {
-      id: user?.UploadRelation[0]?.upload?.id,
-      file: user?.UploadRelation[0]?.upload?.file,
-      fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${user?.UploadRelation[0]?.upload?.file}`,
-    };
+    user["image"] = user?.UploadRelation[0]?.upload
+      ? {
+          id: user?.UploadRelation[0]?.upload?.id,
+          file: user?.UploadRelation[0]?.upload?.file,
+          fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${user?.UploadRelation[0]?.upload?.file}`,
+        }
+      : null;
 
     const { password, ...result } = user;
     return result;
