@@ -575,7 +575,7 @@ export class RoomService {
 
           if (amenities.length > 0) {
             amenities?.map((item) => {
-              if (item?.UploadRelation[0] && item?.UploadRelation[0].upload) {
+              if (item?.UploadRelation[0]?.upload) {
                 item.UploadRelation[0].upload["fileUrl"] =
                   `${process.env.BACKEND_BASE_URL}/uploads/${item?.UploadRelation[0]?.upload?.file}`;
                 item["image"] = item?.UploadRelation[0]?.upload;
