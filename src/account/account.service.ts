@@ -22,9 +22,9 @@ export class AccountService {
     const user = await this.usersService.findOneById(ctx.req.user.userId);
 
     user["image"] = {
-      id: user?.UploadRelation[0].upload.id,
-      file: user?.UploadRelation[0].upload.file,
-      fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${user?.UploadRelation[0].upload.file}`,
+      id: user?.UploadRelation[0]?.upload?.id,
+      file: user?.UploadRelation[0]?.upload?.file,
+      fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${user?.UploadRelation[0]?.upload?.file}`,
     };
 
     const { password, ...result } = user;
