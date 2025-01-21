@@ -6,9 +6,6 @@ export class UpdateProfileInput {
   username: string;
 
   @Field({ nullable: false })
-  name: string;
-
-  @Field({ nullable: false })
   contactNumber: string;
 
   @Field(() => ID, { nullable: false })
