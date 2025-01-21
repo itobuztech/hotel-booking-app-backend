@@ -77,8 +77,14 @@ type BranchRoomType {
 }
 
 type BranchRoomTypeAmenitiesUsed {
-  id: ID!
+  createdAt: String
+  deletedAt: String
+  description: String
+  id: String
+  image: File!
   name: String!
+  selected: Boolean!
+  updatedAt: String
 }
 
 input CreateAmenityInput {

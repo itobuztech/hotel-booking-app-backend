@@ -15,7 +15,7 @@ import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 
 @Injectable()
 export class RoomService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   private async roomCreation(
     numberOfRooms: number,
@@ -554,6 +554,47 @@ export class RoomService {
         });
 
       if (branchRoomTypeRelationPresence) {
+        const branchRoomAmenitiesIdArr =
+          branchRoomTypeRelationPresence?.BranchRoomTypeAmenitiesRelation?.map(
+            (item) => {
+              return item?.amenities.id;
+            }
+          );
+
+        let amenities = [];
+        if (branchRoomAmenitiesIdArr.length > 0) {
+          amenities = await this.prisma.amenities.findMany({
+            include: {
+              UploadRelation: {
+                include: {
+                  upload: true,
+                },
+              },
+            },
+          });
+
+          if (amenities.length > 0) {
+            amenities?.map((item) => {
+              if (item?.UploadRelation[0] && item?.UploadRelation[0].upload) {
+                item.UploadRelation[0].upload["fileUrl"] =
+                  `${process.env.BACKEND_BASE_URL}/uploads/${item?.UploadRelation[0]?.upload?.file}`;
+                item["image"] = item?.UploadRelation[0]?.upload;
+              }
+              if (branchRoomAmenitiesIdArr?.includes(item.id)) {
+                item["selected"] = true;
+              } else {
+                item["selected"] = false;
+              }
+            });
+          } else {
+            amenities?.map((item) => {
+              item["selected"] = false;
+            });
+          }
+        }
+
+        branchRoomTypeRelationPresence["amenities"] = amenities;
+
         const offerPriceVal = Number(branchRoomTypeRelationPresence.offerPrice);
         const setPriceVal = Number(branchRoomTypeRelationPresence.setPrice);
 
@@ -568,15 +609,6 @@ export class RoomService {
           branchRoomTypeRelationPresence.roomType.roomInitial;
         branchRoomTypeRelationPresence["totalRooms"] =
           branchRoomTypeRelationPresence.Room.length;
-        branchRoomTypeRelationPresence["amenities"] =
-          branchRoomTypeRelationPresence.BranchRoomTypeAmenitiesRelation.map(
-            (item) => {
-              return {
-                id: item.amenities.id,
-                name: item.amenities.name,
-              };
-            }
-          );
         branchRoomTypeRelationPresence["image"] =
           branchRoomTypeRelationPresence.UploadRelation.map((item) => {
             return {

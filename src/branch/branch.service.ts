@@ -6,7 +6,6 @@ import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
-import { log } from "console";
 
 @Injectable()
 export class BranchService {
@@ -52,17 +51,17 @@ export class BranchService {
           }
         );
 
-        if (branchAmenitiesIdArr.length > 0) {
-          const amenities = await this.prisma.amenities.findMany({
-            include: {
-              UploadRelation: {
-                include: {
-                  upload: true,
-                },
+        const amenities = await this.prisma.amenities.findMany({
+          include: {
+            UploadRelation: {
+              include: {
+                upload: true,
               },
             },
-          });
+          },
+        });
 
+        if (branchAmenitiesIdArr.length > 0) {
           amenities?.map((item) => {
             if (item?.UploadRelation[0] && item?.UploadRelation[0].upload) {
               item.UploadRelation[0].upload["fileUrl"] =
@@ -75,11 +74,13 @@ export class BranchService {
               item["selected"] = false;
             }
           });
-
-          branch["amenities"] = amenities;
         } else {
-          branch["amenities"] = null;
+          amenities?.map((item) => {
+            item["selected"] = false;
+          });
         }
+
+        branch["amenities"] = amenities;
 
         branch["image"] = branch?.UploadRelation?.map((item) => {
           return {

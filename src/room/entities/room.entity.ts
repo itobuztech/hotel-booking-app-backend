@@ -7,14 +7,12 @@ import {
   Amenities as AmenitiesDB,
 } from "@prisma/client";
 import { File } from "../../upload/entities/files.entity";
+import { Aminity } from "../../item/entities/items.entity";
 
 @ObjectType()
-export class BranchRoomTypeAmenitiesUsed {
-  @Field(() => ID)
-  id: AmenitiesDB["id"];
-
-  @Field(() => String)
-  name: AmenitiesDB["name"];
+export class BranchRoomTypeAmenitiesUsed extends Aminity {
+  @Field(() => Boolean)
+  selected: boolean;
 }
 
 @ObjectType()
