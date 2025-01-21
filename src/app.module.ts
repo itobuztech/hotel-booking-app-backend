@@ -15,6 +15,7 @@ import {
   GraphqlInterceptor,
   SentryModule,
 } from "@travelerdev/nestjs-sentry-graphql";
+import { ServeStaticModule } from "@nestjs/serve-static";
 import { UsersModule } from "./users/users.module";
 import { AuthModule } from "./auth/auth.module";
 import { AccountModule } from "./account/account.module";
@@ -36,6 +37,10 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
       envFilePath: join(process.cwd(), `.env.${env}`),
       isGlobal: true,
       load: [throttle],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join("public"),
+      serveRoot: "/",
     }),
     GraphQLModule.forRoot({
       driver: ApolloDriver,
@@ -103,4 +108,4 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
     },
   ],
 })
-export class AppModule { }
+export class AppModule {}
