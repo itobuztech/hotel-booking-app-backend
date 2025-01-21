@@ -13,6 +13,8 @@ export enum UserPermissionNames {
   FILE_MANAGEMENT = "FILE_MANAGEMENT",
   ITEM_MANAGEMENT = "ITEM_MANAGEMENT",
   BRANCH_MANAGEMENT = "BRANCH_MANAGEMENT",
+  ROOM_MANAGEMENT = "ROOM_MANAGEMENT",
+  BOOKING_MANAGEMENT = "BOOKING_MANAGEMENT",
 }
 
 export type PrivilegesListType = {
@@ -72,6 +74,26 @@ const PrivilegesList: PrivilegesListType = {
       CREATE: 152,
       EDIT: 153,
       DELETE: 154,
+    },
+  },
+  ROOM_MANAGEMENT: {
+    LABEL: "Room Management",
+    ORDER: 7,
+    CAPABILITIES: {
+      VIEW: 161,
+      CREATE: 162,
+      EDIT: 163,
+      DELETE: 164,
+    },
+  },
+  BOOKING_MANAGEMENT: {
+    LABEL: "Booking Management",
+    ORDER: 8,
+    CAPABILITIES: {
+      VIEW: 171,
+      CREATE: 172,
+      EDIT: 173,
+      DELETE: 174,
     },
   },
 };
