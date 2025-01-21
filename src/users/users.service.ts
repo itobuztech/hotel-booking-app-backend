@@ -68,14 +68,26 @@ export class UsersService {
     });
   }
 
-  async findOneById(
-    id: string
-  ): Promise<User & { role: Pick<Role, "userType" | "privileges"> }> {
+  async findOneById(id: string): Promise<
+    User & { role: Pick<Role, "userType" | "privileges"> } & {
+      UploadRelation: any;
+    }
+  > {
     return await this.prisma.user.findFirst({
       where: {
         id,
       },
       include: {
+        UploadRelation: {
+          select: {
+            upload: {
+              select: {
+                id: true,
+                file: true,
+              },
+            },
+          },
+        },
         role: {
           select: {
             userType: true,

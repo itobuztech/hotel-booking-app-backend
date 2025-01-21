@@ -46,6 +46,8 @@ async function main() {
         password: password,
         roleId: adminRole.id,
         isEmailConfirmed: true,
+        username: "PalashAdmin",
+        contactNumber: "1234567890",
       },
       {
         email: "sudeep@itobuz.com",
@@ -53,6 +55,8 @@ async function main() {
         password: password,
         roleId: adminRole.id,
         isEmailConfirmed: true,
+        username: "SudeepAdmin",
+        contactNumber: "1234567891",
       },
     ],
   });
