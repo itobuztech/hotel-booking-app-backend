@@ -6,11 +6,20 @@ export class CreateBookingInput {
   fullName: string;
 
   // Data to be filled in the "BranchRoomTypeRelation" table
-  @Field(() => ID)
-  branchId: string;
+  @Field(() => Int)
+  contactNumber: number;
+
+  @Field(() => ID, { nullable: true })
+  image?: string;
 
   @Field(() => ID)
-  roomTypeId: string;
+  branch: string;
+
+  @Field(() => ID)
+  roomType: string;
+
+  @Field(() => String)
+  roomNumber: string;
 
   @Field(() => Int)
   setPrice: number;
@@ -18,14 +27,12 @@ export class CreateBookingInput {
   @Field(() => Int)
   offerPrice: number;
 
-  @Field(() => String, { nullable: true })
-  description?: string;
+  @Field(() => Date)
+  checkInDate: Date;
 
-  // Data to be filled in the "BranchRoomTypeAmenitiesRelation" table
-  @Field(() => [ID])
-  amenities: string[];
+  @Field(() => Date)
+  checkOutDate: Date;
 
-  // Data to be filled in the "UploadRelation" table
-  @Field(() => [ID])
-  images: string[];
+  @Field(() => String)
+  description: string;
 }
