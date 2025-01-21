@@ -41,13 +41,39 @@ export class BookingService {
       if (!roomTypePresence) {
         throw new NotFoundException(`Room type does not exist.`);
       }
+      // const roomTypeLinkedToBranch = await this.prisma.roomType.findUnique({
+      //   where: {
+      //     id: roomType,
+      //     BranchRoomTypeRelation: {
+      //       branchId: branch,
+      //     },
+      //   },
+      // });
+      // if (roomTypeLinkedToBranch) {
+      //   throw new NotFoundException(`Room type is not linked with branch.`);
+      // }
 
       // Validate if room exists
-      const roomPresence = await this.prisma.roomType.findUnique({
+      const roomPresence = await this.prisma.room.findUnique({
         where: { id: roomNumber },
       });
       if (!roomPresence) {
         throw new NotFoundException(`Room number does not exist.`);
+      }
+
+      const roomLinkedToBranchRoomtype = await this.prisma.room.findUnique({
+        where: {
+          id: roomNumber,
+          branchRoomType: {
+            branchId: branch,
+            roomTypeId: roomType,
+          },
+        },
+      });
+      if (roomLinkedToBranchRoomtype) {
+        throw new NotFoundException(
+          `Room is not linked with branch and room type.`
+        );
       }
 
       // Validate if image exists
@@ -73,6 +99,13 @@ export class BookingService {
       if (!phoneRegex.test(contactNumber)) {
         throw new BadRequestException(`Invalid phone number.`);
       }
+
+      // Creation of booking
+      // const booking = await this.prisma.booking.create({
+      //   data: {},
+      // });
+
+      return { message: "Booking successfull!" };
     } catch (error) {
       console.error("Error=", error);
 
