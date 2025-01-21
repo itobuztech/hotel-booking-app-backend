@@ -93,6 +93,17 @@ input CreateAmenityInput {
   name: String!
 }
 
+input CreateBookingInput {
+  amenities: [ID!]!
+  branchId: ID!
+  description: String
+  fullName: String!
+  images: [ID!]!
+  offerPrice: Int!
+  roomTypeId: ID!
+  setPrice: Int!
+}
+
 input CreateBranchInput {
   address: String!
   amenityIds: [String!]
@@ -202,6 +213,7 @@ type Message {
 
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
+  bookingCreate(CreateBookingInput: CreateBookingInput!): Message!
   branchRoomTypeDelete(branchRoomTypeId: UniqueIdentifierInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
