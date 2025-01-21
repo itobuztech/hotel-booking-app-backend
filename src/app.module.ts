@@ -27,6 +27,7 @@ import { ItemModule } from "./item/item.module";
 import { NotFoundExceptionFilter } from "./util/not-found-exception.filter";
 import { RoomModule } from "./room/room.module";
 import { BranchModule } from "./branch/branch.module";
+import { BookingModule } from "./booking/booking.module";
 
 const env = `${(process.env.NODE_ENV || "development").toLowerCase()}`;
 
@@ -75,6 +76,7 @@ dotenv.config({ path: join(process.cwd(), `.env.${env}`) });
     ItemModule,
     BranchModule,
     RoomModule,
+    BookingModule,
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
