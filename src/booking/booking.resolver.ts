@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args, Query } from "@nestjs/graphql";
+import { Resolver, Mutation, Args, Query, Context } from "@nestjs/graphql";
 import { UseGuards } from "@nestjs/common";
 import { UserRole } from "@prisma/client";
 import { Message } from "../types/inputtypes/message.entity";
@@ -8,8 +8,6 @@ import { RolesGuard } from "../auth/guards/roles.guard";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { Permissions } from "../auth/decorators/permissions.decorator";
 import { PrivilegesList } from "../privileges/user-privileges";
-import { SearchInput } from "../types/inputtypes/search-input";
-import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingService } from "./booking.service";
 
@@ -20,12 +18,13 @@ export class BookingResolver {
   // Room Creation or Update
   @Mutation(() => Message)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.CREATE])
-  bookingCreate(
+  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
+  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.CREATE])
+  booking(
+    @Context() ctx: any,
     @Args("CreateBookingInput")
     CreateBookingInput: CreateBookingInput
   ) {
-    return this.BookingService.bookingCreateService(CreateBookingInput);
+    return this.BookingService.bookingService(ctx, CreateBookingInput);
   }
 }

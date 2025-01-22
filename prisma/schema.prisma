@@ -48,7 +48,6 @@ model User {
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime?              @default(now()) @updatedAt @map("updated_at")
   deletedAt              DateTime?              @map("deleted_at")
-  Booking                Booking[]
   BookedBy               Booking[]              @relation("booking_booked_by")
   bookingHistoryBookedBy BookingStatusHistory[] @relation("booking_history_booked_by")
   UploadRelation         UploadRelation[]
@@ -117,28 +116,29 @@ model Room {
 }
 
 model Booking {
-  id                   String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  user                 User?                  @relation(fields: [userId], references: [id])
-  userId               String?                @map("user_id") @db.Uuid
-  bookedBy             User?                  @relation("booking_booked_by", fields: [bookedById], references: [id])
-  bookedById           String?                @map("booked_by_id") @db.Uuid
-  fullName             String                 @map("full_name")
-  contactNumber        String                 @map("contact_number")
-  roomNumber           String                 @map("room_number")
-  source               String                 @db.VarChar(255)
-  finalPrice           Decimal                @map("final_price") @db.Decimal(10, 2)
-  checkInDate          DateTime               @map("check_in_date")
-  checkOutDate         DateTime               @map("check_out_date")
-  description          String?
-  bookingStatus        BookingStatus
-  branch               Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  branchId             String                 @map("branch_id") @db.Uuid
-  room                 Room                   @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId               String                 @map("room_id") @db.Uuid
-  createdAt            DateTime               @default(now()) @map("created_at")
-  updatedAt            DateTime?              @default(now()) @updatedAt @map("updated_at")
-  deletedAt            DateTime?              @map("deleted_at")
-  BookingStatusHistory BookingStatusHistory[]
+  id                       String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  bookedBy                 User?                  @relation("booking_booked_by", fields: [bookedById], references: [id])
+  bookedById               String?                @map("booked_by_id") @db.Uuid
+  fullName                 String                 @map("full_name")
+  contactNumber            String                 @map("contact_number")
+  source                   String                 @db.VarChar(255)
+  finalPrice               Decimal                @map("final_price") @db.Decimal(10, 2)
+  checkInDate              DateTime               @map("check_in_date")
+  checkOutDate             DateTime               @map("check_out_date")
+  description              String?
+  bookingStatus            BookingStatus
+  upload                   Upload?                @relation(fields: [uploadId], references: [id], onDelete: Cascade)
+  uploadId                 String?                @map("upload_id") @db.Uuid
+  BranchRoomTypeRelation   BranchRoomTypeRelation @relation(fields: [branchRoomTypeRelationId], references: [id])
+  branchRoomTypeRelationId String                 @map("branch_room_type_relation_id") @db.Uuid
+  branch                   Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId                 String                 @map("branch_id") @db.Uuid
+  room                     Room                   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId                   String                 @map("room_id") @db.Uuid
+  createdAt                DateTime               @default(now()) @map("created_at")
+  updatedAt                DateTime?              @default(now()) @updatedAt @map("updated_at")
+  deletedAt                DateTime?              @map("deleted_at")
+  BookingStatusHistory     BookingStatusHistory[]
 
   @@map("booking")
 }
@@ -148,6 +148,7 @@ model Upload {
   file           String           @db.VarChar(500)
   createdAt      DateTime         @default(now()) @map("created_at")
   UploadRelation UploadRelation[]
+  Booking        Booking[]
 
   @@map("upload")
 }
@@ -198,6 +199,7 @@ model BranchRoomTypeRelation {
   Room                            Room[]
   UploadRelation                  UploadRelation[]
   BranchRoomTypeAmenitiesRelation BranchRoomTypeAmenitiesRelation[]
+  Booking                         Booking[]
 
   @@map("branchRoomTypeRelation")
 }
