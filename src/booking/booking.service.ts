@@ -141,6 +141,18 @@ export class BookingService {
         },
       });
 
+      await this.prisma.bookingStatusHistory.create({
+        data: {
+          booking: { connect: { id: booking.id } },
+          bookedBy: {
+            connect: {
+              id: bookedById,
+            },
+          },
+          bookingStatus: BookingStatus.BOOKED,
+        },
+      });
+
       return { message: "Booking successfull!" };
     } catch (error) {
       console.error("Error=", error);
