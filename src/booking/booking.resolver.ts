@@ -12,6 +12,7 @@ import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingService } from "./booking.service";
 import { Booking } from "./entities/booking.entity";
 import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
+import { UpdateBookingInput } from "./dto/update-booking.input";
 
 @Resolver()
 export class BookingResolver {
@@ -33,7 +34,7 @@ export class BookingResolver {
   // Booking details
   @Query(() => Booking)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
   bookingDetails(
     @Args("bookingId")
@@ -43,14 +44,14 @@ export class BookingResolver {
   }
 
   // Booking update
-  @Query(() => Booking)
+  @Mutation(() => Message)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.EDIT])
   bookingUpdate(
-    @Args("bookingId")
-    bookingId: UniqueIdentifierInput
+    @Args("UpdateBookingInput")
+    UpdateBookingInput: UpdateBookingInput
   ) {
-    return this.BookingService.bookingUpdateService(bookingId);
+    return this.BookingService.bookingUpdateService(UpdateBookingInput);
   }
 }

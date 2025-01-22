@@ -221,5 +221,8 @@ export class BookingService {
     }
   }
 
-  async bookingUpdateService(bookingId) {}
+  async bookingUpdateService(bookingId) {
+    const { id } = bookingId;
+    log("id=", id);
+  }
 }

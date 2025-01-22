@@ -49,6 +49,15 @@ type Booking {
   source: String!
 }
 
+enum BookingStatus {
+  BOOKED
+  CANCELLED
+  CHECKDOUT
+  CHECKEDIN
+  OVERDUE
+  RESERVED
+}
+
 type BranchAmenitiesUsed {
   createdAt: String
   deletedAt: String
@@ -233,6 +242,7 @@ type Message {
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   booking(CreateBookingInput: CreateBookingInput!): Message!
+  bookingUpdate(UpdateBookingInput: UpdateBookingInput!): Message!
   branchRoomTypeDelete(branchRoomTypeId: UniqueIdentifierInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
@@ -286,7 +296,6 @@ type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
   bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
-  bookingUpdate(bookingId: UniqueIdentifierInput!): Booking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
   branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
@@ -354,6 +363,21 @@ input TokenConfirmationInput {
 
 input UniqueIdentifierInput {
   id: ID!
+}
+
+input UpdateBookingInput {
+  bookingStatus: BookingStatus!
+  branch: ID!
+  checkInDate: DateTime!
+  checkOutDate: DateTime!
+  contactNumber: String!
+  description: String!
+  finalPrice: Int!
+  fullName: String!
+  id: ID!
+  image: ID
+  roomId: ID!
+  roomType: ID!
 }
 
 input UpdateBranchInput {
