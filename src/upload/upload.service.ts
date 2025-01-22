@@ -84,11 +84,10 @@ export class UploadService {
 
   async uploadMulipleFiles(uploadMultipleFileInput: UploadMultipleFileInput) {
     const { files } = uploadMultipleFileInput;
-
     const multiFiles = [];
 
     for (const file of await files) {
-      const { createReadStream, filename, mimetype } = await file;
+      const { filename, mimetype } = await file;
 
       if (!mimetype.includes("image")) {
         throw new HttpException(
@@ -96,6 +95,10 @@ export class UploadService {
           HttpStatus.BAD_REQUEST
         );
       }
+    }
+
+    for (const file of await files) {
+      const { createReadStream, filename } = await file;
 
       let uniqueFilename = null;
       const uniqueString = `${Date.now()}`;
@@ -134,8 +137,6 @@ export class UploadService {
           fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${file.file}`,
         };
       });
-
-      // console.log("uploadedFiles", uploadedFiles);
 
       return uploadedFiles;
     } catch (error) {
