@@ -50,8 +50,8 @@ export class BookingService {
             roomTypeId: roomType,
           },
         });
-      if (roomTypeLinkedToBranch) {
-        throw new NotFoundException(`Room type is not linked with branch.`);
+      if (!roomTypeLinkedToBranch) {
+        throw new BadRequestException(`Room type is not linked with branch.`);
       }
 
       // Validate if room exists
@@ -70,8 +70,8 @@ export class BookingService {
           },
         },
       });
-      if (roomLinkedToBranchRoomtype) {
-        throw new NotFoundException(
+      if (!roomLinkedToBranchRoomtype) {
+        throw new BadRequestException(
           `Room is not linked with branch and room type.`
         );
       }
@@ -88,9 +88,7 @@ export class BookingService {
       }
 
       // Validate if checkout date more than check in date.
-      const checkIn = new Date(checkInDate);
-      const checkOut = new Date(checkOutDate);
-      if (checkIn > checkOut) {
+      if (checkInDate > checkOutDate) {
         throw new BadRequestException(
           `Checkout date must be more than checkin date.`
         );
@@ -128,8 +126,8 @@ export class BookingService {
             },
           },
           finalPrice,
-          checkInDate: checkIn,
-          checkOutDate: checkOut,
+          checkInDate,
+          checkOutDate,
           description,
           source: "walk-in",
           bookingStatus: BookingStatus.BOOKED,
