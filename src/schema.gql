@@ -33,6 +33,7 @@ type Aminity {
 }
 
 type Booking {
+  bookingStatus: String!
   branchName: String!
   checkInDate: DateTime!
   checkOutDate: DateTime!
