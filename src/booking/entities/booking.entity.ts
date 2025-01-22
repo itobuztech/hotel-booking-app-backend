@@ -42,4 +42,7 @@ export class Booking {
 
   @Field(() => String)
   description: BookingDB["description"];
+
+  @Field(() => String)
+  bookingStatus: BookingDB["bookingStatus"];
 }
