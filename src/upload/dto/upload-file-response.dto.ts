@@ -8,3 +8,12 @@ export class UploadFileResponse {
   @Field(() => String)
   fileUrl: String;
 }
+
+@ObjectType()
+export class UploadMultipleFileResponse {
+  @Field(() => String)
+  id: String;
+
+  @Field(() => String)
+  fileUrl: String;
+}

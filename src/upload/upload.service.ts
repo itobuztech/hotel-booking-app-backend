@@ -16,7 +16,10 @@ import * as thumbsupply from "thumbsupply";
 import { createWriteStream } from "fs";
 import { join } from "path";
 // import { CreateCourseInput } from "../courses/dto/create-item.input";
-import { UploadFileInput } from "./dto/upload-file-input.dto";
+import {
+  UploadFileInput,
+  UploadMultipleFileInput,
+} from "./dto/upload-file-input.dto";
 import { GetUploadedFile } from "./dto/get-upload-file.dto";
 
 import * as path from "path";
@@ -26,8 +29,10 @@ import { spawn } from "child_process";
 export class UploadService {
   constructor(private prisma: PrismaService) {}
 
-  async uploadFiles(uploadFileInput: UploadFileInput) {
+  async uploadFiles(uploadFileInput) {
     const { file } = uploadFileInput;
+
+    console.log("file: ", file);
 
     let uniqueFilename = null;
     const uniqueString = `${Date.now()}`;
@@ -71,6 +76,70 @@ export class UploadService {
       };
     } catch (error) {
       throw new NotAcceptableException("Course couldn't be created", {
+        cause: new Error(),
+        description: error,
+      });
+    }
+  }
+
+  async uploadMulipleFiles(uploadMultipleFileInput: UploadMultipleFileInput) {
+    const { files } = uploadMultipleFileInput;
+
+    const multiFiles = [];
+
+    for (const file of await files) {
+      const { createReadStream, filename, mimetype } = await file;
+
+      if (!mimetype.includes("image")) {
+        throw new HttpException(
+          `'${filename}' not an image!`,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+
+      let uniqueFilename = null;
+      const uniqueString = `${Date.now()}`;
+
+      uniqueFilename = `${uniqueString}-${filename}`;
+
+      createReadStream()
+        .pipe(
+          createWriteStream(
+            join(process.cwd(), `./public/uploads/${uniqueFilename}`)
+          )
+        )
+        .on("finish", () =>
+          console.log("File uploaded successfully: ", filename)
+        )
+        .on("error", () => {
+          new HttpException(
+            `Could not save image '${filename}'`,
+            HttpStatus.BAD_REQUEST
+          );
+        });
+
+      multiFiles.push({
+        file: uniqueFilename,
+      });
+    }
+
+    try {
+      const newFiles = await this.prisma.upload.createManyAndReturn({
+        data: multiFiles,
+      });
+
+      const uploadedFiles = newFiles.map((file) => {
+        return {
+          id: file.id,
+          fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${file.file}`,
+        };
+      });
+
+      // console.log("uploadedFiles", uploadedFiles);
+
+      return uploadedFiles;
+    } catch (error) {
+      throw new NotAcceptableException("Upload failed!", {
         cause: new Error(),
         description: error,
       });
