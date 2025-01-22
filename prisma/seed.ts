@@ -16,14 +16,14 @@ async function main() {
         userType: UserRole.ADMIN,
         privileges: [
           101, 102, 111, 112, 113, 114, 131, 132, 133, 134, 141, 142, 143, 144,
-          151, 152, 153, 154,
+          151, 152, 153, 154, 161, 162, 163, 164, 171, 172, 173, 174,
         ],
       },
       {
         name: "Benjamin Miller",
         description: "Customers of hotel",
         userType: UserRole.CUSTOMER,
-        privileges: [101, 151],
+        privileges: [101, 151, 171, 172],
       },
     ],
     skipDuplicates: true,
