@@ -11,7 +11,7 @@ import { BookingStatus } from "@prisma/client";
 export class BookingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async bookingCreateService(CreateBookingInput: CreateBookingInput) {
+  async bookingCreateService(ctx, CreateBookingInput: CreateBookingInput) {
     try {
       const {
         fullName,
@@ -26,6 +26,8 @@ export class BookingService {
         checkOutDate,
         description,
       } = CreateBookingInput;
+
+      const bookedById = ctx.req.user.userId;
 
       // Validate if branch exists
       const branchPresence = await this.prisma.branch.count({
@@ -76,12 +78,14 @@ export class BookingService {
       }
 
       // Validate if image exists
-      const imagePresence = await this.prisma.upload.findUnique({
-        where: { id: image },
-      });
+      if (image) {
+        const imagePresence = await this.prisma.upload.findUnique({
+          where: { id: image },
+        });
 
-      if (!imagePresence) {
-        throw new NotFoundException(`Image does not exist.`);
+        if (!imagePresence) {
+          throw new NotFoundException(`Image does not exist.`);
+        }
       }
 
       // Validate if checkout date more than check in date.
@@ -106,7 +110,7 @@ export class BookingService {
           contactNumber,
           upload: {
             connect: {
-              id: image,
+              id: image || null,
             },
           },
           branch: {
@@ -125,12 +129,17 @@ export class BookingService {
             },
           },
           finalPrice,
-          checkInDate,
-          checkOutDate,
+          checkInDate: checkIn,
+          checkOutDate: checkOut,
           description,
           source: "walk-in",
           roomNumber,
           bookingStatus: BookingStatus.BOOKED,
+          bookedBy: {
+            connect: {
+              id: bookedById,
+            },
+          },
         },
       });
 

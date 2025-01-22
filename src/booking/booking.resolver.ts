@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args, Query } from "@nestjs/graphql";
+import { Resolver, Mutation, Args, Query, Context } from "@nestjs/graphql";
 import { UseGuards } from "@nestjs/common";
 import { UserRole } from "@prisma/client";
 import { Message } from "../types/inputtypes/message.entity";
@@ -21,9 +21,10 @@ export class BookingResolver {
   @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.CREATE])
   bookingCreate(
+    @Context() ctx: any,
     @Args("CreateBookingInput")
     CreateBookingInput: CreateBookingInput
   ) {
-    return this.BookingService.bookingCreateService(CreateBookingInput);
+    return this.BookingService.bookingCreateService(ctx, CreateBookingInput);
   }
 }
