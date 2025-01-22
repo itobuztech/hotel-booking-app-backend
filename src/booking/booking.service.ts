@@ -406,7 +406,16 @@ export class BookingService {
         throw new BadRequestException("There is no data to be updated!");
       }
       log("updateDataObj=", updateDataObj);
-      // const bookingUpdate = await this.prisma.booking.update({});
+
+      // Updating Booking
+      await this.prisma.booking.update({
+        where: {
+          id,
+        },
+        data: updateDataObj,
+      });
+
+      return { message: "Booking Updated!" };
     } catch (error) {
       console.error("Error=", error);
 
