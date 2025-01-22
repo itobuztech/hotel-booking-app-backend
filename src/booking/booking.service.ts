@@ -7,6 +7,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus } from "@prisma/client";
 import { log } from "console";
+import { UpdateBookingInput } from "./dto/update-booking.input";
 
 @Injectable()
 export class BookingService {
@@ -221,8 +222,42 @@ export class BookingService {
     }
   }
 
-  async bookingUpdateService(bookingId) {
-    const { id } = bookingId;
-    log("id=", id);
+  async bookingUpdateService(ctx, UpdateBookingInput: UpdateBookingInput) {
+    try {
+      const {
+        id,
+        bookingStatus,
+        fullName,
+        contactNumber,
+        image,
+        branch,
+        roomType,
+        roomId,
+        finalPrice,
+        checkInDate,
+        checkOutDate,
+        description,
+      } = UpdateBookingInput;
+
+      const bookedById = ctx.req.user.userId;
+
+      const Booking = await this.prisma.booking.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!Booking) {
+        throw new NotFoundException("No booking found!");
+      }
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
   }
 }

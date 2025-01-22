@@ -49,9 +49,10 @@ export class BookingResolver {
   @Roles(UserRole.ADMIN)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.EDIT])
   bookingUpdate(
+    @Context() ctx: any,
     @Args("UpdateBookingInput")
     UpdateBookingInput: UpdateBookingInput
   ) {
-    return this.BookingService.bookingUpdateService(UpdateBookingInput);
+    return this.BookingService.bookingUpdateService(ctx, UpdateBookingInput);
   }
 }
