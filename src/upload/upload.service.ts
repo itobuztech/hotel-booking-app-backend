@@ -24,6 +24,7 @@ import { GetUploadedFile } from "./dto/get-upload-file.dto";
 
 import * as path from "path";
 import { spawn } from "child_process";
+import { concat } from "rxjs";
 
 @Injectable()
 export class UploadService {
@@ -85,13 +86,24 @@ export class UploadService {
   async uploadMulipleFiles(uploadMultipleFileInput: UploadMultipleFileInput) {
     const { files } = uploadMultipleFileInput;
     const multiFiles = [];
+    let invalidImages = [];
 
     for (const file of await files) {
       const { filename, mimetype } = await file;
-
       if (!mimetype.includes("image")) {
+        invalidImages.push(filename);
+      }
+    }
+
+    if (invalidImages.length > 0) {
+      if (invalidImages.length == 1) {
         throw new HttpException(
-          `'${filename}' not an image!`,
+          `'${invalidImages.join(", ")}' is not an image!`,
+          HttpStatus.BAD_REQUEST
+        );
+      } else {
+        throw new HttpException(
+          `'${invalidImages.join(", ")}' are not images!`,
           HttpStatus.BAD_REQUEST
         );
       }
