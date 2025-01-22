@@ -337,8 +337,6 @@ export class BookingService {
       if (!Booking.finalPrice.equals(new Prisma.Decimal(finalPrice))) {
         updateDataObj = { ...updateDataObj, finalPrice };
       }
-      log("checkInDate=", checkInDate);
-      log("Booking.checkInDate=", Booking.checkInDate);
       if (
         new Date(Booking.checkInDate).getTime() !==
         new Date(checkInDate).getTime()
@@ -405,7 +403,6 @@ export class BookingService {
       if (Object.keys(updateDataObj).length === 0) {
         throw new BadRequestException("There is no data to be updated!");
       }
-      log("updateDataObj=", updateDataObj);
 
       // Updating Booking
       await this.prisma.booking.update({
@@ -414,6 +411,21 @@ export class BookingService {
         },
         data: updateDataObj,
       });
+
+      if (Booking.bookingStatus !== bookingStatus) {
+        await this.prisma.bookingStatusHistory.create({
+          data: {
+            booking: { connect: { id } },
+            bookedBy: {
+              connect: {
+                id: bookedById,
+              },
+            },
+            bookingStatus:
+              BookingStatus[bookingStatus as keyof typeof BookingStatus],
+          },
+        });
+      }
 
       return { message: "Booking Updated!" };
     } catch (error) {
