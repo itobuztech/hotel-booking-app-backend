@@ -378,6 +378,7 @@ input UpdateBookingInput {
   image: ID
   roomId: ID!
   roomType: ID!
+  source: String!
 }
 
 input UpdateBranchInput {

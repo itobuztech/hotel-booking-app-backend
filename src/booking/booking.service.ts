@@ -5,7 +5,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
-import { BookingStatus } from "@prisma/client";
+import { BookingStatus, Prisma } from "@prisma/client";
 import { log } from "console";
 import { UpdateBookingInput } from "./dto/update-booking.input";
 
@@ -107,6 +107,12 @@ export class BookingService {
         data: {
           fullName,
           contactNumber,
+          finalPrice,
+          checkInDate,
+          checkOutDate,
+          description,
+          source: "walk-in",
+          bookingStatus: BookingStatus.BOOKED,
           upload: {
             connect: {
               id: image || null,
@@ -127,12 +133,6 @@ export class BookingService {
               id: roomId,
             },
           },
-          finalPrice,
-          checkInDate,
-          checkOutDate,
-          description,
-          source: "walk-in",
-          bookingStatus: BookingStatus.BOOKED,
           bookedBy: {
             connect: {
               id: bookedById,
@@ -227,6 +227,7 @@ export class BookingService {
       const {
         id,
         bookingStatus,
+        source,
         fullName,
         contactNumber,
         image,
@@ -322,11 +323,97 @@ export class BookingService {
       if (!phoneRegex.test(contactNumber)) {
         throw new BadRequestException(`Invalid phone number.`);
       }
+
+      // Updating Booking
+
+      let updateDataObj: any = {};
+
+      if (Booking.fullName !== fullName) {
+        updateDataObj = { ...updateDataObj, fullName };
+      }
+      if (Booking.contactNumber !== contactNumber) {
+        updateDataObj = { ...updateDataObj, contactNumber };
+      }
+      if (!Booking.finalPrice.equals(new Prisma.Decimal(finalPrice))) {
+        updateDataObj = { ...updateDataObj, finalPrice };
+      }
+      log("checkInDate=", checkInDate);
+      log("Booking.checkInDate=", Booking.checkInDate);
+      if (
+        new Date(Booking.checkInDate).getTime() !==
+        new Date(checkInDate).getTime()
+      ) {
+        updateDataObj = { ...updateDataObj, checkInDate };
+      }
+      if (
+        new Date(Booking.checkOutDate).getTime() !==
+        new Date(checkOutDate).getTime()
+      ) {
+        updateDataObj = { ...updateDataObj, checkOutDate };
+      }
+
+      if (Booking.description !== description) {
+        updateDataObj = { ...updateDataObj, description };
+      }
+      if (Booking.source !== source) {
+        updateDataObj = { ...updateDataObj, source };
+      }
+      if (Booking.bookingStatus !== bookingStatus) {
+        updateDataObj = { ...updateDataObj, bookingStatus };
+      }
+      if (Booking.branchId !== branch) {
+        updateDataObj = {
+          ...updateDataObj,
+          branch: {
+            connect: {
+              id: branch,
+            },
+          },
+        };
+      }
+      if (Booking.branchRoomTypeRelationId !== roomTypeLinkedToBranch.id) {
+        updateDataObj = {
+          ...updateDataObj,
+          BranchRoomTypeRelation: {
+            connect: {
+              id: roomTypeLinkedToBranch.id,
+            },
+          },
+        };
+      }
+      if (Booking.roomId !== roomId) {
+        updateDataObj = {
+          ...updateDataObj,
+          room: {
+            connect: {
+              id: roomId,
+            },
+          },
+        };
+      }
+      if (Booking.uploadId !== image) {
+        updateDataObj = {
+          ...updateDataObj,
+          upload: {
+            connect: {
+              id: image || null,
+            },
+          },
+        };
+      }
+
+      if (Object.keys(updateDataObj).length === 0) {
+        throw new BadRequestException("There is no data to be updated!");
+      }
+      log("updateDataObj=", updateDataObj);
+      // const bookingUpdate = await this.prisma.booking.update({});
     } catch (error) {
       console.error("Error=", error);
 
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
       } else {
         throw new Error("Internal Server Error. Please try again later.");
       }

@@ -9,4 +9,7 @@ export class UpdateBookingInput extends CreateBookingInput {
 
   @Field(() => BookingStatus)
   bookingStatus: string;
+
+  @Field(() => String)
+  source: string;
 }
