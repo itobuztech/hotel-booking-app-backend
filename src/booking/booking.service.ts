@@ -41,17 +41,16 @@ export class BookingService {
       if (!roomTypePresence) {
         throw new NotFoundException(`Room type does not exist.`);
       }
-      // const roomTypeLinkedToBranch = await this.prisma.roomType.findUnique({
-      //   where: {
-      //     id: roomType,
-      //     BranchRoomTypeRelation: {
-      //       branchId: branch,
-      //     },
-      //   },
-      // });
-      // if (roomTypeLinkedToBranch) {
-      //   throw new NotFoundException(`Room type is not linked with branch.`);
-      // }
+      const roomTypeLinkedToBranch =
+        await this.prisma.branchRoomTypeRelation.findFirst({
+          where: {
+            branchId: branch,
+            roomTypeId: roomType,
+          },
+        });
+      if (roomTypeLinkedToBranch) {
+        throw new NotFoundException(`Room type is not linked with branch.`);
+      }
 
       // Validate if room exists
       const roomPresence = await this.prisma.room.findUnique({
