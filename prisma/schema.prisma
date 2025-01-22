@@ -122,7 +122,6 @@ model Booking {
   bookedById               String?                @map("booked_by_id") @db.Uuid
   fullName                 String                 @map("full_name")
   contactNumber            String                 @map("contact_number")
-  roomNumber               String                 @map("room_number")
   source                   String                 @db.VarChar(255)
   finalPrice               Decimal                @map("final_price") @db.Decimal(10, 2)
   checkInDate              DateTime               @map("check_in_date")

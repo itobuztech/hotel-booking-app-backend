@@ -103,7 +103,6 @@ input CreateBookingInput {
   fullName: String!
   image: ID
   roomId: ID!
-  roomNumber: String!
   roomType: ID!
 }
 

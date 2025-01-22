@@ -20,7 +20,6 @@ export class BookingService {
         branch,
         roomType,
         roomId,
-        roomNumber,
         finalPrice,
         checkInDate,
         checkOutDate,
@@ -125,7 +124,7 @@ export class BookingService {
           },
           room: {
             connect: {
-              id: roomNumber,
+              id: roomId,
             },
           },
           finalPrice,
@@ -133,7 +132,6 @@ export class BookingService {
           checkOutDate: checkOut,
           description,
           source: "walk-in",
-          roomNumber,
           bookingStatus: BookingStatus.BOOKED,
           bookedBy: {
             connect: {
