@@ -48,7 +48,6 @@ model User {
   createdAt              DateTime               @default(now()) @map("created_at")
   updatedAt              DateTime?              @default(now()) @updatedAt @map("updated_at")
   deletedAt              DateTime?              @map("deleted_at")
-  Booking                Booking[]
   BookedBy               Booking[]              @relation("booking_booked_by")
   bookingHistoryBookedBy BookingStatusHistory[] @relation("booking_history_booked_by")
   UploadRelation         UploadRelation[]
@@ -140,8 +139,6 @@ model Booking {
   updatedAt                DateTime?              @default(now()) @updatedAt @map("updated_at")
   deletedAt                DateTime?              @map("deleted_at")
   BookingStatusHistory     BookingStatusHistory[]
-  User                     User?                  @relation(fields: [userId], references: [id])
-  userId                   String?                @db.Uuid
 
   @@map("booking")
 }
