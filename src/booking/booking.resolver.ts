@@ -12,12 +12,13 @@ import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingService } from "./booking.service";
 import { Booking } from "./entities/booking.entity";
 import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
+import { UpdateBookingInput } from "./dto/update-booking.input";
 
 @Resolver()
 export class BookingResolver {
   constructor(private readonly BookingService: BookingService) {}
 
-  // Room Creation or Update
+  //Booking create
   @Mutation(() => Message)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
@@ -30,15 +31,28 @@ export class BookingResolver {
     return this.BookingService.bookingService(ctx, CreateBookingInput);
   }
 
-  // Branch Roomtype Detail
+  // Booking details
   @Query(() => Booking)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
   bookingDetails(
     @Args("bookingId")
     bookingId: UniqueIdentifierInput
   ) {
     return this.BookingService.bookingDetailsService(bookingId);
+  }
+
+  // Booking update
+  @Mutation(() => Message)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.EDIT])
+  bookingUpdate(
+    @Context() ctx: any,
+    @Args("UpdateBookingInput")
+    UpdateBookingInput: UpdateBookingInput
+  ) {
+    return this.BookingService.bookingUpdateService(ctx, UpdateBookingInput);
   }
 }
