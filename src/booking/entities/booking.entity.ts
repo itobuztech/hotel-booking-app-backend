@@ -13,8 +13,8 @@ export class Booking {
   @Field(() => String)
   contactNumber: BookingDB["contactNumber"];
 
-  @Field(() => [File], { nullable: true })
-  image?: File[];
+  @Field(() => File, { nullable: true })
+  image?: File;
 
   @Field(() => String)
   roomNumber: string;
@@ -23,10 +23,10 @@ export class Booking {
   source: string;
 
   @Field(() => String)
-  branch: string;
+  branchName: string;
 
   @Field(() => String)
-  roomtype: string;
+  roomtypeName: string;
 
   @Field(() => Int)
   setPrice: number;
@@ -40,6 +40,6 @@ export class Booking {
   @Field(() => Date)
   checkOutDate: BookingDB["checkOutDate"];
 
-  @Field(() => Date)
+  @Field(() => String)
   description: BookingDB["description"];
 }

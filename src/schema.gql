@@ -33,17 +33,17 @@ type Aminity {
 }
 
 type Booking {
-  branch: String!
+  branchName: String!
   checkInDate: DateTime!
   checkOutDate: DateTime!
   contactNumber: String!
-  description: DateTime!
+  description: String!
   fullName: String!
   id: ID!
-  image: [File!]
+  image: File
   offerPrice: Int!
   roomNumber: String!
-  roomtype: String!
+  roomtypeName: String!
   setPrice: Int!
   source: String!
 }

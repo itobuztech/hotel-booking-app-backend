@@ -6,6 +6,7 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus } from "@prisma/client";
+import { log } from "console";
 
 @Injectable()
 export class BookingService {
@@ -165,5 +166,60 @@ export class BookingService {
     }
   }
 
-  async bookingDetailsService(bookingId) {}
+  async bookingDetailsService(bookingId) {
+    log("bookingId=", bookingId);
+    try {
+      const { id } = bookingId;
+
+      const Booking = await this.prisma.booking.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          branch: true,
+          upload: true,
+          room: true,
+          BranchRoomTypeRelation: {
+            include: {
+              roomType: true,
+            },
+          },
+        },
+      });
+
+      if (!Booking) {
+        throw new NotFoundException("No booking found!");
+      }
+
+      Booking["branchName"] = Booking.branch.name;
+      Booking["roomtypeName"] = Booking.BranchRoomTypeRelation.roomType.name;
+      Booking["setPrice"] = Number(Booking.BranchRoomTypeRelation.setPrice);
+      Booking["offerPrice"] = Number(Booking.BranchRoomTypeRelation.offerPrice);
+      Booking["roomNumber"] = Booking.room.roomName;
+
+      if (Booking.uploadId) {
+        Booking.upload["fileUrl"] =
+          `${process.env.BACKEND_BASE_URL}/uploads/${Booking?.upload?.file}`;
+
+        Booking["image"] = Booking.upload;
+
+        delete Booking.upload;
+      }
+
+      delete Booking.branch;
+      delete Booking.BranchRoomTypeRelation;
+      delete Booking.room;
+      log("Booking=", Booking);
+
+      return Booking;
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
+  }
 }
