@@ -6,7 +6,6 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus, Prisma } from "@prisma/client";
-import { log } from "console";
 import { UpdateBookingInput } from "./dto/update-booking.input";
 
 @Injectable()
