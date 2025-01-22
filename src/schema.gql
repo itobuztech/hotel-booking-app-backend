@@ -320,7 +320,9 @@ type RoomsWithInitial {
 }
 
 type RoomsWithInitialArr {
+  offerPrice: Int!
   roomsWithInitials: [RoomsWithInitial!]!
+  setPrice: Int!
 }
 
 input SearchInput {

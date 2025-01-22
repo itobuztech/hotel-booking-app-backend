@@ -482,6 +482,7 @@ export class RoomService {
             },
           },
         });
+      console.log("branchRoomTypeRelation=", branchRoomTypeRelation);
 
       if (!roomTypeId) {
         branchRoomTypeRelation?.map((branchRoomType) => {
@@ -504,7 +505,11 @@ export class RoomService {
           room["roomInitial"] = branchRoomTypeRelation[0].roomType.roomInitial;
         });
 
-        return { roomsWithInitials: roomsWithInitials || [] };
+        return {
+          roomsWithInitials: roomsWithInitials || [],
+          setPrice: Number(branchRoomTypeRelation[0].setPrice),
+          offerPrice: Number(branchRoomTypeRelation[0].offerPrice),
+        };
       }
     } catch (error) {
       console.log("Error=", error);

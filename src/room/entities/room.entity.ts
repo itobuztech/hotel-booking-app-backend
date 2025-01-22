@@ -91,6 +91,12 @@ export class RoomsWithInitial {
 export class RoomsWithInitialArr {
   @Field(() => [RoomsWithInitial])
   roomsWithInitials: RoomsWithInitial[];
+
+  @Field(() => Int)
+  setPrice: number;
+
+  @Field(() => Int)
+  offerPrice: number;
 }
 
 export const RoomsOverAllOrRoomsWithInitial = createUnionType({
