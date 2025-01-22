@@ -220,4 +220,6 @@ export class BookingService {
       }
     }
   }
+
+  async bookingUpdateService(bookingId) {}
 }

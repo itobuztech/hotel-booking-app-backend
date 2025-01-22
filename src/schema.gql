@@ -286,6 +286,7 @@ type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
   bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
+  bookingUpdate(bookingId: UniqueIdentifierInput!): Booking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
   branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!

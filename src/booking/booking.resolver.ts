@@ -17,7 +17,7 @@ import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 export class BookingResolver {
   constructor(private readonly BookingService: BookingService) {}
 
-  // Room Creation or Update
+  //Booking create
   @Mutation(() => Message)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
@@ -30,7 +30,7 @@ export class BookingResolver {
     return this.BookingService.bookingService(ctx, CreateBookingInput);
   }
 
-  // Branch Roomtype Detail
+  // Booking details
   @Query(() => Booking)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
@@ -40,5 +40,17 @@ export class BookingResolver {
     bookingId: UniqueIdentifierInput
   ) {
     return this.BookingService.bookingDetailsService(bookingId);
+  }
+
+  // Booking update
+  @Query(() => Booking)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.EDIT])
+  bookingUpdate(
+    @Args("bookingId")
+    bookingId: UniqueIdentifierInput
+  ) {
+    return this.BookingService.bookingUpdateService(bookingId);
   }
 }
