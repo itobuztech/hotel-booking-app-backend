@@ -215,7 +215,7 @@ type Message {
 
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
-  bookingCreate(CreateBookingInput: CreateBookingInput!): Message!
+  booking(CreateBookingInput: CreateBookingInput!): Message!
   branchRoomTypeDelete(branchRoomTypeId: UniqueIdentifierInput!): Message!
   create(createUserInput: CreateUserInput!): User!
   createBranch(createBranchInput: CreateBranchInput!): BranchResponse!

@@ -20,11 +20,11 @@ export class BookingResolver {
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.CREATE])
-  bookingCreate(
+  booking(
     @Context() ctx: any,
     @Args("CreateBookingInput")
     CreateBookingInput: CreateBookingInput
   ) {
-    return this.BookingService.bookingCreateService(ctx, CreateBookingInput);
+    return this.BookingService.bookingService(ctx, CreateBookingInput);
   }
 }

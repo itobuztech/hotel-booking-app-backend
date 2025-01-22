@@ -11,7 +11,7 @@ import { BookingStatus } from "@prisma/client";
 export class BookingService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async bookingCreateService(ctx, CreateBookingInput: CreateBookingInput) {
+  async bookingService(ctx, CreateBookingInput: CreateBookingInput) {
     try {
       const {
         fullName,
