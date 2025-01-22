@@ -164,4 +164,6 @@ export class BookingService {
       }
     }
   }
+
+  async bookingDetailsService(bookingId) {}
 }
