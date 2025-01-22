@@ -18,14 +18,14 @@ export class CreateBookingInput {
   @Field(() => ID)
   roomType: string;
 
+  @Field(() => ID)
+  roomId: string;
+
   @Field(() => String)
   roomNumber: string;
 
   @Field(() => Int)
-  setPrice: number;
-
-  @Field(() => Int)
-  offerPrice: number;
+  finalPrice: number;
 
   @Field(() => Date)
   checkInDate: Date;

@@ -5,6 +5,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
+import { BookingStatus } from "@prisma/client";
 
 @Injectable()
 export class BookingService {
@@ -18,9 +19,9 @@ export class BookingService {
         image,
         branch,
         roomType,
+        roomId,
         roomNumber,
-        setPrice,
-        offerPrice,
+        finalPrice,
         checkInDate,
         checkOutDate,
         description,
@@ -54,7 +55,7 @@ export class BookingService {
 
       // Validate if room exists
       const roomPresence = await this.prisma.room.findUnique({
-        where: { id: roomNumber },
+        where: { id: roomId },
       });
       if (!roomPresence) {
         throw new NotFoundException(`Room number does not exist.`);
@@ -62,10 +63,9 @@ export class BookingService {
 
       const roomLinkedToBranchRoomtype = await this.prisma.room.findUnique({
         where: {
-          id: roomNumber,
+          id: roomId,
           branchRoomType: {
-            branchId: branch,
-            roomTypeId: roomType,
+            id: roomTypeLinkedToBranch.id,
           },
         },
       });
@@ -100,9 +100,39 @@ export class BookingService {
       }
 
       // Creation of booking
-      // const booking = await this.prisma.booking.create({
-      //   data: {},
-      // });
+      const booking = await this.prisma.booking.create({
+        data: {
+          fullName,
+          contactNumber,
+          upload: {
+            connect: {
+              id: image,
+            },
+          },
+          branch: {
+            connect: {
+              id: branch,
+            },
+          },
+          BranchRoomTypeRelation: {
+            connect: {
+              id: roomTypeLinkedToBranch.id,
+            },
+          },
+          room: {
+            connect: {
+              id: roomNumber,
+            },
+          },
+          finalPrice,
+          checkInDate,
+          checkOutDate,
+          description,
+          source: "walk-in",
+          roomNumber,
+          bookingStatus: BookingStatus.BOOKED,
+        },
+      });
 
       return { message: "Booking successfull!" };
     } catch (error) {

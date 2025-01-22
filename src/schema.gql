@@ -99,12 +99,12 @@ input CreateBookingInput {
   checkOutDate: DateTime!
   contactNumber: String!
   description: String!
+  finalPrice: Int!
   fullName: String!
   image: ID
-  offerPrice: Int!
+  roomId: ID!
   roomNumber: String!
   roomType: ID!
-  setPrice: Int!
 }
 
 input CreateBranchInput {
