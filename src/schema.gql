@@ -32,6 +32,22 @@ type Aminity {
   updatedAt: String
 }
 
+type Booking {
+  branchName: String!
+  checkInDate: DateTime!
+  checkOutDate: DateTime!
+  contactNumber: String!
+  description: String!
+  fullName: String!
+  id: ID!
+  image: File
+  offerPrice: Int!
+  roomNumber: String!
+  roomtypeName: String!
+  setPrice: Int!
+  source: String!
+}
+
 type BranchAmenitiesUsed {
   createdAt: String
   deletedAt: String
@@ -268,6 +284,7 @@ type PaginationResponse {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
+  bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
   branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
@@ -320,7 +337,9 @@ type RoomsWithInitial {
 }
 
 type RoomsWithInitialArr {
+  offerPrice: Int!
   roomsWithInitials: [RoomsWithInitial!]!
+  setPrice: Int!
 }
 
 input SearchInput {
