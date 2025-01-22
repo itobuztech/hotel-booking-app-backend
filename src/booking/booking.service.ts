@@ -167,7 +167,6 @@ export class BookingService {
   }
 
   async bookingDetailsService(bookingId) {
-    log("bookingId=", bookingId);
     try {
       const { id } = bookingId;
 
