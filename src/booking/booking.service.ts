@@ -6,7 +6,6 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus, Prisma } from "@prisma/client";
-import { log } from "console";
 import { UpdateBookingInput } from "./dto/update-booking.input";
 
 @Injectable()
@@ -96,6 +95,33 @@ export class BookingService {
         );
       }
 
+      // Validate if check-in and check-out dates do not collide with other bookings for the same room
+      const conflictingBookings = await this.prisma.booking.findMany({
+        where: {
+          roomId: roomId,
+          bookingStatus: {
+            notIn: [BookingStatus.CHECKDOUT, BookingStatus.CANCELLED],
+          },
+          AND: [
+            {
+              checkInDate: {
+                lte: checkOutDate,
+              },
+            },
+            {
+              checkOutDate: {
+                gte: checkInDate,
+              },
+            },
+          ],
+        },
+      });
+
+      if (conflictingBookings.length > 0) {
+        throw new BadRequestException(
+          `The room is already booked for the selected dates.`
+        );
+      }
       // Validate phone number
       const phoneRegex = /^[0-9]{10}$/;
       if (!phoneRegex.test(contactNumber)) {
