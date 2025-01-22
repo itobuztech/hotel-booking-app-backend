@@ -209,7 +209,6 @@ export class BookingService {
       delete Booking.branch;
       delete Booking.BranchRoomTypeRelation;
       delete Booking.room;
-      log("Booking=", Booking);
 
       return Booking;
     } catch (error) {
