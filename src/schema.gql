@@ -304,6 +304,7 @@ type Query {
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
   listBranches(paginationArgs: PaginationArgs, searchInput: SearchInput): BranchListResponse!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
+  roomTypeDetail(roomTypeId: UniqueIdentifierInput!): RoomType!
   user(email: String!): User!
   users: [User!]
 }

@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -99,6 +100,34 @@ export class ItemService {
     } catch (error) {
       console.log("Error=", error);
       throw new Error("Internal Server Error. Please try after some time!");
+    }
+  }
+
+  async roomTypeDetailService(roomTypeId) {
+    try {
+      const { id } = roomTypeId;
+
+      const roomType = await this.prisma.roomType.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!roomType) {
+        throw new NotFoundException(`Room type does not exist.`);
+      }
+
+      return roomType;
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
     }
   }
 
