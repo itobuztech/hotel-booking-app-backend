@@ -7,6 +7,7 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus, Prisma } from "@prisma/client";
 import { UpdateBookingInput } from "./dto/update-booking.input";
+import { log } from "console";
 
 @Injectable()
 export class BookingService {
@@ -350,6 +351,9 @@ export class BookingService {
         throw new BadRequestException(`Invalid phone number.`);
       }
 
+      // Updating Booking
+      let updateDataObj: any = {};
+
       // Validate if check-in and check-out dates do not collide with other bookings for the same room
       const conflictingBookings = await this.prisma.booking.findMany({
         where: {
@@ -368,6 +372,11 @@ export class BookingService {
                 gte: checkInDate,
               },
             },
+            {
+              id: {
+                not: id,
+              },
+            },
           ],
         },
       });
@@ -377,10 +386,6 @@ export class BookingService {
           `The room is already booked for the selected dates.`
         );
       }
-
-      // Updating Booking
-
-      let updateDataObj: any = {};
 
       if (Booking.fullName !== fullName) {
         updateDataObj = { ...updateDataObj, fullName };
