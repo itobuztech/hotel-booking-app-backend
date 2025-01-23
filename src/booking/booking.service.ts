@@ -362,7 +362,6 @@ export class BookingService {
             notIn: [BookingStatus.CHECKDOUT, BookingStatus.CANCELLED],
           },
           AND: [
-            // ...andArr,
             {
               checkInDate: {
                 lte: checkOutDate,
@@ -381,7 +380,6 @@ export class BookingService {
           ],
         },
       });
-      log("conflictingBookings=", conflictingBookings);
 
       if (conflictingBookings.length > 0) {
         throw new BadRequestException(
