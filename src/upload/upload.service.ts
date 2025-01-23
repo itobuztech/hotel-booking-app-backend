@@ -70,7 +70,7 @@ export class UploadService {
         fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${newFile.file}`,
       };
     } catch (error) {
-      throw new NotAcceptableException("Course couldn't be created", {
+      throw new NotAcceptableException("Upload Failed!", {
         cause: new Error(),
         description: error,
       });
