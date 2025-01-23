@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -102,7 +103,21 @@ export class ItemService {
     }
   }
 
-  async roomTypeDetailService(roomTypeId) {}
+  async roomTypeDetailService(roomTypeId) {
+    try {
+      const { id } = roomTypeId;
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
+  }
 
   async listItems(filterArg: FilterItemInput) {
     const { entity } = filterArg;
