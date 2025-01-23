@@ -534,7 +534,6 @@ export class BookingService {
           },
         },
       });
-      console.log("booking=", bookings);
 
       if (bookings.length > 0) {
         bookings?.map((booking) => {

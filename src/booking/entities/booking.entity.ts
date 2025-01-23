@@ -47,7 +47,7 @@ export class Booking {
   @Field(() => String)
   bookingStatus: BookingDB["bookingStatus"];
 
-  @Field(() => String)
+  @Field(() => Date)
   createdAt: BookingDB["createdAt"];
 }
 

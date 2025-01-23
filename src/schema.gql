@@ -38,7 +38,7 @@ type Booking {
   checkInDate: DateTime!
   checkOutDate: DateTime!
   contactNumber: String!
-  createdAt: String!
+  createdAt: DateTime!
   description: String!
   fullName: String!
   id: ID!
