@@ -26,7 +26,7 @@ export class PrismaService
   // Soft delete middleware
   private softDeleteMiddleware(): Prisma.Middleware {
     return async (params, next) => {
-      const { model, action, args } = params;
+      const { model, action, args = {} } = params;
 
       // Skip models in the excluded list
       if (excludedModels.includes(model)) {

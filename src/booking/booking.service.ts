@@ -520,13 +520,36 @@ export class BookingService {
 
   async bookingListService() {
     try {
-      const bookingCount = await this.prisma.booking.count({});
-      console.log("bookingCount=", bookingCount);
+      const bookingCount = await this.prisma.booking.count();
 
-      const Booking = await this.prisma.booking.findMany({});
-      console.log("booking=", Booking);
+      const bookings = await this.prisma.booking.findMany({
+        include: {
+          branch: true,
+          upload: true,
+          room: true,
+          BranchRoomTypeRelation: {
+            include: {
+              roomType: true,
+            },
+          },
+        },
+      });
+      console.log("booking=", bookings);
 
-      return { Booking, total: bookingCount };
+      if (bookings.length > 0) {
+        bookings?.map((booking) => {
+          booking["branchName"] = booking.branch.name;
+          booking["roomtypeName"] =
+            booking.BranchRoomTypeRelation.roomType.name;
+          booking["setPrice"] = Number(booking.BranchRoomTypeRelation.setPrice);
+          booking["offerPrice"] = Number(
+            booking.BranchRoomTypeRelation.offerPrice
+          );
+          booking["roomNumber"] = booking.room.roomName;
+        });
+      }
+
+      return { bookings, total: bookingCount };
     } catch (error) {
       console.error("Error=", error);
 
