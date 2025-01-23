@@ -7,8 +7,6 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import * as fsS from "fs";
-import * as fs from "fs/promises"; // Ensure using fs.promises
 import { cwd } from "process";
 // import { StreamService } from "../stream/stream.service";
 import { Prisma, UserRole } from "@prisma/client";
@@ -24,16 +22,13 @@ import { GetUploadedFile } from "./dto/get-upload-file.dto";
 
 import * as path from "path";
 import { spawn } from "child_process";
-import { concat } from "rxjs";
 
 @Injectable()
 export class UploadService {
   constructor(private prisma: PrismaService) {}
 
-  async uploadFiles(uploadFileInput) {
+  async uploadFiles(uploadFileInput: UploadFileInput) {
     const { file } = uploadFileInput;
-
-    console.log("file: ", file);
 
     let uniqueFilename = null;
     const uniqueString = `${Date.now()}`;
