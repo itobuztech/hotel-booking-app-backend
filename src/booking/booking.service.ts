@@ -350,6 +350,34 @@ export class BookingService {
         throw new BadRequestException(`Invalid phone number.`);
       }
 
+      // Validate if check-in and check-out dates do not collide with other bookings for the same room
+      const conflictingBookings = await this.prisma.booking.findMany({
+        where: {
+          roomId: roomId,
+          bookingStatus: {
+            notIn: [BookingStatus.CHECKDOUT, BookingStatus.CANCELLED],
+          },
+          AND: [
+            {
+              checkInDate: {
+                lte: checkOutDate,
+              },
+            },
+            {
+              checkOutDate: {
+                gte: checkInDate,
+              },
+            },
+          ],
+        },
+      });
+
+      if (conflictingBookings.length > 0) {
+        throw new BadRequestException(
+          `The room is already booked for the selected dates.`
+        );
+      }
+
       // Updating Booking
 
       let updateDataObj: any = {};
