@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, Int } from "@nestjs/graphql";
 import { Booking as BookingDB } from "@prisma/client";
 import { File } from "../../upload/entities/files.entity";
+import { TotalCount } from "../../types/inputtypes/toalCount.entity";
 
 @ObjectType()
 export class Booking {
@@ -45,4 +46,13 @@ export class Booking {
 
   @Field(() => String)
   bookingStatus: BookingDB["bookingStatus"];
+
+  @Field(() => String)
+  createdAt: BookingDB["createdAt"];
+}
+
+@ObjectType()
+export class PaginatedBooking extends TotalCount {
+  @Field(() => [Booking])
+  bookings: Booking[];
 }

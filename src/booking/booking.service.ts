@@ -520,7 +520,13 @@ export class BookingService {
 
   async bookingListService() {
     try {
-      console.log("asd");
+      const bookingCount = await this.prisma.booking.count({});
+      console.log("bookingCount=", bookingCount);
+
+      const Booking = await this.prisma.booking.findMany({});
+      console.log("booking=", Booking);
+
+      return { Booking, total: bookingCount };
     } catch (error) {
       console.error("Error=", error);
 

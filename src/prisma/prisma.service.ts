@@ -42,9 +42,9 @@ export class PrismaService
         args.where.deletedAt = null;
       };
 
-      // Handle `find` queries (findUnique, findFirst, findMany) with exclusion of models
+      // Handle `find` queries (findUnique, findFirst, findMany, count) with exclusion of models
       if (
-        ["findUnique", "findFirst", "findMany"].includes(action) &&
+        ["findUnique", "findFirst", "findMany", "count"].includes(action) &&
         !excludedMasterModels.includes(model)
       ) {
         handleFindQuery();

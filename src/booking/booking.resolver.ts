@@ -10,7 +10,7 @@ import { Permissions } from "../auth/decorators/permissions.decorator";
 import { PrivilegesList } from "../privileges/user-privileges";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingService } from "./booking.service";
-import { Booking } from "./entities/booking.entity";
+import { Booking, PaginatedBooking } from "./entities/booking.entity";
 import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 import { UpdateBookingInput } from "./dto/update-booking.input";
 
@@ -32,7 +32,7 @@ export class BookingResolver {
   }
 
   // Booking Listing
-  @Mutation(() => Message)
+  @Query(() => PaginatedBooking)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])

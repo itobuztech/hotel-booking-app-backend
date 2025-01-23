@@ -38,6 +38,7 @@ type Booking {
   checkInDate: DateTime!
   checkOutDate: DateTime!
   contactNumber: String!
+  createdAt: String!
   description: String!
   fullName: String!
   id: ID!
@@ -242,7 +243,6 @@ type Message {
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   booking(CreateBookingInput: CreateBookingInput!): Message!
-  bookingList: Message!
   bookingUpdate(UpdateBookingInput: UpdateBookingInput!): Message!
   branchRoomTypeDelete(branchRoomTypeId: UniqueIdentifierInput!): Message!
   create(createUserInput: CreateUserInput!): User!
@@ -273,6 +273,11 @@ type PaginatedAminity {
 
 union PaginatedAminityOrRoomType = PaginatedAminity | PaginatedRoomType
 
+type PaginatedBooking {
+  bookings: [Booking!]!
+  total: Int!
+}
+
 type PaginatedFile {
   files: [File!]!
   total: Int!
@@ -298,6 +303,7 @@ type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
   bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
+  bookingList: PaginatedBooking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
   branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
