@@ -106,6 +106,18 @@ export class ItemService {
   async roomTypeDetailService(roomTypeId) {
     try {
       const { id } = roomTypeId;
+
+      const roomType = await this.prisma.roomType.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!roomType) {
+        throw new NotFoundException(`Room type does not exist.`);
+      }
+
+      return roomType;
     } catch (error) {
       console.error("Error=", error);
 
