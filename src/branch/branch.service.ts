@@ -170,31 +170,39 @@ export class BranchService {
       };
     });
 
-    return await this.prisma.branch.create({
-      data: {
-        name,
-        address,
-        areaPincode,
-        city,
-        contactNumber,
-        description,
-        location,
-        BranchAmenitiesRelation: {
-          createMany: {
-            data: amenityIdsArr,
+    try {
+      const abc = await this.prisma.branch.create({
+        data: {
+          name,
+          address,
+          areaPincode,
+          city,
+          contactNumber,
+          description,
+          location,
+          BranchAmenitiesRelation: {
+            createMany: {
+              data: amenityIdsArr,
+            },
+          },
+          UploadRelation: {
+            createMany: {
+              data: fileIdsArr,
+            },
           },
         },
-        UploadRelation: {
-          createMany: {
-            data: fileIdsArr,
-          },
+        include: {
+          BranchAmenitiesRelation: true,
+          UploadRelation: true,
         },
-      },
-      include: {
-        BranchAmenitiesRelation: true,
-        UploadRelation: true,
-      },
-    });
+      });
+
+      return {
+        message: "Branch created successfully!",
+      };
+    } catch (error) {
+      throw new Error(`Error : ${error}`);
+    }
   }
 
   async list(paginationArgs: PaginationArgs, searchInput: SearchInput) {
