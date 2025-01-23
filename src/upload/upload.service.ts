@@ -1,34 +1,25 @@
 import {
-  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
   NotAcceptableException,
-  UnauthorizedException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { cwd } from "process";
-// import { StreamService } from "../stream/stream.service";
-import { Prisma, UserRole } from "@prisma/client";
-import * as thumbsupply from "thumbsupply";
+
+import * as fs from "fs/promises"; // Ensure using fs.promises
 import { createWriteStream } from "fs";
 import { join } from "path";
-// import { CreateCourseInput } from "../courses/dto/create-item.input";
-import {
-  UploadFileInput,
-  UploadMultipleFileInput,
-} from "./dto/upload-file-input.dto";
+import { UploadMultipleFileInput } from "./dto/upload-file-input.dto";
 import { GetUploadedFile } from "./dto/get-upload-file.dto";
-
-import * as path from "path";
-import { spawn } from "child_process";
 
 @Injectable()
 export class UploadService {
   constructor(private prisma: PrismaService) {}
 
-  async uploadFiles(uploadFileInput: UploadFileInput) {
+  async uploadFiles(uploadFileInput) {
     const { file } = uploadFileInput;
+
+    console.log("file: ", file);
 
     let uniqueFilename = null;
     const uniqueString = `${Date.now()}`;
