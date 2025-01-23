@@ -261,6 +261,7 @@ type Mutation {
   updateBranch(getBranchInput: GetBranchInput!, updateBranchInput: UpdateBranchInput!): BranchResponse!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
+  uploadMulipleFiles(uploadMultipleFileInput: UploadMultipleFileInput!): [UploadMultipleFileResponse!]!
   validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
 }
 
@@ -412,6 +413,15 @@ input UploadFileInput {
 }
 
 type UploadFileResponse {
+  fileUrl: String!
+  id: String!
+}
+
+input UploadMultipleFileInput {
+  files: [Upload!]!
+}
+
+type UploadMultipleFileResponse {
   fileUrl: String!
   id: String!
 }

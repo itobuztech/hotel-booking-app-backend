@@ -8,15 +8,21 @@ import { PermissionsGuardOR } from "../auth/guards/permissions-or.guard";
 import { Permissions } from "../auth/decorators/permissions.decorator";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { PrivilegesList } from "../privileges/user-privileges";
-import { UploadFileInput } from "./dto/upload-file-input.dto";
-import { UploadFileResponse } from "./dto/upload-file-response.dto";
+import {
+  UploadFileInput,
+  UploadMultipleFileInput,
+} from "./dto/upload-file-input.dto";
+import {
+  UploadFileResponse,
+  UploadMultipleFileResponse,
+} from "./dto/upload-file-response.dto";
 import { PaginatedFile, File } from "./entities/files.entity";
 import { GetUploadedFile } from "./dto/get-upload-file.dto";
 import { PaginationArgs } from "src/types/inputtypes/pagination.input";
 
 @Resolver("Video")
 export class UploadResolver {
-  constructor(private readonly uploadService: UploadService) { }
+  constructor(private readonly uploadService: UploadService) {}
 
   @Mutation(() => UploadFileResponse)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
@@ -24,6 +30,17 @@ export class UploadResolver {
   @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.CREATE])
   uploadFiles(@Args("uploadFileInput") uploadFileInput: UploadFileInput) {
     return this.uploadService.uploadFiles(uploadFileInput);
+  }
+
+  @Mutation(() => [UploadMultipleFileResponse])
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.FILE_MANAGEMENT.CAPABILITIES.CREATE])
+  async uploadMulipleFiles(
+    @Args("uploadMultipleFileInput")
+    uploadMultipleFileInput: UploadMultipleFileInput
+  ) {
+    return await this.uploadService.uploadMulipleFiles(uploadMultipleFileInput);
   }
 
   @Query(() => PaginatedFile)

@@ -7,3 +7,9 @@ export class UploadFileInput {
   @Field(() => GraphQLUpload)
   file: Promise<FileUpload>;
 }
+
+@InputType()
+export class UploadMultipleFileInput {
+  @Field(() => [GraphQLUpload])
+  files: Promise<FileUpload[]>;
+}
