@@ -12,6 +12,7 @@ import { UpdateRoomNumberInput } from "./dto/update-room-number.input";
 import { FilterBranchRoomTypeInput } from "./dto/filter-branch-room-type.input";
 import { SearchInput } from "../types/inputtypes/search-input";
 import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
+import { log } from "console";
 
 @Injectable()
 export class RoomService {
@@ -529,7 +530,10 @@ export class RoomService {
           where: { id: branchRoomTypeId.id },
           include: {
             branch: {
-              select: { id: true, name: true },
+              select: {
+                id: true,
+                name: true,
+              },
             },
             Room: {
               select: { id: true, roomName: true },
@@ -557,48 +561,52 @@ export class RoomService {
             },
           },
         });
-
       if (branchRoomTypeRelationPresence) {
         const branchRoomAmenitiesIdArr =
           branchRoomTypeRelationPresence?.BranchRoomTypeAmenitiesRelation?.map(
             (item) => {
               return item?.amenities.id;
             }
-          );
+          ) || [];
 
-        let amenities = [];
-        if (branchRoomAmenitiesIdArr.length > 0) {
-          amenities = await this.prisma.amenities.findMany({
-            include: {
-              UploadRelation: {
-                include: {
-                  upload: true,
-                },
+        const branchAmenities = await this.prisma.amenities.findMany({
+          where: {
+            BranchAmenitiesRelation: {
+              some: {
+                branchId: branchRoomTypeRelationPresence.branch.id,
               },
             },
-          });
+          },
+          include: {
+            UploadRelation: {
+              include: {
+                upload: true,
+              },
+            },
+          },
+        });
 
-          if (amenities.length > 0) {
-            amenities?.map((item) => {
-              if (item?.UploadRelation[0]?.upload) {
-                item.UploadRelation[0].upload["fileUrl"] =
-                  `${process.env.BACKEND_BASE_URL}/uploads/${item?.UploadRelation[0]?.upload?.file}`;
-                item["image"] = item?.UploadRelation[0]?.upload;
-              }
-              if (branchRoomAmenitiesIdArr?.includes(item.id)) {
-                item["selected"] = true;
-              } else {
-                item["selected"] = false;
-              }
-            });
-          } else {
-            amenities?.map((item) => {
+        if (branchAmenities.length > 0) {
+          branchAmenities?.map((item) => {
+            if (item?.UploadRelation[0]?.upload) {
+              item.UploadRelation[0].upload["fileUrl"] =
+                `${process.env.BACKEND_BASE_URL}/uploads/${item?.UploadRelation[0]?.upload?.file}`;
+              item["image"] = item?.UploadRelation[0]?.upload;
+            }
+
+            if (branchRoomAmenitiesIdArr?.includes(item.id)) {
+              item["selected"] = true;
+            } else {
               item["selected"] = false;
-            });
-          }
+            }
+          });
+        } else {
+          branchAmenities?.map((item) => {
+            item["selected"] = false;
+          });
         }
 
-        branchRoomTypeRelationPresence["amenities"] = amenities;
+        branchRoomTypeRelationPresence["amenities"] = branchAmenities;
 
         const offerPriceVal = Number(branchRoomTypeRelationPresence.offerPrice);
         const setPriceVal = Number(branchRoomTypeRelationPresence.setPrice);
