@@ -31,6 +31,15 @@ export class BookingResolver {
     return this.BookingService.bookingService(ctx, CreateBookingInput);
   }
 
+  // Booking Listing
+  @Mutation(() => Message)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
+  bookingList() {
+    return this.BookingService.bookingListService();
+  }
+
   // Booking details
   @Query(() => Booking)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)

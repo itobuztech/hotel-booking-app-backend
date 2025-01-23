@@ -517,4 +517,20 @@ export class BookingService {
       }
     }
   }
+
+  async bookingListService() {
+    try {
+      console.log("asd");
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
+  }
 }

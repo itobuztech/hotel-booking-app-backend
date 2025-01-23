@@ -242,6 +242,7 @@ type Message {
 type Mutation {
   amenityCreate(createAmenityInput: CreateAmenityInput!): Message!
   booking(CreateBookingInput: CreateBookingInput!): Message!
+  bookingList: Message!
   bookingUpdate(UpdateBookingInput: UpdateBookingInput!): Message!
   branchRoomTypeDelete(branchRoomTypeId: UniqueIdentifierInput!): Message!
   create(createUserInput: CreateUserInput!): User!
