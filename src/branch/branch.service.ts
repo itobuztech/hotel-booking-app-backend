@@ -45,41 +45,38 @@ export class BranchService {
       if (!branch) {
         throw new NotFoundException("Branch not found!");
       } else {
-        const branchAmenitiesIdArr = branch?.BranchAmenitiesRelation?.map(
-          (item) => {
+        const branchAmenitiesIdArr =
+          branch?.BranchAmenitiesRelation?.map((item) => {
             return item?.amenities.id;
-          }
-        );
+          }) || [];
 
-        let amenities = [];
-        if (branchAmenitiesIdArr.length > 0) {
-          amenities = await this.prisma.amenities.findMany({
-            include: {
-              UploadRelation: {
-                include: {
-                  upload: true,
-                },
+        let amenities = await this.prisma.amenities.findMany({
+          include: {
+            UploadRelation: {
+              include: {
+                upload: true,
               },
             },
-          });
-          if (amenities.length > 0) {
-            amenities?.map((item) => {
-              if (item?.UploadRelation[0].upload) {
-                item.UploadRelation[0].upload["fileUrl"] =
-                  `${process.env.BACKEND_BASE_URL}/uploads/${item?.UploadRelation[0]?.upload?.file}`;
-                item["image"] = item?.UploadRelation[0]?.upload;
-              }
-              if (branchAmenitiesIdArr?.includes(item.id)) {
-                item["selected"] = true;
-              } else {
-                item["selected"] = false;
-              }
-            });
-          } else {
-            amenities?.map((item) => {
+          },
+        });
+
+        if (amenities.length > 0) {
+          amenities?.map((item) => {
+            if (item?.UploadRelation[0].upload) {
+              item.UploadRelation[0].upload["fileUrl"] =
+                `${process.env.BACKEND_BASE_URL}/uploads/${item?.UploadRelation[0]?.upload?.file}`;
+              item["image"] = item?.UploadRelation[0]?.upload;
+            }
+            if (branchAmenitiesIdArr?.includes(item.id)) {
+              item["selected"] = true;
+            } else {
               item["selected"] = false;
-            });
-          }
+            }
+          });
+        } else {
+          amenities?.map((item) => {
+            item["selected"] = false;
+          });
         }
 
         branch["amenities"] = amenities;
