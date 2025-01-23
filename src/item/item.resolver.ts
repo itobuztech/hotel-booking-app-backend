@@ -13,7 +13,7 @@ import { Roles } from "../auth/decorators/roles.decorator";
 import { Permissions } from "../auth/decorators/permissions.decorator";
 import { PrivilegesList } from "../privileges/user-privileges";
 import { CreateAmenityInput } from "./dto/create-amenity.input";
-import { PaginatedAminityOrRoomType } from "./entities/items.entity";
+import { PaginatedAminityOrRoomType, RoomType } from "./entities/items.entity";
 
 @Resolver()
 export class ItemResolver {
@@ -39,6 +39,18 @@ export class ItemResolver {
     @Args("createRoomTypeInput") createRoomTypeInput: CreateRoomTypeInput
   ) {
     return this.itemService.createRoomType(createRoomTypeInput);
+  }
+
+  // RoomType Detail
+  @Query(() => RoomType)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
+  roomTypeDetail(
+    @Args("roomTypeId")
+    roomTypeId: UniqueIdentifierInput
+  ) {
+    return this.itemService.roomTypeDetailService(roomTypeId);
   }
 
   // Items Listing

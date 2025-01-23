@@ -102,6 +102,8 @@ export class ItemService {
     }
   }
 
+  async roomTypeDetailService(roomTypeId) {}
+
   async listItems(filterArg: FilterItemInput) {
     const { entity } = filterArg;
 
