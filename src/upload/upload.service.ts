@@ -1,33 +1,25 @@
 import {
-  BadRequestException,
   HttpException,
   HttpStatus,
   Injectable,
   NotAcceptableException,
-  UnauthorizedException,
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import * as fsS from "fs";
+
 import * as fs from "fs/promises"; // Ensure using fs.promises
-import { cwd } from "process";
-// import { StreamService } from "../stream/stream.service";
-import { Prisma, UserRole } from "@prisma/client";
-import * as thumbsupply from "thumbsupply";
 import { createWriteStream } from "fs";
 import { join } from "path";
-// import { CreateCourseInput } from "../courses/dto/create-item.input";
-import { UploadFileInput } from "./dto/upload-file-input.dto";
+import { UploadMultipleFileInput } from "./dto/upload-file-input.dto";
 import { GetUploadedFile } from "./dto/get-upload-file.dto";
-
-import * as path from "path";
-import { spawn } from "child_process";
 
 @Injectable()
 export class UploadService {
   constructor(private prisma: PrismaService) {}
 
-  async uploadFiles(uploadFileInput: UploadFileInput) {
+  async uploadFiles(uploadFileInput) {
     const { file } = uploadFileInput;
+
+    console.log("file: ", file);
 
     let uniqueFilename = null;
     const uniqueString = `${Date.now()}`;
@@ -71,6 +63,82 @@ export class UploadService {
       };
     } catch (error) {
       throw new NotAcceptableException("Upload Failed!", {
+        cause: new Error(),
+        description: error,
+      });
+    }
+  }
+
+  async uploadMulipleFiles(uploadMultipleFileInput: UploadMultipleFileInput) {
+    const { files } = uploadMultipleFileInput;
+    const multiFiles = [];
+    let invalidImages = [];
+
+    for (const file of await files) {
+      const { filename, mimetype } = await file;
+      if (!mimetype.includes("image")) {
+        invalidImages.push(filename);
+      }
+    }
+
+    if (invalidImages.length > 0) {
+      if (invalidImages.length == 1) {
+        throw new HttpException(
+          `'${invalidImages.join(", ")}' is not an image!`,
+          HttpStatus.BAD_REQUEST
+        );
+      } else {
+        throw new HttpException(
+          `'${invalidImages.join(", ")}' are not images!`,
+          HttpStatus.BAD_REQUEST
+        );
+      }
+    }
+
+    for (const file of await files) {
+      const { createReadStream, filename } = await file;
+
+      let uniqueFilename = null;
+      const uniqueString = `${Date.now()}`;
+
+      uniqueFilename = `${uniqueString}-${filename}`;
+
+      createReadStream()
+        .pipe(
+          createWriteStream(
+            join(process.cwd(), `./public/uploads/${uniqueFilename}`)
+          )
+        )
+        .on("finish", () =>
+          console.log("File uploaded successfully: ", filename)
+        )
+        .on("error", () => {
+          new HttpException(
+            `Could not save image '${filename}'`,
+            HttpStatus.BAD_REQUEST
+          );
+        });
+
+      multiFiles.push({
+        file: uniqueFilename,
+      });
+    }
+
+    try {
+      const newFiles = await this.prisma.upload.createManyAndReturn({
+        data: multiFiles,
+      });
+
+      const uploadedFiles = newFiles.map((file) => {
+        return {
+          id: file.id,
+          fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${file.file}`,
+        };
+      });
+
+      return uploadedFiles;
+    } catch (error) {
+      throw new NotAcceptableException("Upload failed!", {
         cause: new Error(),
         description: error,
       });
