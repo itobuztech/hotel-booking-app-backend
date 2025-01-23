@@ -89,6 +89,15 @@ export class BookingService {
         }
       }
 
+      // Validate if check-in date is today or in the future
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate comparison
+      if (new Date(checkInDate) < today) {
+        throw new BadRequestException(
+          `Check-in date must be today or in the future.`
+        );
+      }
+
       // Validate if checkout date more than check in date.
       if (checkInDate > checkOutDate) {
         throw new BadRequestException(
@@ -336,6 +345,15 @@ export class BookingService {
         if (!imagePresence) {
           throw new NotFoundException(`Image does not exist.`);
         }
+      }
+
+      // Validate if check-in date is today or in the future
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate comparison
+      if (new Date(checkInDate) < today) {
+        throw new BadRequestException(
+          `Check-in date must be today or in the future.`
+        );
       }
 
       // Validate if checkout date more than check in date.
