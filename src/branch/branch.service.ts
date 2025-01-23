@@ -171,7 +171,7 @@ export class BranchService {
     });
 
     try {
-      const abc = await this.prisma.branch.create({
+      await this.prisma.branch.create({
         data: {
           name,
           address,
@@ -209,7 +209,7 @@ export class BranchService {
     const { search = "" } = searchInput;
     const { limit = 10, skip = 0 } = paginationArgs;
     const currentPage = Math.floor(skip / limit) + 1;
-    const recordCount = await this.prisma.branch.count();
+    const recordCount = await this.prisma.branch.count({});
     const filteredBranches = await this.prisma.branch.findMany({
       skip: skip,
       take: limit,
@@ -281,7 +281,7 @@ export class BranchService {
         delete branch.UploadRelation;
 
         branch["startingPrice"] = Number(
-          branch?.BranchRoomTypeRelation?.[0]?.offerPrice
+          branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
         );
       });
     }
