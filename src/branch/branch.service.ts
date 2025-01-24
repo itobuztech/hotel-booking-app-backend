@@ -287,8 +287,6 @@ export class BranchService {
       });
     }
 
-    console.log("filteredBranches:-", filteredBranches);
-
     return {
       branches: filteredBranches,
       pagination: {
