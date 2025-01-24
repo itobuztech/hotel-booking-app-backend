@@ -128,7 +128,7 @@ export class BranchService {
         branch["status"] = branch.BranchRoomTypeRelation.map((relation) => {
           let bookedRooms = 0;
           if (branch?.Booking?.length === 0) {
-            bookedRooms = relation.Room.length;
+            bookedRooms = 0;
           } else {
             branch?.Booking?.map((room) => {
               if (
