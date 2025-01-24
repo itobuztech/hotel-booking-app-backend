@@ -170,38 +170,46 @@ export class BranchService {
       };
     });
 
-    return await this.prisma.branch.create({
-      data: {
-        name,
-        address,
-        areaPincode,
-        city,
-        contactNumber,
-        description,
-        location,
-        BranchAmenitiesRelation: {
-          createMany: {
-            data: amenityIdsArr,
+    try {
+      await this.prisma.branch.create({
+        data: {
+          name,
+          address,
+          areaPincode,
+          city,
+          contactNumber,
+          description,
+          location,
+          BranchAmenitiesRelation: {
+            createMany: {
+              data: amenityIdsArr,
+            },
+          },
+          UploadRelation: {
+            createMany: {
+              data: fileIdsArr,
+            },
           },
         },
-        UploadRelation: {
-          createMany: {
-            data: fileIdsArr,
-          },
+        include: {
+          BranchAmenitiesRelation: true,
+          UploadRelation: true,
         },
-      },
-      include: {
-        BranchAmenitiesRelation: true,
-        UploadRelation: true,
-      },
-    });
+      });
+
+      return {
+        message: "Branch created successfully!",
+      };
+    } catch (error) {
+      throw new Error(`Error : ${error}`);
+    }
   }
 
   async list(paginationArgs: PaginationArgs, searchInput: SearchInput) {
     const { search = "" } = searchInput;
     const { limit = 10, skip = 0 } = paginationArgs;
     const currentPage = Math.floor(skip / limit) + 1;
-    const recordCount = await this.prisma.branch.count();
+    const recordCount = await this.prisma.branch.count({});
     const filteredBranches = await this.prisma.branch.findMany({
       skip: skip,
       take: limit,
@@ -273,7 +281,7 @@ export class BranchService {
         delete branch.UploadRelation;
 
         branch["startingPrice"] = Number(
-          branch?.BranchRoomTypeRelation?.[0]?.offerPrice
+          branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
         );
       });
     }

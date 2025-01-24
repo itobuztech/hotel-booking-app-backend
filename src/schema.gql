@@ -69,6 +69,10 @@ type BranchAmenitiesUsed {
   updatedAt: String
 }
 
+type BranchCreationMessage {
+  message: String!
+}
+
 type BranchListResponse {
   branches: [BranchResponse!]!
   pagination: PaginationResponse!
@@ -245,7 +249,7 @@ type Mutation {
   bookingUpdate(UpdateBookingInput: UpdateBookingInput!): Message!
   branchRoomTypeDelete(branchRoomTypeId: UniqueIdentifierInput!): Message!
   create(createUserInput: CreateUserInput!): User!
-  createBranch(createBranchInput: CreateBranchInput!): BranchResponse!
+  createBranch(createBranchInput: CreateBranchInput!): BranchCreationMessage!
   deleteBranch(deleteBranchInput: DeleteBranchInput!): String!
   deleteFile(deleteUploadedFile: GetUploadedFile!): String!
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
