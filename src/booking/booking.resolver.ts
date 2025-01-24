@@ -15,6 +15,7 @@ import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 import { UpdateBookingInput } from "./dto/update-booking.input";
 import { PaginationArgs } from "src/types/inputtypes/pagination.input";
 import { FilterBookingInputs } from "./dto/filter-booking.input";
+import { SortBookingInputs } from "./dto/sort-booking.input";
 
 @Resolver()
 export class BookingResolver {
@@ -42,12 +43,15 @@ export class BookingResolver {
     @Args("searchText", { nullable: true }) searchText: string,
     @Args("paginationArgs", { nullable: true }) paginationArgs: PaginationArgs,
     @Args("filterArgs", { nullable: true })
-    filterArgs: FilterBookingInputs
+    filterArgs: FilterBookingInputs,
+    @Args("sortInputs", { nullable: true })
+    sortInputs: SortBookingInputs
   ) {
     return this.BookingService.bookingListService(
-      searchText,
       paginationArgs,
-      filterArgs
+      searchText,
+      filterArgs,
+      sortInputs
     );
   }
 

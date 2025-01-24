@@ -316,7 +316,7 @@ type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
   bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
-  bookingList(filterArgs: FilterBookingInputs, paginationArgs: PaginationArgs, searchText: String): PaginatedBooking!
+  bookingList(filterArgs: FilterBookingInputs, paginationArgs: PaginationArgs, searchText: String, sortInputs: SortBookingInputs): PaginatedBooking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
   branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
@@ -377,6 +377,15 @@ type RoomsWithInitialArr {
 
 input SearchInput {
   search: String!
+}
+
+input SortBookingInputs {
+  createdAt: SortOrder
+}
+
+enum SortOrder {
+  ASC
+  DESC
 }
 
 input TokenConfirmationInput {

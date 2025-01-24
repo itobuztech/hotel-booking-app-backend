@@ -4,5 +4,5 @@ import SortOrder from "../../enums/SortOrder.enum";
 @InputType()
 export class SortBookingInputs {
   @Field(() => SortOrder, { nullable: true })
-  dateRange: SortOrder;
+  createdAt?: SortOrder;
 }
