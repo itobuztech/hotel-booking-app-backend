@@ -528,9 +528,12 @@ export class BookingService {
     try {
       const bookingCount = await this.prisma.booking.count();
 
+      const { skip = 0, limit = 10 } = paginationArgs || {};
+
       let where = {};
 
-      const bookings = await this.prisma.booking.findMany({
+      let searchObject: any = {
+        where,
         include: {
           branch: true,
           room: true,
@@ -540,18 +543,37 @@ export class BookingService {
             },
           },
         },
+      };
+
+      if (paginationArgs) {
+        searchObject = {
+          skip,
+          limit,
+          ...searchObject,
+        };
+      }
+
+      const bookings: any = await this.prisma.booking.findMany({
+        ...searchObject,
+        orderBy: [
+          {
+            createdAt: "desc",
+          },
+        ],
       });
 
       if (bookings.length > 0) {
         bookings?.map((booking) => {
-          booking["branchName"] = booking.branch.name;
+          booking["branchName"] = booking?.branch?.name;
           booking["roomtypeName"] =
-            booking.BranchRoomTypeRelation.roomType.name;
-          booking["setPrice"] = Number(booking.BranchRoomTypeRelation.setPrice);
-          booking["offerPrice"] = Number(
-            booking.BranchRoomTypeRelation.offerPrice
+            booking?.BranchRoomTypeRelation?.roomType.name;
+          booking["setPrice"] = Number(
+            booking?.BranchRoomTypeRelation?.setPrice
           );
-          booking["roomNumber"] = booking.room.roomName;
+          booking["offerPrice"] = Number(
+            booking?.BranchRoomTypeRelation?.offerPrice
+          );
+          booking["roomNumber"] = booking?.room?.roomName;
         });
       }
 
