@@ -189,6 +189,15 @@ type File {
   id: ID!
 }
 
+input FilterBookingInputs {
+  bookingDate: DateTime
+  bookingStatus: BookingStatus
+  branch: ID
+  checkInDate: DateTime
+  checkOutDate: DateTime
+  roomType: ID
+}
+
 input FilterBranchRoomTypeInput {
   branchId: ID!
   roomTypeId: ID
@@ -303,7 +312,7 @@ type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
   bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
-  bookingList: PaginatedBooking!
+  bookingList(filterArgs: FilterBookingInputs, paginationArgs: PaginationArgs, searchText: String): PaginatedBooking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
   branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!

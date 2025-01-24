@@ -8,6 +8,8 @@ import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus, Prisma } from "@prisma/client";
 import { UpdateBookingInput } from "./dto/update-booking.input";
 import { log } from "console";
+import { PaginationArgs } from "src/types/inputtypes/pagination.input";
+import { FilterBookingInputs } from "./dto/filter-booking.input";
 
 @Injectable()
 export class BookingService {
@@ -518,14 +520,19 @@ export class BookingService {
     }
   }
 
-  async bookingListService() {
+  async bookingListService(
+    searchText,
+    paginationArgs: PaginationArgs,
+    filterArgs: FilterBookingInputs
+  ) {
     try {
       const bookingCount = await this.prisma.booking.count();
+
+      let where = {};
 
       const bookings = await this.prisma.booking.findMany({
         include: {
           branch: true,
-          upload: true,
           room: true,
           BranchRoomTypeRelation: {
             include: {
