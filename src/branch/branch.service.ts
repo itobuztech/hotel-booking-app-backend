@@ -21,12 +21,12 @@ export class BranchService {
         },
         include: {
           BranchAmenitiesRelation: {
-            include: {
+            select: {
               amenities: true,
             },
           },
           UploadRelation: {
-            include: {
+            select: {
               upload: true,
             },
           },
@@ -34,13 +34,43 @@ export class BranchService {
             select: {
               id: true,
               offerPrice: true,
+              roomType: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              Room: {
+                select: {
+                  id: true,
+                },
+              },
             },
             orderBy: {
               offerPrice: "asc",
             },
           },
+          Booking: {
+            where: {
+              checkInDate: {
+                lte: new Date(),
+              },
+              checkOutDate: {
+                gte: new Date(),
+              },
+            },
+            select: {
+              BranchRoomTypeRelation: {
+                select: {
+                  roomTypeId: true,
+                },
+              },
+            },
+          },
         },
       });
+
+      // console.log(JSON.stringify(branch, null, 2)); // Show every nested object
 
       if (!branch) {
         throw new NotFoundException("Branch not found!");
@@ -51,9 +81,11 @@ export class BranchService {
           }) || [];
 
         let amenities = await this.prisma.amenities.findMany({
-          include: {
+          select: {
+            id: true,
+            name: true,
             UploadRelation: {
-              include: {
+              select: {
                 upload: true,
               },
             },
@@ -92,7 +124,30 @@ export class BranchService {
         branch["startingPrice"] = Number(
           branch?.BranchRoomTypeRelation?.[0]?.offerPrice
         );
+
+        branch["status"] = branch.BranchRoomTypeRelation.map((relation) => {
+          let bookedRooms = 0;
+          if (branch?.Booking?.length === 0) {
+            bookedRooms = relation.Room.length;
+          } else {
+            branch?.Booking?.map((room) => {
+              if (
+                relation?.roomType?.id ===
+                room?.BranchRoomTypeRelation?.roomTypeId
+              ) {
+                bookedRooms++;
+              }
+            });
+          }
+
+          return {
+            ...relation.roomType,
+            totalRooms: relation?.Room?.length,
+            availabeRooms: relation?.Room?.length - bookedRooms,
+          };
+        });
       }
+      console.log(JSON.stringify(branch, null, 2));
 
       return branch;
     } catch (error) {

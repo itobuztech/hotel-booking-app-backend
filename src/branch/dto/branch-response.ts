@@ -16,6 +16,21 @@ export class BranchCreationMessage {
 }
 
 @ObjectType()
+export class AvailabilityStatus {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => String)
+  name: string;
+
+  @Field(() => Number)
+  totalRooms: number;
+
+  @Field(() => Number)
+  availabeRooms: number;
+}
+
+@ObjectType()
 export class BranchResponse {
   @Field(() => String)
   id: string;
@@ -49,6 +64,9 @@ export class BranchResponse {
 
   @Field(() => Number)
   startingPrice: number;
+
+  @Field(() => [AvailabilityStatus], { nullable: true })
+  status?: AvailabilityStatus[];
 }
 
 @ObjectType()
