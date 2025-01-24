@@ -32,6 +32,13 @@ type Aminity {
   updatedAt: String
 }
 
+type AvailabilityStatus {
+  availabeRooms: Float!
+  id: ID!
+  name: String!
+  totalRooms: Float!
+}
+
 type Booking {
   bookingStatus: String!
   branchName: String!
@@ -92,6 +99,7 @@ type BranchResponse {
   location: String!
   name: String!
   startingPrice: Float!
+  status: [AvailabilityStatus!]
 }
 
 type BranchRoomType {
