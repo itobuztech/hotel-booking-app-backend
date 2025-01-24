@@ -10,6 +10,12 @@ export class BranchAmenitiesUsed extends Aminity {
 }
 
 @ObjectType()
+export class BranchCreationMessage {
+  @Field(() => String)
+  message: string;
+}
+
+@ObjectType()
 export class BranchResponse {
   @Field(() => String)
   id: string;

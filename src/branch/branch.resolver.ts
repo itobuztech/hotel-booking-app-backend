@@ -2,7 +2,11 @@ import { Resolver, Query, Mutation, Args } from "@nestjs/graphql";
 import { BranchService } from "./branch.service";
 import { Branch } from "./entities/branch.entity";
 import { CreateBranchInput } from "./dto/create-branch.input";
-import { BranchListResponse, BranchResponse } from "./dto/branch-response";
+import {
+  BranchCreationMessage,
+  BranchListResponse,
+  BranchResponse,
+} from "./dto/branch-response";
 import { UseGuards } from "@nestjs/common";
 import { Roles } from "../auth/decorators/roles.decorator";
 import { UserRole } from "@prisma/client";
@@ -21,7 +25,7 @@ export class BranchResolver {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  @Mutation(() => BranchResponse)
+  @Mutation(() => BranchCreationMessage)
   createBranch(
     @Args("createBranchInput") createBranchInput: CreateBranchInput,
     @checkIfExists("createBranchInputData")
