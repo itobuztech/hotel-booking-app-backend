@@ -541,35 +541,6 @@ export class BookingService {
       }
 
       const searchQuery = [];
-
-      // if (searchText) {
-      //   searchQuery.push(
-      //     {
-      //       fullName: {
-      //         contains: searchText,
-      //         mode: "insensitive",
-      //       },
-      //     },
-      //     {
-      //       bookingStatus: {
-      //         contains: searchText,
-      //         mode: "insensitive",
-      //       },
-      //     },
-      //     {
-      //       branch: {
-      //         contains: searchText,
-      //         mode: "insensitive",
-      //       },
-      //     },
-      //     {
-      //       roomNumber: {
-      //         contains: searchText,
-      //         mode: "insensitive",
-      //       },
-      //     }
-      //   );
-      // }
       if (searchText) {
         searchQuery.push(
           {
@@ -598,48 +569,44 @@ export class BookingService {
       }
 
       let where = {};
-
       if (filterArgs) {
-        const { fromDate, toDate } = filterArgs;
-        if (filterArgs.categories && filterArgs.categories.length > 0) {
-          const categoryIds = filterArgs.categories.map((id) => id);
+        const {
+          branch,
+          bookingDate,
+          roomType,
+          checkInDate,
+          checkOutDate,
+          bookingStatus,
+        } = filterArgs;
+
+        if (branch) {
+          where = { ...where, branchId: branch };
+        }
+
+        if (bookingDate) {
+          where = { ...where, createdAt: new Date(bookingDate) };
+        }
+
+        if (roomType) {
           where = {
             ...where,
-            categories: {
-              some: {
-                id: {
-                  in: categoryIds,
-                },
-              },
-            },
+            BranchRoomTypeRelation: { roomTypeId: roomType },
           };
         }
 
-        if (fromDate && toDate) {
-          searchQuery.push({
-            createdAt: {
-              gte: new Date(fromDate),
-              lte: new Date(toDate),
-            },
-          });
+        if (checkInDate) {
+          where = { ...where, checkInDate: { gte: new Date(checkInDate) } };
         }
 
-        if (fromDate && !toDate) {
-          searchQuery.push({
-            createdAt: {
-              gte: new Date(fromDate),
-            },
-          });
+        if (checkOutDate) {
+          where = { ...where, checkOutDate: { lte: new Date(checkOutDate) } };
         }
 
-        if (!fromDate && toDate) {
-          searchQuery.push({
-            createdAt: {
-              lte: new Date(toDate),
-            },
-          });
+        if (bookingStatus) {
+          where = { ...where, bookingStatus };
         }
       }
+
       if (searchQuery.length > 0) {
         where = { ...where, OR: searchQuery };
       }
@@ -670,8 +637,6 @@ export class BookingService {
       });
 
       let { where, sortBy } = whereClause;
-      console.log("where=", where);
-      console.log("sortBy=", sortBy);
 
       const bookingCount = await this.prisma.booking.count({
         where,
