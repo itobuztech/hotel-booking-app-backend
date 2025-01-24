@@ -71,6 +71,7 @@ type BranchAmenitiesUsed {
 }
 
 type BranchCreationMessage {
+  id: ID!
   message: String!
 }
 
