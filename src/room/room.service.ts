@@ -483,7 +483,6 @@ export class RoomService {
             },
           },
         });
-      console.log("branchRoomTypeRelation=", branchRoomTypeRelation);
 
       if (!roomTypeId) {
         branchRoomTypeRelation?.map((branchRoomType) => {

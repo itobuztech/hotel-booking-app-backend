@@ -10,9 +10,12 @@ import { Permissions } from "../auth/decorators/permissions.decorator";
 import { PrivilegesList } from "../privileges/user-privileges";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingService } from "./booking.service";
-import { Booking } from "./entities/booking.entity";
+import { Booking, PaginatedBooking } from "./entities/booking.entity";
 import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
 import { UpdateBookingInput } from "./dto/update-booking.input";
+import { PaginationArgs } from "src/types/inputtypes/pagination.input";
+import { FilterBookingInputs } from "./dto/filter-booking.input";
+import { SortBookingInputs } from "./dto/sort-booking.input";
 
 @Resolver()
 export class BookingResolver {
@@ -29,6 +32,27 @@ export class BookingResolver {
     CreateBookingInput: CreateBookingInput
   ) {
     return this.BookingService.bookingService(ctx, CreateBookingInput);
+  }
+
+  // Booking Listing
+  @Query(() => PaginatedBooking)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
+  bookingList(
+    @Args("searchText", { nullable: true }) searchText: string,
+    @Args("paginationArgs", { nullable: true }) paginationArgs: PaginationArgs,
+    @Args("filterArgs", { nullable: true })
+    filterArgs: FilterBookingInputs,
+    @Args("sortInputs", { nullable: true })
+    sortInputs: SortBookingInputs
+  ) {
+    return this.BookingService.bookingListService(
+      paginationArgs,
+      searchText,
+      filterArgs,
+      sortInputs
+    );
   }
 
   // Booking details

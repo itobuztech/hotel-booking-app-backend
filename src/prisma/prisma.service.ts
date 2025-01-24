@@ -26,7 +26,7 @@ export class PrismaService
   // Soft delete middleware
   private softDeleteMiddleware(): Prisma.Middleware {
     return async (params, next) => {
-      const { model, action, args } = params;
+      const { model, action, args = {} } = params;
 
       // Skip models in the excluded list
       if (excludedModels.includes(model)) {
@@ -42,9 +42,9 @@ export class PrismaService
         args.where.deletedAt = null;
       };
 
-      // Handle `find` queries (findUnique, findFirst, findMany) with exclusion of models
+      // Handle `find` queries (findUnique, findFirst, findMany, count) with exclusion of models
       if (
-        ["findUnique", "findFirst", "findMany"].includes(action) &&
+        ["findUnique", "findFirst", "findMany", "count"].includes(action) &&
         !excludedMasterModels.includes(model)
       ) {
         handleFindQuery();

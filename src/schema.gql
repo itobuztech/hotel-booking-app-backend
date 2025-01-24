@@ -38,6 +38,7 @@ type Booking {
   checkInDate: DateTime!
   checkOutDate: DateTime!
   contactNumber: String!
+  createdAt: DateTime!
   description: String!
   fullName: String!
   id: ID!
@@ -192,6 +193,15 @@ type File {
   id: ID!
 }
 
+input FilterBookingInputs {
+  bookingDate: DateTime
+  bookingStatus: BookingStatus
+  branch: ID
+  checkInDate: DateTime
+  checkOutDate: DateTime
+  roomType: ID
+}
+
 input FilterBranchRoomTypeInput {
   branchId: ID!
   roomTypeId: ID
@@ -276,6 +286,11 @@ type PaginatedAminity {
 
 union PaginatedAminityOrRoomType = PaginatedAminity | PaginatedRoomType
 
+type PaginatedBooking {
+  bookings: [Booking!]!
+  total: Int!
+}
+
 type PaginatedFile {
   files: [File!]!
   total: Int!
@@ -301,6 +316,7 @@ type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
   bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
+  bookingList(filterArgs: FilterBookingInputs, paginationArgs: PaginationArgs, searchText: String, sortInputs: SortBookingInputs): PaginatedBooking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
   branchRoomTypeListing(filterArgs: FilterBranchRoomTypeInput!, search: SearchInput): RoomsOverAllOrRoomsWithInitial!
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
@@ -361,6 +377,15 @@ type RoomsWithInitialArr {
 
 input SearchInput {
   search: String!
+}
+
+input SortBookingInputs {
+  createdAt: SortOrder
+}
+
+enum SortOrder {
+  ASC
+  DESC
 }
 
 input TokenConfirmationInput {

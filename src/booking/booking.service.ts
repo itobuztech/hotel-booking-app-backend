@@ -8,6 +8,10 @@ import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus, Prisma } from "@prisma/client";
 import { UpdateBookingInput } from "./dto/update-booking.input";
 import { log } from "console";
+import { PaginationArgs } from "src/types/inputtypes/pagination.input";
+import { FilterBookingInputs } from "./dto/filter-booking.input";
+import { SortBookingInputs } from "./dto/sort-booking.input";
+import { GraphQLError } from "graphql";
 
 @Injectable()
 export class BookingService {
@@ -505,6 +509,175 @@ export class BookingService {
       }
 
       return { message: "Booking Updated!" };
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
+  }
+
+  // This is the function that returns the Custom Where Clause. STARTS.
+  async generatingWhereClause({ ...whereArgs }) {
+    const {
+      searchText = null,
+      sortInputs = null,
+      filterArgs = null,
+    } = whereArgs;
+
+    try {
+      let sortBy = [];
+      if (sortInputs) {
+        sortBy = Object.keys(sortInputs).map((key) => {
+          return {
+            [key]: sortInputs[key],
+          };
+        });
+      }
+
+      const searchQuery = [];
+      if (searchText) {
+        searchQuery.push(
+          {
+            fullName: {
+              contains: searchText,
+              mode: "insensitive",
+            },
+          },
+          {
+            branch: {
+              name: {
+                contains: searchText,
+                mode: "insensitive",
+              },
+            },
+          },
+          {
+            room: {
+              roomName: {
+                contains: searchText,
+                mode: "insensitive",
+              },
+            },
+          }
+        );
+      }
+
+      let where = {};
+      if (filterArgs) {
+        const {
+          branch,
+          bookingDate,
+          roomType,
+          checkInDate,
+          checkOutDate,
+          bookingStatus,
+        } = filterArgs;
+
+        if (branch) {
+          where = { ...where, branchId: branch };
+        }
+
+        if (bookingDate) {
+          where = { ...where, createdAt: new Date(bookingDate) };
+        }
+
+        if (roomType) {
+          where = {
+            ...where,
+            BranchRoomTypeRelation: { roomTypeId: roomType },
+          };
+        }
+
+        if (checkInDate) {
+          where = { ...where, checkInDate: { gte: new Date(checkInDate) } };
+        }
+
+        if (checkOutDate) {
+          where = { ...where, checkOutDate: { lte: new Date(checkOutDate) } };
+        }
+
+        if (bookingStatus) {
+          where = { ...where, bookingStatus };
+        }
+      }
+
+      if (searchQuery.length > 0) {
+        where = { ...where, OR: searchQuery };
+      }
+
+      return { where, sortBy };
+    } catch (error) {
+      console.log("Error:", error);
+      throw new GraphQLError(
+        "Internal Server Error. Please try after sometime!"
+      );
+    }
+  }
+  // This is the function that returns the Custom Where Clause. ENDS.
+
+  async bookingListService(
+    paginationArgs: PaginationArgs,
+    searchText,
+    filterArgs: FilterBookingInputs,
+    sortInputs: SortBookingInputs
+  ) {
+    try {
+      const { skip = 0, limit = 10 } = paginationArgs || {};
+
+      const whereClause = await this.generatingWhereClause({
+        searchText,
+        sortInputs,
+        filterArgs,
+      });
+
+      let { where, sortBy } = whereClause;
+
+      const bookingCount = await this.prisma.booking.count({
+        where,
+      });
+
+      let searchObject: any = {
+        skip,
+        take: limit,
+        where,
+        include: {
+          branch: true,
+          room: true,
+          BranchRoomTypeRelation: {
+            include: {
+              roomType: true,
+            },
+          },
+        },
+      };
+
+      const bookings: any = await this.prisma.booking.findMany({
+        ...searchObject,
+        orderBy: sortBy || { updatedAt: "desc" },
+      });
+
+      if (bookings.length > 0) {
+        bookings?.map((booking) => {
+          booking["branchName"] = booking?.branch?.name;
+          booking["roomtypeName"] =
+            booking?.BranchRoomTypeRelation?.roomType.name;
+          booking["setPrice"] = Number(
+            booking?.BranchRoomTypeRelation?.setPrice
+          );
+          booking["offerPrice"] = Number(
+            booking?.BranchRoomTypeRelation?.offerPrice
+          );
+          booking["roomNumber"] = booking?.room?.roomName;
+        });
+      }
+
+      return { bookings, total: bookingCount };
     } catch (error) {
       console.error("Error=", error);
 
