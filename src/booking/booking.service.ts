@@ -628,7 +628,9 @@ export class BookingService {
     sortInputs: SortBookingInputs
   ) {
     try {
-      const { skip = 0, limit = 10 } = paginationArgs || {};
+      let { skip = 0, limit = 10 } = paginationArgs || {};
+      skip = skip ?? 0;
+      limit = limit ?? 10;
 
       const whereClause = await this.generatingWhereClause({
         searchText,
