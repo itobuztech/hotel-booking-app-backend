@@ -70,8 +70,6 @@ export class BranchService {
         },
       });
 
-      // console.log(JSON.stringify(branch, null, 2)); // Show every nested object
-
       if (!branch) {
         throw new NotFoundException("Branch not found!");
       } else {
@@ -147,7 +145,6 @@ export class BranchService {
           };
         });
       }
-      console.log(JSON.stringify(branch, null, 2));
 
       return branch;
     } catch (error) {
