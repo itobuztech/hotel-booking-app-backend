@@ -171,7 +171,7 @@ export class BranchService {
     });
 
     try {
-      await this.prisma.branch.create({
+      const newBranch = await this.prisma.branch.create({
         data: {
           name,
           address,
@@ -198,6 +198,7 @@ export class BranchService {
       });
 
       return {
+        id: newBranch.id,
         message: "Branch created successfully!",
       };
     } catch (error) {
