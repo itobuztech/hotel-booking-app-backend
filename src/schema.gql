@@ -361,6 +361,7 @@ type RoomType {
 type RoomsOverAll {
   id: ID!
   offerPriceShown: Int!
+  roomTypeId: ID!
   rooms: [String!]!
   total: Int!
   type: String!

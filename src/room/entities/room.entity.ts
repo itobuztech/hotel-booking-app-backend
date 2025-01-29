@@ -56,6 +56,9 @@ export class RoomsOverAll {
   @Field(() => ID)
   id: BranchRoomTypeRelationDB["id"];
 
+  @Field(() => ID)
+  roomTypeId: String;
+
   @Field(() => String)
   type: String;
 
