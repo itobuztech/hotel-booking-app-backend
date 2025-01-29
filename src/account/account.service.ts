@@ -58,28 +58,48 @@ export class AccountService {
     ctx: any,
     updateProfileInput: UpdateProfileInput
   ): Promise<boolean> {
-    await this.usersService.updateUser(ctx.req.user.userId, {
-      username: updateProfileInput?.username,
-      contactNumber: updateProfileInput?.contactNumber,
-    });
-
-    if (updateProfileInput?.image) {
-      const imagePresence = await this.prisma.upload.findUnique({
-        where: { id: updateProfileInput.image },
+    try {
+      await this.usersService.updateUser(ctx.req.user.userId, {
+        username: updateProfileInput?.username,
+        contactNumber: updateProfileInput?.contactNumber,
       });
 
-      if (!imagePresence) {
-        throw new NotFoundException(`Some image does not exist.`);
+      if (updateProfileInput?.image) {
+        const imagePresence = await this.prisma.upload.findUnique({
+          where: { id: updateProfileInput.image },
+        });
+
+        if (!imagePresence) {
+          throw new NotFoundException(`Image does not exist.`);
+        }
+
+        const previouslyUpload = await this.prisma.uploadRelation.findFirst({
+          where: {
+            userId: ctx.req.user.userId,
+          },
+        });
+
+        if (previouslyUpload) {
+          await this.prisma.uploadRelation.update({
+            where: {
+              id: previouslyUpload.id,
+            },
+            data: {
+              userId: ctx.req.user.userId,
+              uploadId: updateProfileInput.image,
+            },
+          });
+        } else {
+          await this.prisma.uploadRelation.create({
+            data: {
+              userId: ctx.req.user.userId,
+              uploadId: updateProfileInput.image,
+            },
+          });
+        }
       }
 
-      await this.prisma.uploadRelation.create({
-        data: {
-          userId: ctx.req.user.userId,
-          uploadId: updateProfileInput.image,
-        },
-      });
-    }
-
-    return true;
+      return true;
+    } catch (error) {}
   }
 }
