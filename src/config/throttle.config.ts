@@ -1,6 +1,13 @@
-export default () => ({
-    throttle: {
-        TTL: 10000,
-        LIMIT: 2
-    },
+interface ThrottleConfig {
+  throttle: {
+    TTL: number;
+    LIMIT: number;
+  };
+}
+
+export default (): ThrottleConfig => ({
+  throttle: {
+    TTL: 10000,
+    LIMIT: 15,
+  },
 });
