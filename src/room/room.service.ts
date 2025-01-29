@@ -470,7 +470,7 @@ export class RoomService {
             roomTypeId: roomTypeId || undefined,
           },
           include: {
-            roomType: { select: { name: true, roomInitial: true } },
+            roomType: { select: { id: true, name: true, roomInitial: true } },
             Room: {
               select: { id: true, roomName: true },
               where: {
@@ -489,6 +489,7 @@ export class RoomService {
           const offerPriceVal = Number(branchRoomType.offerPrice);
 
           branchRoomType["offerPriceShown"] = offerPriceVal;
+          branchRoomType["roomTypeId"] = branchRoomType.roomType.id;
           branchRoomType["type"] = branchRoomType.roomType.name;
           branchRoomType["total"] = branchRoomType.Room.length;
           branchRoomType["rooms"] = branchRoomType.Room.map(
