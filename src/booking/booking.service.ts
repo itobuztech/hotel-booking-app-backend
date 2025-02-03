@@ -32,6 +32,8 @@ export class BookingService {
         checkInDate,
         checkOutDate,
         description,
+        email = "",
+        region = "",
       } = CreateBookingInput;
       const bookedById = ctx.req.user.userId;
       const loggedInUserRole = ctx.req.user.role.userType;
@@ -161,6 +163,8 @@ export class BookingService {
           description,
           source: loggedInUserRole === "CUSTOMER" ? "online" : "walk-in",
           bookingStatus: BookingStatus.BOOKED,
+          email,
+          region,
           upload: {
             connect: {
               id: image || null,

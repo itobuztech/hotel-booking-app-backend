@@ -415,12 +415,10 @@ input UpdateBookingInput {
   checkOutDate: DateTime!
   contactNumber: String!
   description: String!
-  email: String
   finalPrice: Int!
   fullName: String!
   id: ID!
   image: ID
-  region: String
   roomIds: [ID!]!
   roomType: ID!
   source: String!
