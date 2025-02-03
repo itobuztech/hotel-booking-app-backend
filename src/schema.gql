@@ -51,7 +51,7 @@ type Booking {
   id: ID!
   image: File
   offerPrice: Int!
-  roomNumber: String!
+  roomNumbers: [roomNumbers!]!
   roomtypeName: String!
   setPrice: Int!
   source: String!
@@ -486,4 +486,9 @@ enum UserRole {
 
 type ValidateForgotPasswordResponse {
   message: String!
+}
+
+type roomNumbers {
+  id: ID!
+  roomNumber: String!
 }
