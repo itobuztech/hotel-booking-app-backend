@@ -4,6 +4,15 @@ import { File } from "../../upload/entities/files.entity";
 import { TotalCount } from "../../types/inputtypes/toalCount.entity";
 
 @ObjectType()
+export class roomNumbers {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => String)
+  roomNumber: string;
+}
+
+@ObjectType()
 export class Booking {
   @Field(() => ID)
   id: BookingDB["id"];
@@ -17,8 +26,8 @@ export class Booking {
   @Field(() => File, { nullable: true })
   image?: File;
 
-  @Field(() => String)
-  roomNumber: string;
+  @Field(() => [roomNumbers])
+  roomNumbers: roomNumbers[];
 
   @Field(() => String)
   source: string;

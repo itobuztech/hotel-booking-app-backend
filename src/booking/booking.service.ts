@@ -640,14 +640,6 @@ export class BookingService {
                 mode: "insensitive",
               },
             },
-          },
-          {
-            room: {
-              roomName: {
-                contains: searchText,
-                mode: "insensitive",
-              },
-            },
           }
         );
       }
@@ -734,11 +726,13 @@ export class BookingService {
         where,
         include: {
           branch: true,
-          room: true,
           BranchRoomTypeRelation: {
             include: {
               roomType: true,
             },
+          },
+          BookingRoomRelation: {
+            select: { roomId: true, room: true },
           },
         },
       };
@@ -759,7 +753,12 @@ export class BookingService {
           booking["offerPrice"] = Number(
             booking?.BranchRoomTypeRelation?.offerPrice
           );
-          booking["roomNumber"] = booking?.room?.roomName;
+          booking["roomNumbers"] = booking?.BookingRoomRelation.map((room) => {
+            return {
+              id: room?.roomId,
+              roomNumber: room?.room?.roomName,
+            };
+          });
         });
       }
 
