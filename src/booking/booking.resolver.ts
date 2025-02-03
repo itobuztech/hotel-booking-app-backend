@@ -31,15 +31,7 @@ export class BookingResolver {
     @Args("CreateBookingInput")
     CreateBookingInput: CreateBookingInput
   ) {
-    const userType = ctx?.req?.user?.role?.userType;
-
-    if (userType === "CUSTOMER") {
-      delete CreateBookingInput?.roomId;
-      return this.BookingService.bookingService(ctx, CreateBookingInput);
-    } else {
-      delete CreateBookingInput?.roomIdArr;
-      return this.BookingService.bookingService(ctx, CreateBookingInput);
-    }
+    return this.BookingService.bookingService(ctx, CreateBookingInput);
   }
 
   // Booking Listing
@@ -72,7 +64,7 @@ export class BookingResolver {
     @Args("bookingId")
     bookingId: UniqueIdentifierInput
   ) {
-    return this.BookingService.bookingDetailsService(bookingId);
+    // return this.BookingService.bookingDetailsService(bookingId);
   }
 
   // Booking update

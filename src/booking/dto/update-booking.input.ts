@@ -1,9 +1,12 @@
-import { InputType, Field, ID, Int } from "@nestjs/graphql";
+import { InputType, Field, ID, Int, OmitType } from "@nestjs/graphql";
 import { CreateBookingInput } from "./create-booking.input";
 import BookingStatus from "../../enums/bookingStatus.enum";
 
 @InputType()
-export class UpdateBookingInput extends CreateBookingInput {
+export class UpdateBookingInput extends OmitType(CreateBookingInput, [
+  "email",
+  "region",
+] as const) {
   @Field(() => ID)
   id: string;
 
