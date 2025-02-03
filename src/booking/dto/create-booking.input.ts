@@ -12,6 +12,9 @@ export class CreateBookingInput {
   contactNumber: string;
 
   @Field(() => String, { nullable: true })
+  email?: string;
+
+  @Field(() => String, { nullable: true })
   region?: string;
 
   @Field(() => ID, { nullable: true })
@@ -23,11 +26,8 @@ export class CreateBookingInput {
   @Field(() => ID)
   roomType: string;
 
-  @Field(() => ID, { nullable: true })
-  roomId?: string;
-
-  @Field(() => [ID], { nullable: true })
-  roomIdArr?: string[];
+  @Field(() => [ID])
+  roomIds: string[];
 
   @Field(() => Int)
   finalPrice: number;

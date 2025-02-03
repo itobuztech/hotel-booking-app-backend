@@ -104,14 +104,14 @@ model Branch {
 }
 
 model Room {
-  id               String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roomName         String                 @db.VarChar(255)
-  branchRoomType   BranchRoomTypeRelation @relation(fields: [branchRoomTypeId], references: [id], onDelete: Cascade)
-  branchRoomTypeId String                 @map("branch_room_type_id") @db.Uuid
-  createdAt        DateTime               @default(now()) @map("created_at")
-  updatedAt        DateTime?              @default(now()) @updatedAt @map("updated_at")
-  deletedAt        DateTime?              @map("deleted_at")
-  Booking          Booking[]
+  id                  String                 @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomName            String                 @db.VarChar(255)
+  branchRoomType      BranchRoomTypeRelation @relation(fields: [branchRoomTypeId], references: [id], onDelete: Cascade)
+  branchRoomTypeId    String                 @map("branch_room_type_id") @db.Uuid
+  createdAt           DateTime               @default(now()) @map("created_at")
+  updatedAt           DateTime?              @default(now()) @updatedAt @map("updated_at")
+  deletedAt           DateTime?              @map("deleted_at")
+  BookingRoomRelation BookingRoomRelation[]
 
   @@map("room")
 }
@@ -122,6 +122,7 @@ model Booking {
   bookedById               String?                @map("booked_by_id") @db.Uuid
   fullName                 String                 @map("full_name")
   contactNumber            String                 @map("contact_number")
+  email                    String?
   source                   String                 @db.VarChar(255)
   finalPrice               Decimal                @map("final_price") @db.Decimal(10, 2)
   checkInDate              DateTime               @map("check_in_date")
@@ -134,13 +135,12 @@ model Booking {
   branchRoomTypeRelationId String                 @map("branch_room_type_relation_id") @db.Uuid
   branch                   Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
   branchId                 String                 @map("branch_id") @db.Uuid
-  room                     Room                   @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  roomId                   String                 @map("room_id") @db.Uuid
   createdAt                DateTime               @default(now()) @map("created_at")
   updatedAt                DateTime?              @default(now()) @updatedAt @map("updated_at")
   deletedAt                DateTime?              @map("deleted_at")
-  BookingStatusHistory     BookingStatusHistory[]
   Notification             Notification[]
+  BookingRoomRelation      BookingRoomRelation[]
+  BookingStatusHistory     BookingStatusHistory[]
 
   @@map("booking")
 }
@@ -157,9 +157,9 @@ model Upload {
 
 model BookingStatusHistory {
   id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  bookingStatus BookingStatus
   booking       Booking       @relation(fields: [bookingId], references: [id])
   bookingId     String        @map("booking_id") @db.Uuid
+  bookingStatus BookingStatus
   bookedBy      User?         @relation("booking_history_booked_by", fields: [bookedById], references: [id])
   bookedById    String?       @map("booked_by_id") @db.Uuid
   createdAt     DateTime      @default(now()) @map("created_at")
@@ -243,4 +243,16 @@ model Notification {
   updatedAt      DateTime? @default(now()) @updatedAt @map("updated_at")
 
   @@map("notification")
+}
+
+model BookingRoomRelation {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  booking   Booking   @relation(fields: [bookingId], references: [id])
+  bookingId String    @map("booking_id") @db.Uuid
+  room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId    String    @map("room_id") @db.Uuid
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime? @default(now()) @updatedAt @map("updated_at")
+
+  @@map("bookingRoomRelation")
 }

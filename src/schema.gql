@@ -139,12 +139,12 @@ input CreateBookingInput {
   checkOutDate: DateTime!
   contactNumber: String!
   description: String!
+  email: String
   finalPrice: Int!
   fullName: String!
   image: ID
   region: String
-  roomId: ID
-  roomIdArr: [ID!]
+  roomIds: [ID!]!
   roomType: ID!
 }
 
@@ -415,13 +415,13 @@ input UpdateBookingInput {
   checkOutDate: DateTime!
   contactNumber: String!
   description: String!
+  email: String
   finalPrice: Int!
   fullName: String!
   id: ID!
   image: ID
   region: String
-  roomId: ID
-  roomIdArr: [ID!]
+  roomIds: [ID!]!
   roomType: ID!
   source: String!
 }
