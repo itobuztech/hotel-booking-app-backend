@@ -314,8 +314,6 @@ export class BookingService {
         },
       });
 
-      console.log("Booking=", Booking);
-
       if (!Booking) {
         throw new NotFoundException("No booking found!");
       }
@@ -524,17 +522,15 @@ export class BookingService {
         throw new BadRequestException("There is no data to be updated!");
       }
 
-      console.log("updateDataObj=", updateDataObj);
-
       // Updating Booking
-      // if (Object.keys(updateDataObj).length !== 0) {
-      //   await this.prisma.booking.update({
-      //     where: {
-      //       id,
-      //     },
-      //     data: updateDataObj,
-      //   });
-      // }
+      if (Object.keys(updateDataObj).length !== 0) {
+        await this.prisma.booking.update({
+          where: {
+            id,
+          },
+          data: updateDataObj,
+        });
+      }
 
       if (updatedRooms.length !== 0) {
         const roomsToLink = await this.getNotIdenticalElements(
