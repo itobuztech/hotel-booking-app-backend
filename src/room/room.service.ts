@@ -12,7 +12,6 @@ import { UpdateRoomNumberInput } from "./dto/update-room-number.input";
 import { FilterBranchRoomTypeInput } from "./dto/filter-branch-room-type.input";
 import { SearchInput } from "../types/inputtypes/search-input";
 import { UniqueIdentifierInput } from "src/types/inputtypes/unique-id.input";
-import { log } from "console";
 
 @Injectable()
 export class RoomService {

@@ -51,6 +51,7 @@ model User {
   BookedBy               Booking[]              @relation("booking_booked_by")
   bookingHistoryBookedBy BookingStatusHistory[] @relation("booking_history_booked_by")
   UploadRelation         UploadRelation[]
+  Notification           Notification[]
 
   @@map("users")
 }
@@ -139,6 +140,7 @@ model Booking {
   updatedAt                DateTime?              @default(now()) @updatedAt @map("updated_at")
   deletedAt                DateTime?              @map("deleted_at")
   BookingStatusHistory     BookingStatusHistory[]
+  Notification             Notification[]
 
   @@map("booking")
 }
@@ -226,4 +228,19 @@ model BranchAmenitiesRelation {
   updatedAt   DateTime?  @default(now()) @updatedAt @map("updated_at")
 
   @@map("branchAmenitiesRelation")
+}
+
+model Notification {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  User           User      @relation(fields: [notifiedUserId], references: [id])
+  notifiedUserId String    @map("notified_user_id") @db.Uuid
+  booking        Booking   @relation(fields: [bookingId], references: [id])
+  bookingId      String    @map("booking_id") @db.Uuid
+  description    String?
+  customerNumber String?
+  customerEmail  String?
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime? @default(now()) @updatedAt @map("updated_at")
+
+  @@map("notification")
 }

@@ -1,4 +1,6 @@
 import { InputType, Field, ID, Int } from "@nestjs/graphql";
+import { IsOneOfTwoFields } from "../../helpers/custom-decorators/is-one-of-two-fields";
+import { IsOptional } from "class-validator";
 
 @InputType()
 export class CreateBookingInput {
@@ -9,6 +11,9 @@ export class CreateBookingInput {
   @Field(() => String)
   contactNumber: string;
 
+  @Field(() => String, { nullable: true })
+  region?: string;
+
   @Field(() => ID, { nullable: true })
   image?: string;
 
@@ -18,8 +23,11 @@ export class CreateBookingInput {
   @Field(() => ID)
   roomType: string;
 
-  @Field(() => ID)
-  roomId: string;
+  @Field(() => ID, { nullable: true })
+  roomId?: string;
+
+  @Field(() => [ID], { nullable: true })
+  roomIdArr?: string[];
 
   @Field(() => Int)
   finalPrice: number;

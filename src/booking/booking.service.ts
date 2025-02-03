@@ -31,7 +31,6 @@ export class BookingService {
         checkOutDate,
         description,
       } = CreateBookingInput;
-
       const bookedById = ctx.req.user.userId;
 
       // Validate if branch exists

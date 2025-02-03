@@ -31,7 +31,15 @@ export class BookingResolver {
     @Args("CreateBookingInput")
     CreateBookingInput: CreateBookingInput
   ) {
-    return this.BookingService.bookingService(ctx, CreateBookingInput);
+    const userType = ctx?.req?.user?.role?.userType;
+
+    if (userType === "CUSTOMER") {
+      delete CreateBookingInput?.roomId;
+      return this.BookingService.bookingService(ctx, CreateBookingInput);
+    } else {
+      delete CreateBookingInput?.roomIdArr;
+      return this.BookingService.bookingService(ctx, CreateBookingInput);
+    }
   }
 
   // Booking Listing
