@@ -23,25 +23,11 @@ export class CreateBookingInput {
   @Field(() => ID)
   roomType: string;
 
-  // @Field(() => ID)
-  // roomId: string;
+  @Field(() => ID, { nullable: true })
+  roomId?: string;
 
-  // @Field(() => [ID])
-  // roomIdArr: string[];
-
-  @Field(() => ID)
-  @IsOptional()
-  @IsOneOfTwoFields("roomId", {
-    message: "Either roomId or roomIdArr must be provided, but not both",
-  })
-  roomId: string;
-
-  @Field(() => [ID])
-  @IsOptional()
-  @IsOneOfTwoFields("roomIdArr", {
-    message: "Either roomId or roomIdArr must be provided, but not both.",
-  })
-  roomIdArr: string[];
+  @Field(() => [ID], { nullable: true })
+  roomIdArr?: string[];
 
   @Field(() => Int)
   finalPrice: number;

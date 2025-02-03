@@ -143,8 +143,8 @@ input CreateBookingInput {
   fullName: String!
   image: ID
   region: String
-  roomId: ID!
-  roomIdArr: [ID!]!
+  roomId: ID
+  roomIdArr: [ID!]
   roomType: ID!
 }
 
@@ -420,8 +420,8 @@ input UpdateBookingInput {
   id: ID!
   image: ID
   region: String
-  roomId: ID!
-  roomIdArr: [ID!]!
+  roomId: ID
+  roomIdArr: [ID!]
   roomType: ID!
   source: String!
 }
