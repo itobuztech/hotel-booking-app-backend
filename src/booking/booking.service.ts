@@ -64,8 +64,6 @@ export class BookingService {
 
       // Validate each room
       for (const roomId of roomIds) {
-        console.log("roomId=", roomId);
-
         const roomPresence = await this.prisma.room.findUnique({
           where: { id: roomId },
         });
@@ -161,7 +159,7 @@ export class BookingService {
           checkInDate,
           checkOutDate,
           description,
-          source: "walk-in",
+          source: loggedInUserRole === "CUSTOMER" ? "online" : "walk-in",
           bookingStatus: BookingStatus.BOOKED,
           upload: {
             connect: {
@@ -280,265 +278,332 @@ export class BookingService {
   //   }
   // }
 
-  // async bookingUpdateService(ctx, UpdateBookingInput: UpdateBookingInput) {
-  //   try {
-  //     const {
-  //       id,
-  //       bookingStatus,
-  //       source,
-  //       fullName,
-  //       contactNumber,
-  //       image,
-  //       branch,
-  //       roomType,
-  //       roomId,
-  //       finalPrice,
-  //       checkInDate,
-  //       checkOutDate,
-  //       description,
-  //     } = UpdateBookingInput;
+  private async getNotIdenticalElements<T>(
+    array1: T[],
+    array2: T[]
+  ): Promise<T[]> {
+    return array1.filter((item) => !array2.includes(item));
+  }
 
-  //     const bookedById = ctx.req.user.userId;
+  async bookingUpdateService(ctx, UpdateBookingInput: UpdateBookingInput) {
+    try {
+      const {
+        id,
+        bookingStatus,
+        source,
+        fullName,
+        contactNumber,
+        image,
+        branch,
+        roomType,
+        roomIds,
+        finalPrice,
+        checkInDate,
+        checkOutDate,
+        description,
+      } = UpdateBookingInput;
 
-  //     const Booking = await this.prisma.booking.findUnique({
-  //       where: {
-  //         id,
-  //       },
-  //     });
+      const bookedById = ctx.req.user.userId;
 
-  //     if (!Booking) {
-  //       throw new NotFoundException("No booking found!");
-  //     }
+      const Booking = await this.prisma.booking.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          BookingRoomRelation: true,
+        },
+      });
 
-  //     // Validate if branch exists
-  //     const branchPresence = await this.prisma.branch.count({
-  //       where: { id: branch },
-  //     });
-  //     if (!branchPresence) {
-  //       throw new NotFoundException(`Branch does not exist.`);
-  //     }
+      console.log("Booking=", Booking);
 
-  //     // Validate if room type exists
-  //     const roomTypePresence = await this.prisma.roomType.findUnique({
-  //       where: { id: roomType },
-  //     });
-  //     if (!roomTypePresence) {
-  //       throw new NotFoundException(`Room type does not exist.`);
-  //     }
-  //     const roomTypeLinkedToBranch =
-  //       await this.prisma.branchRoomTypeRelation.findFirst({
-  //         where: {
-  //           branchId: branch,
-  //           roomTypeId: roomType,
-  //         },
-  //       });
-  //     if (!roomTypeLinkedToBranch) {
-  //       throw new BadRequestException(`Room type is not linked with branch.`);
-  //     }
+      if (!Booking) {
+        throw new NotFoundException("No booking found!");
+      }
 
-  //     // Validate if room exists
-  //     const roomPresence = await this.prisma.room.findUnique({
-  //       where: { id: roomId },
-  //     });
-  //     if (!roomPresence) {
-  //       throw new NotFoundException(`Room number does not exist.`);
-  //     }
+      const BookedRoomIds = Booking.BookingRoomRelation.map((relation) => {
+        return relation.roomId;
+      });
 
-  //     const roomLinkedToBranchRoomtype = await this.prisma.room.findUnique({
-  //       where: {
-  //         id: roomId,
-  //         branchRoomType: {
-  //           id: roomTypeLinkedToBranch.id,
-  //         },
-  //       },
-  //     });
-  //     if (!roomLinkedToBranchRoomtype) {
-  //       throw new BadRequestException(
-  //         `Room is not linked with branch and room type.`
-  //       );
-  //     }
+      // Validate if branch exists
+      const branchPresence = await this.prisma.branch.count({
+        where: { id: branch },
+      });
+      if (!branchPresence) {
+        throw new NotFoundException(`Branch does not exist.`);
+      }
 
-  //     // Validate if image exists
-  //     if (image) {
-  //       const imagePresence = await this.prisma.upload.findUnique({
-  //         where: { id: image },
-  //       });
+      // Validate if room type exists
+      const roomTypePresence = await this.prisma.roomType.findUnique({
+        where: { id: roomType },
+      });
+      if (!roomTypePresence) {
+        throw new NotFoundException(`Room type does not exist.`);
+      }
+      const roomTypeLinkedToBranch =
+        await this.prisma.branchRoomTypeRelation.findFirst({
+          where: {
+            branchId: branch,
+            roomTypeId: roomType,
+          },
+        });
+      if (!roomTypeLinkedToBranch) {
+        throw new BadRequestException(`Room type is not linked with branch.`);
+      }
 
-  //       if (!imagePresence) {
-  //         throw new NotFoundException(`Image does not exist.`);
-  //       }
-  //     }
+      let updatedRooms = [];
+      // Validate if room exists
+      for (const roomId of roomIds) {
+        const roomPresence = await this.prisma.room.findUnique({
+          where: { id: roomId },
+        });
+        if (!roomPresence) {
+          throw new NotFoundException(`Some/One Room number does not exist.`);
+        }
 
-  //     // Validate if check-in date is today or in the future
-  //     const today = new Date();
-  //     today.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate comparison
-  //     if (new Date(checkInDate) < today) {
-  //       throw new BadRequestException(
-  //         `Check-in date must be today or in the future.`
-  //       );
-  //     }
+        const roomLinkedToBranchRoomtype = await this.prisma.room.findFirst({
+          where: {
+            id: roomId,
+            branchRoomType: {
+              id: roomTypeLinkedToBranch.id,
+            },
+          },
+        });
+        if (!roomLinkedToBranchRoomtype) {
+          throw new BadRequestException(
+            `Room ${roomPresence.roomName} is not linked with branch and room type.`
+          );
+        }
 
-  //     // Validate if checkout date more than check in date.
-  //     if (checkInDate > checkOutDate) {
-  //       throw new BadRequestException(
-  //         `Checkout date must be more than checkin date.`
-  //       );
-  //     }
+        // Validate if room is available for the selected dates
+        const conflictingBookings =
+          await this.prisma.bookingRoomRelation.findFirst({
+            where: {
+              roomId, // If roomId is an array, check multiple rooms
+              booking: {
+                bookingStatus: {
+                  notIn: [BookingStatus.CHECKDOUT, BookingStatus.CANCELLED],
+                },
+                AND: [
+                  {
+                    checkInDate: {
+                      lte: checkOutDate,
+                    },
+                  },
+                  {
+                    checkOutDate: {
+                      gte: checkInDate,
+                    },
+                  },
+                  {
+                    id: {
+                      not: id,
+                    },
+                  },
+                ],
+              },
+            },
+            include: {
+              booking: true, // Ensures we fetch related booking details
+            },
+          });
 
-  //     // Validate phone number
-  //     const phoneRegex = /^[0-9]{10}$/;
-  //     if (!phoneRegex.test(contactNumber)) {
-  //       throw new BadRequestException(`Invalid phone number.`);
-  //     }
+        if (conflictingBookings) {
+          throw new BadRequestException(
+            `Room ${roomPresence.roomName} is already booked for the selected dates.`
+          );
+        }
 
-  //     // Updating Booking
-  //     let updateDataObj: any = {};
+        if (!BookedRoomIds.includes(roomId)) {
+          updatedRooms.push(roomId);
+        }
+      }
 
-  //     // Validate if check-in and check-out dates do not collide with other bookings for the same room
-  //     const conflictingBookings = await this.prisma.booking.findMany({
-  //       where: {
-  //         roomId: roomId,
-  //         bookingStatus: {
-  //           notIn: [BookingStatus.CHECKDOUT, BookingStatus.CANCELLED],
-  //         },
-  //         AND: [
-  //           {
-  //             checkInDate: {
-  //               lte: checkOutDate,
-  //             },
-  //           },
-  //           {
-  //             checkOutDate: {
-  //               gte: checkInDate,
-  //             },
-  //           },
-  //           {
-  //             id: {
-  //               not: id,
-  //             },
-  //           },
-  //         ],
-  //       },
-  //     });
+      // Validate if image exists
+      if (image) {
+        const imagePresence = await this.prisma.upload.findUnique({
+          where: { id: image },
+        });
 
-  //     if (conflictingBookings.length > 0) {
-  //       throw new BadRequestException(
-  //         `The room is already booked for the selected dates.`
-  //       );
-  //     }
+        if (!imagePresence) {
+          throw new NotFoundException(`Image does not exist.`);
+        }
+      }
 
-  //     if (Booking.fullName !== fullName) {
-  //       updateDataObj = { ...updateDataObj, fullName };
-  //     }
-  //     if (Booking.contactNumber !== contactNumber) {
-  //       updateDataObj = { ...updateDataObj, contactNumber };
-  //     }
-  //     if (!Booking.finalPrice.equals(new Prisma.Decimal(finalPrice))) {
-  //       updateDataObj = { ...updateDataObj, finalPrice };
-  //     }
-  //     if (
-  //       new Date(Booking.checkInDate).getTime() !==
-  //       new Date(checkInDate).getTime()
-  //     ) {
-  //       updateDataObj = { ...updateDataObj, checkInDate };
-  //     }
-  //     if (
-  //       new Date(Booking.checkOutDate).getTime() !==
-  //       new Date(checkOutDate).getTime()
-  //     ) {
-  //       updateDataObj = { ...updateDataObj, checkOutDate };
-  //     }
+      // Validate if check-in date is today or in the future
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set time to 00:00:00 for accurate comparison
+      if (new Date(checkInDate) < today) {
+        throw new BadRequestException(
+          `Check-in date must be today or in the future.`
+        );
+      }
 
-  //     if (Booking.description !== description) {
-  //       updateDataObj = { ...updateDataObj, description };
-  //     }
-  //     if (Booking.source !== source) {
-  //       updateDataObj = { ...updateDataObj, source };
-  //     }
-  //     if (Booking.bookingStatus !== bookingStatus) {
-  //       updateDataObj = { ...updateDataObj, bookingStatus };
-  //     }
-  //     if (Booking.branchId !== branch) {
-  //       updateDataObj = {
-  //         ...updateDataObj,
-  //         branch: {
-  //           connect: {
-  //             id: branch,
-  //           },
-  //         },
-  //       };
-  //     }
-  //     if (Booking.branchRoomTypeRelationId !== roomTypeLinkedToBranch.id) {
-  //       updateDataObj = {
-  //         ...updateDataObj,
-  //         BranchRoomTypeRelation: {
-  //           connect: {
-  //             id: roomTypeLinkedToBranch.id,
-  //           },
-  //         },
-  //       };
-  //     }
-  //     if (Booking.roomId !== roomId) {
-  //       updateDataObj = {
-  //         ...updateDataObj,
-  //         room: {
-  //           connect: {
-  //             id: roomId,
-  //           },
-  //         },
-  //       };
-  //     }
-  //     if (Booking.uploadId !== image) {
-  //       updateDataObj = {
-  //         ...updateDataObj,
-  //         upload: {
-  //           connect: {
-  //             id: image || null,
-  //           },
-  //         },
-  //       };
-  //     }
+      // Validate if checkout date more than check in date.
+      if (checkInDate > checkOutDate) {
+        throw new BadRequestException(
+          `Checkout date must be more than checkin date.`
+        );
+      }
 
-  //     if (Object.keys(updateDataObj).length === 0) {
-  //       throw new BadRequestException("There is no data to be updated!");
-  //     }
+      // Validate phone number
+      const phoneRegex = /^[0-9]{10}$/;
+      if (!phoneRegex.test(contactNumber)) {
+        throw new BadRequestException(`Invalid phone number.`);
+      }
 
-  //     // Updating Booking
-  //     await this.prisma.booking.update({
-  //       where: {
-  //         id,
-  //       },
-  //       data: updateDataObj,
-  //     });
+      // Updating Booking
+      let updateDataObj: any = {};
 
-  //     if (Booking.bookingStatus !== bookingStatus) {
-  //       await this.prisma.bookingStatusHistory.create({
-  //         data: {
-  //           booking: { connect: { id } },
-  //           bookedBy: {
-  //             connect: {
-  //               id: bookedById,
-  //             },
-  //           },
-  //           bookingStatus:
-  //             BookingStatus[bookingStatus as keyof typeof BookingStatus],
-  //         },
-  //       });
-  //     }
+      if (Booking.fullName !== fullName) {
+        updateDataObj = { ...updateDataObj, fullName };
+      }
+      if (Booking.contactNumber !== contactNumber) {
+        updateDataObj = { ...updateDataObj, contactNumber };
+      }
+      if (!Booking.finalPrice.equals(new Prisma.Decimal(finalPrice))) {
+        updateDataObj = { ...updateDataObj, finalPrice };
+      }
+      if (
+        new Date(Booking.checkInDate).getTime() !==
+        new Date(checkInDate).getTime()
+      ) {
+        updateDataObj = { ...updateDataObj, checkInDate };
+      }
+      if (
+        new Date(Booking.checkOutDate).getTime() !==
+        new Date(checkOutDate).getTime()
+      ) {
+        updateDataObj = { ...updateDataObj, checkOutDate };
+      }
 
-  //     return { message: "Booking Updated!" };
-  //   } catch (error) {
-  //     console.error("Error=", error);
+      if (Booking.description !== description) {
+        updateDataObj = { ...updateDataObj, description };
+      }
+      if (Booking.source !== source) {
+        updateDataObj = { ...updateDataObj, source };
+      }
+      if (Booking.bookingStatus !== bookingStatus) {
+        updateDataObj = { ...updateDataObj, bookingStatus };
+      }
+      if (Booking.branchId !== branch) {
+        updateDataObj = {
+          ...updateDataObj,
+          branch: {
+            connect: {
+              id: branch,
+            },
+          },
+        };
+      }
+      if (Booking.branchRoomTypeRelationId !== roomTypeLinkedToBranch.id) {
+        updateDataObj = {
+          ...updateDataObj,
+          BranchRoomTypeRelation: {
+            connect: {
+              id: roomTypeLinkedToBranch.id,
+            },
+          },
+        };
+      }
 
-  //     if (error instanceof NotFoundException) {
-  //       throw new NotFoundException(error.message);
-  //     } else if (error instanceof BadRequestException) {
-  //       throw new BadRequestException(error.message);
-  //     } else {
-  //       throw new Error("Internal Server Error. Please try again later.");
-  //     }
-  //   }
-  // }
+      if (Booking.uploadId !== image) {
+        updateDataObj = {
+          ...updateDataObj,
+          upload: {
+            connect: {
+              id: image || null,
+            },
+          },
+        };
+      }
+
+      if (
+        Object.keys(updateDataObj).length === 0 &&
+        updatedRooms.length === 0
+      ) {
+        throw new BadRequestException("There is no data to be updated!");
+      }
+
+      console.log("updateDataObj=", updateDataObj);
+
+      // Updating Booking
+      // if (Object.keys(updateDataObj).length !== 0) {
+      //   await this.prisma.booking.update({
+      //     where: {
+      //       id,
+      //     },
+      //     data: updateDataObj,
+      //   });
+      // }
+
+      if (updatedRooms.length !== 0) {
+        const roomsToLink = await this.getNotIdenticalElements(
+          roomIds,
+          BookedRoomIds
+        );
+        const roomsToDlink = await this.getNotIdenticalElements(
+          BookedRoomIds,
+          roomIds
+        );
+
+        // Create Images
+        if (roomsToLink.length > 0) {
+          const roomsLinkArr = roomsToLink.map((room) => {
+            return {
+              roomId: room,
+              bookingId: id,
+            };
+          });
+
+          await this.prisma.bookingRoomRelation.createMany({
+            data: roomsLinkArr,
+          });
+        }
+        // Delete Images
+        if (roomsToDlink.length > 0) {
+          const roomsDlinkArr = roomsToDlink.map((room) => {
+            return {
+              roomId: room,
+              bookingId: id,
+            };
+          });
+
+          await this.prisma.bookingRoomRelation.deleteMany({
+            where: {
+              OR: roomsDlinkArr,
+            },
+          });
+        }
+      }
+
+      if (Booking.bookingStatus !== bookingStatus) {
+        await this.prisma.bookingStatusHistory.create({
+          data: {
+            booking: { connect: { id } },
+            bookedBy: {
+              connect: {
+                id: bookedById,
+              },
+            },
+            bookingStatus:
+              BookingStatus[bookingStatus as keyof typeof BookingStatus],
+          },
+        });
+      }
+
+      return { message: "Booking Updated!" };
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
+  }
 
   // This is the function that returns the Custom Where Clause. STARTS.
 

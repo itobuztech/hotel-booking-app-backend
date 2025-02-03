@@ -77,6 +77,6 @@ export class BookingResolver {
     @Args("UpdateBookingInput")
     UpdateBookingInput: UpdateBookingInput
   ) {
-    // return this.BookingService.bookingUpdateService(ctx, UpdateBookingInput);
+    return this.BookingService.bookingUpdateService(ctx, UpdateBookingInput);
   }
 }
