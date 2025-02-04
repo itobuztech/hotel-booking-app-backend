@@ -124,6 +124,7 @@ model Booking {
   contactNumber            String                 @map("contact_number")
   email                    String?                @db.VarChar(255)
   region                   String?                @db.VarChar(255)
+  numberOfRooms            Int?                   @map("number_of_rooms")
   source                   String                 @db.VarChar(255)
   finalPrice               Decimal                @map("final_price") @db.Decimal(10, 2)
   checkInDate              DateTime               @map("check_in_date")

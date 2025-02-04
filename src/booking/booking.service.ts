@@ -34,6 +34,7 @@ export class BookingService {
         description,
         email = "",
         region = "",
+        numberOfRooms,
       } = CreateBookingInput;
       const bookedById = ctx.req.user.userId;
       const loggedInUserRole = ctx.req.user.role.userType;
@@ -64,61 +65,72 @@ export class BookingService {
         throw new BadRequestException(`Room type is not linked with branch.`);
       }
 
-      // Validate each room
-      for (const roomId of roomIds) {
-        const roomPresence = await this.prisma.room.findUnique({
-          where: { id: roomId },
-        });
-        if (!roomPresence) {
-          throw new NotFoundException(`Some/One Room number does not exist.`);
+      // Validate each room for adimin login
+      if (loggedInUserRole === "ADMIN") {
+        if (roomIds.length === 0) {
+          throw new BadRequestException(`Need to assign rooms!`);
         }
-
-        const roomLinkedToBranchRoomtype = await this.prisma.room.findFirst({
-          where: {
-            id: roomId,
-            branchRoomType: {
-              id: roomTypeLinkedToBranch.id,
-            },
-          },
-        });
-        if (!roomLinkedToBranchRoomtype) {
+        if (roomIds.length !== numberOfRooms) {
           throw new BadRequestException(
-            `Room ${roomPresence.roomName} is not linked with branch and room type.`
+            `Need to assign rooms as per number of rooms given!`
           );
         }
 
-        // Validate if room is available for the selected dates
-        const conflictingBookings =
-          await this.prisma.bookingRoomRelation.findFirst({
+        for (const roomId of roomIds) {
+          const roomPresence = await this.prisma.room.findUnique({
+            where: { id: roomId },
+          });
+          if (!roomPresence) {
+            throw new NotFoundException(`Some/One Room number does not exist.`);
+          }
+
+          const roomLinkedToBranchRoomtype = await this.prisma.room.findFirst({
             where: {
-              roomId, // If roomId is an array, check multiple rooms
-              booking: {
-                bookingStatus: {
-                  notIn: [BookingStatus.CHECKDOUT, BookingStatus.CANCELLED],
-                },
-                AND: [
-                  {
-                    checkInDate: {
-                      lte: checkOutDate,
-                    },
-                  },
-                  {
-                    checkOutDate: {
-                      gte: checkInDate,
-                    },
-                  },
-                ],
+              id: roomId,
+              branchRoomType: {
+                id: roomTypeLinkedToBranch.id,
               },
             },
-            include: {
-              booking: true, // Ensures we fetch related booking details
-            },
           });
+          if (!roomLinkedToBranchRoomtype) {
+            throw new BadRequestException(
+              `Room ${roomPresence.roomName} is not linked with branch and room type.`
+            );
+          }
 
-        if (conflictingBookings) {
-          throw new BadRequestException(
-            `Room ${roomPresence.roomName} is already booked for the selected dates.`
-          );
+          // Validate if room is available for the selected dates
+          const conflictingBookings =
+            await this.prisma.bookingRoomRelation.findFirst({
+              where: {
+                roomId, // If roomId is an array, check multiple rooms
+                booking: {
+                  bookingStatus: {
+                    notIn: [BookingStatus.CHECKDOUT, BookingStatus.CANCELLED],
+                  },
+                  AND: [
+                    {
+                      checkInDate: {
+                        lte: checkOutDate,
+                      },
+                    },
+                    {
+                      checkOutDate: {
+                        gte: checkInDate,
+                      },
+                    },
+                  ],
+                },
+              },
+              include: {
+                booking: true, // Ensures we fetch related booking details
+              },
+            });
+
+          if (conflictingBookings) {
+            throw new BadRequestException(
+              `Room ${roomPresence.roomName} is already booked for the selected dates.`
+            );
+          }
         }
       }
 
@@ -165,6 +177,7 @@ export class BookingService {
           bookingStatus: BookingStatus.BOOKED,
           email,
           region,
+          numberOfRooms,
           upload: {
             connect: {
               id: image || null,
@@ -188,16 +201,18 @@ export class BookingService {
         },
       });
 
-      const roomRelationData = roomIds.map((roomId) => {
-        return {
-          roomId,
-          bookingId: booking.id,
-        };
-      });
+      if (loggedInUserRole === "ADMIN") {
+        const roomRelationData = roomIds.map((roomId) => {
+          return {
+            roomId,
+            bookingId: booking.id,
+          };
+        });
 
-      await this.prisma.bookingRoomRelation.createMany({
-        data: roomRelationData,
-      });
+        await this.prisma.bookingRoomRelation.createMany({
+          data: roomRelationData,
+        });
+      }
 
       await this.prisma.bookingStatusHistory.create({
         data: {
@@ -305,6 +320,7 @@ export class BookingService {
         checkInDate,
         checkOutDate,
         description,
+        numberOfRooms,
       } = UpdateBookingInput;
 
       const bookedById = ctx.req.user.userId;
@@ -353,6 +369,11 @@ export class BookingService {
       }
 
       let updatedRooms = [];
+      if (roomIds.length !== numberOfRooms) {
+        throw new BadRequestException(
+          `Need to assign rooms as per number of rooms given!`
+        );
+      }
       // Validate if room exists
       for (const roomId of roomIds) {
         const roomPresence = await this.prisma.room.findUnique({
@@ -753,12 +774,15 @@ export class BookingService {
           booking["offerPrice"] = Number(
             booking?.BranchRoomTypeRelation?.offerPrice
           );
-          booking["roomNumbers"] = booking?.BookingRoomRelation.map((room) => {
-            return {
-              id: room?.roomId,
-              roomNumber: room?.room?.roomName,
-            };
-          });
+          booking["roomNumbers"] =
+            booking.BookingRoomRelation.length > 0
+              ? booking?.BookingRoomRelation.map((room) => {
+                  return {
+                    id: room?.roomId,
+                    roomNumber: room?.room?.roomName,
+                  };
+                })
+              : [];
         });
       }
 
