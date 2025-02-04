@@ -242,60 +242,70 @@ export class BookingService {
     }
   }
 
-  // async bookingDetailsService(bookingId) {
-  //   try {
-  //     const { id } = bookingId;
+  async bookingDetailsService(bookingId) {
+    try {
+      const { id } = bookingId;
 
-  //     const Booking = await this.prisma.booking.findUnique({
-  //       where: {
-  //         id,
-  //       },
-  //       include: {
-  //         branch: true,
-  //         upload: true,
-  //         room: true,
-  //         BranchRoomTypeRelation: {
-  //           include: {
-  //             roomType: true,
-  //           },
-  //         },
-  //       },
-  //     });
+      const Booking = await this.prisma.booking.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          branch: true,
+          upload: true,
+          BookingRoomRelation: {
+            select: { roomId: true, room: true },
+          },
+          BranchRoomTypeRelation: {
+            include: {
+              roomType: true,
+            },
+          },
+        },
+      });
 
-  //     if (!Booking) {
-  //       throw new NotFoundException("No booking found!");
-  //     }
+      if (!Booking) {
+        throw new NotFoundException("No booking found!");
+      }
 
-  //     Booking["branchName"] = Booking.branch.name;
-  //     Booking["roomtypeName"] = Booking.BranchRoomTypeRelation.roomType.name;
-  //     Booking["setPrice"] = Number(Booking.BranchRoomTypeRelation.setPrice);
-  //     Booking["offerPrice"] = Number(Booking.BranchRoomTypeRelation.offerPrice);
-  //     Booking["roomNumber"] = Booking.room.roomName;
+      Booking["branchName"] = Booking.branch.name;
+      Booking["roomtypeName"] = Booking.BranchRoomTypeRelation.roomType.name;
+      Booking["setPrice"] = Number(Booking.BranchRoomTypeRelation.setPrice);
+      Booking["offerPrice"] = Number(Booking.BranchRoomTypeRelation.offerPrice);
+      Booking["roomNumbers"] =
+        Booking?.BookingRoomRelation?.length > 0
+          ? Booking?.BookingRoomRelation.map((room) => {
+              return {
+                id: room?.roomId,
+                roomNumber: room?.room?.roomName,
+              };
+            })
+          : [];
 
-  //     if (Booking.uploadId) {
-  //       Booking.upload["fileUrl"] =
-  //         `${process.env.BACKEND_BASE_URL}/uploads/${Booking?.upload?.file}`;
+      if (Booking.uploadId) {
+        Booking.upload["fileUrl"] =
+          `${process.env.BACKEND_BASE_URL}/uploads/${Booking?.upload?.file}`;
 
-  //       Booking["image"] = Booking.upload;
+        Booking["image"] = Booking.upload;
 
-  //       delete Booking.upload;
-  //     }
+        delete Booking.upload;
+      }
 
-  //     delete Booking.branch;
-  //     delete Booking.BranchRoomTypeRelation;
-  //     delete Booking.room;
+      delete Booking.branch;
+      delete Booking.BranchRoomTypeRelation;
+      delete Booking.BookingRoomRelation;
 
-  //     return Booking;
-  //   } catch (error) {
-  //     console.error("Error=", error);
+      return Booking;
+    } catch (error) {
+      console.error("Error=", error);
 
-  //     if (error instanceof NotFoundException) {
-  //       throw new NotFoundException(error.message);
-  //     } else {
-  //       throw new Error("Internal Server Error. Please try again later.");
-  //     }
-  //   }
-  // }
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
+  }
 
   private async getNotIdenticalElements<T>(
     array1: T[],
@@ -775,8 +785,8 @@ export class BookingService {
             booking?.BranchRoomTypeRelation?.offerPrice
           );
           booking["roomNumbers"] =
-            booking.BookingRoomRelation.length > 0
-              ? booking?.BookingRoomRelation.map((room) => {
+            booking?.BookingRoomRelation?.length > 0
+              ? booking?.BookingRoomRelation?.map((room) => {
                   return {
                     id: room?.roomId,
                     roomNumber: room?.room?.roomName,

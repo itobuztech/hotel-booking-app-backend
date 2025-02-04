@@ -64,7 +64,7 @@ export class BookingResolver {
     @Args("bookingId")
     bookingId: UniqueIdentifierInput
   ) {
-    // return this.BookingService.bookingDetailsService(bookingId);
+    return this.BookingService.bookingDetailsService(bookingId);
   }
 
   // Booking update
