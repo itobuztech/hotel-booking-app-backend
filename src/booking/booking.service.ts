@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
-import { BookingStatus, Prisma } from "@prisma/client";
+import { BookingStatus, Prisma, UserRole } from "@prisma/client";
 import { UpdateBookingInput } from "./dto/update-booking.input";
 import { log } from "console";
 import { PaginationArgs } from "src/types/inputtypes/pagination.input";
@@ -36,7 +36,9 @@ export class BookingService {
         region = "",
         numberOfRooms,
       } = CreateBookingInput;
+
       const bookedById = ctx.req.user.userId;
+      const loggedInEmail = ctx.req.user.email;
       const loggedInUserRole = ctx.req.user.role.userType;
 
       // Validate if branch exists
@@ -223,6 +225,18 @@ export class BookingService {
             },
           },
           bookingStatus: BookingStatus.BOOKED,
+        },
+      });
+
+      await this.prisma.notification.create({
+        data: {
+          bookedById,
+          userType:
+            loggedInUserRole === "ADMIN" ? UserRole.ADMIN : UserRole.CUSTOMER,
+          bookingId: booking.id,
+          description: `Booking request generated from ${loggedInUserRole === "ADMIN" ? "walk-in" : "online"}`,
+          customerNumber: contactNumber,
+          customerEmail: email ? email : loggedInEmail,
         },
       });
 
@@ -618,6 +632,16 @@ export class BookingService {
             },
             bookingStatus:
               BookingStatus[bookingStatus as keyof typeof BookingStatus],
+          },
+        });
+
+        await this.prisma.notification.create({
+          data: {
+            bookedById,
+            userType: UserRole.ADMIN,
+            bookingId: id,
+            description: `The booking status is being changed from ${Booking.bookingStatus} to ${bookingStatus}`,
+            customerNumber: contactNumber,
           },
         });
       }
