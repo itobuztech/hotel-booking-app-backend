@@ -234,13 +234,15 @@ model BranchAmenitiesRelation {
 
 model Notification {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  User           User      @relation(fields: [notifiedUserId], references: [id])
-  notifiedUserId String    @map("notified_user_id") @db.Uuid
+  User           User      @relation(fields: [bookedById], references: [id])
+  bookedById     String    @map("notified_user_id") @db.Uuid
+  userType       UserRole  @map("user_type")
   booking        Booking   @relation(fields: [bookingId], references: [id])
   bookingId      String    @map("booking_id") @db.Uuid
   description    String?
   customerNumber String?
   customerEmail  String?
+  status         Boolean?  @default(false)
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime? @default(now()) @updatedAt @map("updated_at")
 
