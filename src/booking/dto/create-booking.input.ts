@@ -26,8 +26,11 @@ export class CreateBookingInput {
   @Field(() => ID)
   roomType: string;
 
-  @Field(() => [ID])
-  roomIds: string[];
+  @Field(() => [ID], { nullable: true })
+  roomIds?: string[];
+
+  @Field(() => Int)
+  numberOfRooms: number;
 
   @Field(() => Int)
   finalPrice: number;
