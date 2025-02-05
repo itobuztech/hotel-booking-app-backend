@@ -34,6 +34,15 @@ export class AvailabilityStatus {
 }
 
 @ObjectType()
+export class GeoLocationRes {
+  @Field(() => Number)
+  lat: number;
+
+  @Field(() => Number)
+  long: number;
+}
+
+@ObjectType()
 export class BranchResponse {
   @Field(() => String)
   id: string;
@@ -67,6 +76,9 @@ export class BranchResponse {
 
   @Field(() => Number)
   startingPrice: number;
+
+  @Field(() => GeoLocationRes)
+  geoLocation: GeoLocationRes;
 
   @Field(() => [AvailabilityStatus], { nullable: true })
   status?: AvailabilityStatus[];

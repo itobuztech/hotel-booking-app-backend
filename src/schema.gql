@@ -94,6 +94,7 @@ type BranchResponse {
   city: String!
   contactNumber: String!
   description: String!
+  geoLocation: GeoLocationRes!
   id: String!
   image: [File!]!
   location: String!
@@ -238,6 +239,11 @@ type ForgotPasswordResponse {
 }
 
 input GeoLocation {
+  lat: Float!
+  long: Float!
+}
+
+type GeoLocationRes {
   lat: Float!
   long: Float!
 }
