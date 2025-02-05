@@ -8,12 +8,10 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus, Prisma, UserRole } from "@prisma/client";
 import { UpdateBookingInput } from "./dto/update-booking.input";
-import { log } from "console";
 import { PaginationArgs } from "src/types/inputtypes/pagination.input";
 import { FilterBookingInputs } from "./dto/filter-booking.input";
 import { SortBookingInputs } from "./dto/sort-booking.input";
 import { GraphQLError } from "graphql";
-import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
 export class BookingService {
@@ -821,6 +819,34 @@ export class BookingService {
       }
 
       return { bookings, total: bookingCount };
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
+  }
+
+  async notificationsService(ctx) {
+    try {
+      const notifications = await this.prisma.notification.findMany({});
+      const unreadNotificationCount = await this.prisma.notification.count({
+        where: { status: false },
+      });
+
+      console.log("notifications=", notifications);
+      console.log("unreadNotificationCount=", unreadNotificationCount);
+
+      return {
+        notifications,
+        total: notifications.length,
+        unreadNotificationCount,
+      };
     } catch (error) {
       console.error("Error=", error);
 

@@ -291,6 +291,16 @@ type Mutation {
   validateForgotPassword(forgotPasswordInput: ForgotPasswordConfirmationInput!): ValidateForgotPasswordResponse!
 }
 
+type Notification {
+  createdAt: DateTime!
+  customerEmail: String!
+  customerNumber: String!
+  description: String!
+  id: ID!
+  status: String!
+  user: UserNotification!
+}
+
 type PaginatedAminity {
   aminities: [Aminity!]!
   total: Int!
@@ -306,6 +316,12 @@ type PaginatedBooking {
 type PaginatedFile {
   files: [File!]!
   total: Int!
+}
+
+type PaginatedNotification {
+  notifications: [Notification!]!
+  total: Int!
+  unreadNotificationCount: Float!
 }
 
 type PaginatedRoomType {
@@ -336,6 +352,7 @@ type Query {
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
   listBranches(paginationArgs: PaginationArgs, searchInput: SearchInput): BranchListResponse!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
+  notifications: PaginatedNotification!
   roomTypeDetail(roomTypeId: UniqueIdentifierInput!): RoomType!
   user(email: String!): User!
   users: [User!]
@@ -478,6 +495,12 @@ type User {
   image: File
   updatedAt: DateTime
   username: String!
+}
+
+type UserNotification {
+  email: ID!
+  id: ID!
+  name: ID!
 }
 
 """The roles available for users"""
