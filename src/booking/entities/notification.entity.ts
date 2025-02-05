@@ -18,18 +18,6 @@ export class UserNotification {
   email: UserDB["email"];
 }
 
-// @ObjectType()
-// export class BookingNotification {
-//   @Field(() => ID)
-//   id: string;
-
-//   @Field(() => ID)
-//   name: BookingDB[""];
-
-//   @Field(() => ID)
-//   email: BookingDB["email"];
-// }
-
 @ObjectType()
 export class Notification {
   @Field(() => ID)
@@ -41,17 +29,14 @@ export class Notification {
   @Field(() => String)
   customerNumber: NotificationDB["customerNumber"];
 
-  @Field(() => String)
-  customerEmail: NotificationDB["customerEmail"];
+  @Field(() => String, { nullable: true })
+  customerEmail?: NotificationDB["customerEmail"];
 
   @Field(() => String)
   status: NotificationDB["status"];
 
   @Field(() => UserNotification)
-  user: UserNotification;
-
-  // @Field(() => UserNotification)
-  // user: UserNotification;
+  User: UserNotification;
 
   @Field(() => Date)
   createdAt: NotificationDB["createdAt"];

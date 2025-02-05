@@ -864,13 +864,19 @@ export class BookingService {
 
   async notificationsService(ctx) {
     try {
-      const notifications = await this.prisma.notification.findMany({});
+      const notifications = await this.prisma.notification.findMany({
+        include: {
+          User: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+        orderBy: {
+          status: "asc", // Assuming 'false' is represented as 0 and 'true' as 1
+        },
+      });
       const unreadNotificationCount = await this.prisma.notification.count({
         where: { status: false },
       });
-
-      console.log("notifications=", notifications);
-      console.log("unreadNotificationCount=", unreadNotificationCount);
 
       return {
         notifications,
