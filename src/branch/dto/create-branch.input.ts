@@ -1,6 +1,15 @@
 import { InputType, Int, Field, ID } from "@nestjs/graphql";
 
 @InputType()
+export class GeoLocation {
+  @Field(() => Number)
+  lat: number;
+
+  @Field(() => Number)
+  long: number;
+}
+
+@InputType()
 export class CreateBranchInput {
   @Field(() => String)
   name: string;
@@ -19,6 +28,9 @@ export class CreateBranchInput {
 
   @Field(() => String)
   location: string;
+
+  @Field(() => GeoLocation)
+  geoLocation: GeoLocation;
 
   @Field(() => String)
   description?: string;

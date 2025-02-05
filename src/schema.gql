@@ -156,6 +156,7 @@ input CreateBranchInput {
   city: String!
   contactNumber: String!
   description: String!
+  geoLocation: GeoLocation!
   location: String!
   name: String!
   uploadFileIds: [ID!]
@@ -236,6 +237,11 @@ type ForgotPasswordResponse {
   token: String!
 }
 
+input GeoLocation {
+  lat: Float!
+  long: Float!
+}
+
 input GetBranchInput {
   """Branch ID"""
   id: String!
@@ -284,7 +290,7 @@ type Mutation {
   roomTypeCreate(createRoomTypeInput: CreateRoomTypeInput!): Message!
   signup(signupUserInput: CreateUserInput!): Message!
   tokenConfirmation(tokenConfirmationInput: TokenConfirmationInput!): LoginResponse!
-  updateBranch(getBranchInput: GetBranchInput!, updateBranchInput: UpdateBranchInput!): BranchResponse!
+  updateBranch(getBranchInput: GetBranchInput!, updateBranchInput: UpdateBranchInput!): Message!
   updateprofile(updateProfileInput: UpdateProfileInput!): Boolean!
   uploadFiles(uploadFileInput: UploadFileInput!): UploadFileResponse!
   uploadMulipleFiles(uploadMultipleFileInput: UploadMultipleFileInput!): [UploadMultipleFileResponse!]!
@@ -450,6 +456,7 @@ input UpdateBranchInput {
   city: String
   contactNumber: String
   description: String
+  geoLocation: GeoLocation
   location: String
   name: String
   uploadFileIds: [ID!]

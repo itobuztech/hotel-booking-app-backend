@@ -18,6 +18,7 @@ import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
 import { checkIfExists } from "../helpers/custom-decorators/checkIfExists-decorators";
+import { Message } from "../types/inputtypes/message.entity";
 
 @Resolver(() => Branch)
 export class BranchResolver {
@@ -62,7 +63,7 @@ export class BranchResolver {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
-  @Mutation(() => BranchResponse)
+  @Mutation(() => Message)
   updateBranch(
     @Args("getBranchInput") getBranchInput: GetBranchInput,
     @Args("updateBranchInput") updateBranchInput: UpdateBranchInput
