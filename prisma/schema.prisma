@@ -159,7 +159,7 @@ model Upload {
 
 model BookingStatusHistory {
   id            String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  booking       Booking       @relation(fields: [bookingId], references: [id])
+  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId     String        @map("booking_id") @db.Uuid
   bookingStatus BookingStatus
   bookedBy      User?         @relation("booking_history_booked_by", fields: [bookedById], references: [id])
@@ -237,7 +237,7 @@ model Notification {
   User           User      @relation(fields: [bookedById], references: [id])
   bookedById     String    @map("notified_user_id") @db.Uuid
   userType       UserRole  @map("user_type")
-  booking        Booking   @relation(fields: [bookingId], references: [id])
+  booking        Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId      String    @map("booking_id") @db.Uuid
   description    String?
   customerNumber String?
@@ -251,7 +251,7 @@ model Notification {
 
 model BookingRoomRelation {
   id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  booking   Booking   @relation(fields: [bookingId], references: [id])
+  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId String    @map("booking_id") @db.Uuid
   room      Room      @relation(fields: [roomId], references: [id], onDelete: Cascade)
   roomId    String    @map("room_id") @db.Uuid

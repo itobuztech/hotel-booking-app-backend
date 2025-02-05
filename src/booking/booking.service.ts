@@ -8,12 +8,10 @@ import { PrismaService } from "../prisma/prisma.service";
 import { CreateBookingInput } from "./dto/create-booking.input";
 import { BookingStatus, Prisma, UserRole } from "@prisma/client";
 import { UpdateBookingInput } from "./dto/update-booking.input";
-import { log } from "console";
 import { PaginationArgs } from "src/types/inputtypes/pagination.input";
 import { FilterBookingInputs } from "./dto/filter-booking.input";
 import { SortBookingInputs } from "./dto/sort-booking.input";
 import { GraphQLError } from "graphql";
-import { v4 as uuidv4 } from "uuid";
 
 @Injectable()
 export class BookingService {
@@ -42,7 +40,7 @@ export class BookingService {
       const loggedInUserRole = ctx.req.user.role.userType;
 
       // Validate if branch exists
-      const branchPresence = await this.prisma.branch.count({
+      const branchPresence = await this.prisma.branch.findUnique({
         where: { id: branch },
       });
       if (!branchPresence) {
@@ -203,6 +201,7 @@ export class BookingService {
         },
       });
 
+      let finalRooms = null;
       if (loggedInUserRole === "ADMIN") {
         const roomRelationData = roomIds.map((roomId) => {
           return {
@@ -211,8 +210,20 @@ export class BookingService {
           };
         });
 
-        await this.prisma.bookingRoomRelation.createMany({
-          data: roomRelationData,
+        const roomsCreated =
+          await this.prisma.bookingRoomRelation.createManyAndReturn({
+            data: roomRelationData,
+            include: {
+              room: {
+                select: {
+                  roomName: true,
+                },
+              },
+            },
+          });
+
+        finalRooms = roomsCreated.map((rooms) => {
+          return rooms.room.roomName;
         });
       }
 
@@ -234,7 +245,7 @@ export class BookingService {
           userType:
             loggedInUserRole === "ADMIN" ? UserRole.ADMIN : UserRole.CUSTOMER,
           bookingId: booking.id,
-          description: `Booking request generated from ${loggedInUserRole === "ADMIN" ? "walk-in" : "online"}`,
+          description: `Booking request generated from ${loggedInUserRole === "ADMIN" ? "walk-in" : "online"} for ${branchPresence.name} branch ${loggedInUserRole === "ADMIN" ? `of room ${[...finalRooms]}` : ""}`,
           customerNumber: contactNumber,
           customerEmail: email ? email : loggedInEmail,
         },
@@ -367,7 +378,7 @@ export class BookingService {
       });
 
       // Validate if branch exists
-      const branchPresence = await this.prisma.branch.count({
+      const branchPresence = await this.prisma.branch.findUnique({
         where: { id: branch },
       });
       if (!branchPresence) {
@@ -635,12 +646,29 @@ export class BookingService {
           },
         });
 
+        const bookedRooms = await this.prisma.bookingRoomRelation.findMany({
+          where: {
+            bookingId: id,
+          },
+          include: {
+            room: {
+              select: {
+                roomName: true,
+              },
+            },
+          },
+        });
+
+        const finalRooms = bookedRooms.map((rooms) => {
+          return rooms.room.roomName;
+        });
+
         await this.prisma.notification.create({
           data: {
             bookedById,
             userType: UserRole.ADMIN,
             bookingId: id,
-            description: `The booking status is being changed from ${Booking.bookingStatus} to ${bookingStatus}`,
+            description: `The booking status is being changed from ${Booking.bookingStatus} to ${bookingStatus} for ${branchPresence.name} branch of room ${[...finalRooms]}.`,
             customerNumber: contactNumber,
           },
         });
@@ -821,6 +849,40 @@ export class BookingService {
       }
 
       return { bookings, total: bookingCount };
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
+  }
+
+  async notificationsService(ctx) {
+    try {
+      const notifications = await this.prisma.notification.findMany({
+        include: {
+          User: {
+            select: { id: true, name: true, email: true },
+          },
+        },
+        orderBy: {
+          status: "asc", // Assuming 'false' is represented as 0 and 'true' as 1
+        },
+      });
+      const unreadNotificationCount = await this.prisma.notification.count({
+        where: { status: false },
+      });
+
+      return {
+        notifications,
+        total: notifications.length,
+        unreadNotificationCount,
+      };
     } catch (error) {
       console.error("Error=", error);
 

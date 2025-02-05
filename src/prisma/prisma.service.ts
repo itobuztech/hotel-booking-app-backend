@@ -10,6 +10,7 @@ const excludedModels = [
   "BranchRoomTypeAmenitiesRelation",
   "BranchAmenitiesRelation",
   "BookingRoomRelation",
+  "Notification",
 ];
 
 const excludedMasterModels = ["RoomType", "Amenities"];

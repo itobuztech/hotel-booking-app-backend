@@ -16,6 +16,7 @@ import { UpdateBookingInput } from "./dto/update-booking.input";
 import { PaginationArgs } from "src/types/inputtypes/pagination.input";
 import { FilterBookingInputs } from "./dto/filter-booking.input";
 import { SortBookingInputs } from "./dto/sort-booking.input";
+import { PaginatedNotification } from "./entities/notification.entity";
 
 @Resolver()
 export class BookingResolver {
@@ -78,5 +79,14 @@ export class BookingResolver {
     UpdateBookingInput: UpdateBookingInput
   ) {
     return this.BookingService.bookingUpdateService(ctx, UpdateBookingInput);
+  }
+
+  // Notification List
+  @Query(() => PaginatedNotification)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
+  notifications(@Context() ctx: any) {
+    return this.BookingService.notificationsService(ctx);
   }
 }
