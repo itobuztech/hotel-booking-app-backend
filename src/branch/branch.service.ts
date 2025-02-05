@@ -1,4 +1,8 @@
-import { NotFoundException, Injectable } from "@nestjs/common";
+import {
+  NotFoundException,
+  Injectable,
+  BadRequestException,
+} from "@nestjs/common";
 import { CreateBranchInput } from "./dto/create-branch.input";
 import { PrismaService } from "../prisma/prisma.service";
 import { PaginationArgs } from "../types/inputtypes/pagination.input";
@@ -15,7 +19,7 @@ export class BranchService {
     const { id } = getBranchInput;
 
     try {
-      const branch = await this.prisma.branch.findUnique({
+      const branch: any = await this.prisma.branch.findUnique({
         where: {
           id: id,
         },
@@ -144,6 +148,8 @@ export class BranchService {
             availabeRooms: relation?.Room?.length - bookedRooms,
           };
         });
+
+        branch.geoLocation = JSON.parse(branch.geoLocation);
       }
 
       return branch;
@@ -166,6 +172,7 @@ export class BranchService {
       contactNumber,
       description,
       location,
+      geoLocation,
       amenityIds,
       uploadFileIds,
     } = createBranchInput;
@@ -232,6 +239,7 @@ export class BranchService {
           contactNumber,
           description,
           location,
+          geoLocation: JSON.stringify(geoLocation),
           BranchAmenitiesRelation: {
             createMany: {
               data: amenityIdsArr,
@@ -350,7 +358,7 @@ export class BranchService {
     });
 
     if (filteredBranches.length > 0) {
-      filteredBranches.map((branch) => {
+      filteredBranches.map((branch: any) => {
         branch["image"] = branch?.UploadRelation?.map((item) => {
           return {
             id: item.upload.id,
@@ -386,6 +394,8 @@ export class BranchService {
             availabeRooms: relation?.Room?.length - bookedRooms,
           };
         });
+
+        branch.geoLocation = JSON.parse(branch.geoLocation);
       });
     }
 
@@ -414,11 +424,40 @@ export class BranchService {
     updateBranchInput: UpdateBranchInput
   ) {
     const { id } = getBranchInput;
-    return await this.prisma.branch.update({
-      where: {
-        id: id,
-      },
-      data: updateBranchInput,
-    });
+
+    try {
+      // Validate if branch exists
+      const branchPresence = await this.prisma.branch.findUnique({
+        where: { id },
+      });
+      if (!branchPresence) {
+        throw new NotFoundException(`Branch does not exist.`);
+      }
+
+      const data: any = updateBranchInput;
+      if (updateBranchInput.geoLocation) {
+        const stringedGeo = JSON.stringify(updateBranchInput.geoLocation);
+        data.geoLocation = stringedGeo;
+      }
+
+      await this.prisma.branch.update({
+        where: {
+          id: id,
+        },
+        data,
+      });
+
+      return { message: "Branch updated Successfully!" };
+    } catch (error) {
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
+    }
   }
 }

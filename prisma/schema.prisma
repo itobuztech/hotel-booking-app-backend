@@ -91,6 +91,7 @@ model Branch {
   city                    String                    @db.VarChar(255)
   areaPincode             String                    @map("area_pincode")
   location                String                    @db.VarChar(500)
+  geoLocation             Json?                     @map("geo_location")
   description             String?
   createdAt               DateTime                  @default(now()) @map("created_at")
   updatedAt               DateTime?                 @default(now()) @updatedAt @map("updated_at")
