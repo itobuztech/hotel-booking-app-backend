@@ -40,7 +40,7 @@ export class BookingService {
       const loggedInUserRole = ctx.req.user.role.userType;
 
       // Validate if branch exists
-      const branchPresence = await this.prisma.branch.count({
+      const branchPresence = await this.prisma.branch.findUnique({
         where: { id: branch },
       });
       if (!branchPresence) {
@@ -201,6 +201,7 @@ export class BookingService {
         },
       });
 
+      let finalRooms = null;
       if (loggedInUserRole === "ADMIN") {
         const roomRelationData = roomIds.map((roomId) => {
           return {
@@ -209,8 +210,20 @@ export class BookingService {
           };
         });
 
-        await this.prisma.bookingRoomRelation.createMany({
-          data: roomRelationData,
+        const roomsCreated =
+          await this.prisma.bookingRoomRelation.createManyAndReturn({
+            data: roomRelationData,
+            include: {
+              room: {
+                select: {
+                  roomName: true,
+                },
+              },
+            },
+          });
+
+        finalRooms = roomsCreated.map((rooms) => {
+          return rooms.room.roomName;
         });
       }
 
@@ -232,7 +245,7 @@ export class BookingService {
           userType:
             loggedInUserRole === "ADMIN" ? UserRole.ADMIN : UserRole.CUSTOMER,
           bookingId: booking.id,
-          description: `Booking request generated from ${loggedInUserRole === "ADMIN" ? "walk-in" : "online"}`,
+          description: `Booking request generated from ${loggedInUserRole === "ADMIN" ? "walk-in" : "online"} for ${branchPresence.name} branch ${loggedInUserRole === "ADMIN" ? `of room ${[...finalRooms]}` : ""}`,
           customerNumber: contactNumber,
           customerEmail: email ? email : loggedInEmail,
         },
@@ -365,7 +378,7 @@ export class BookingService {
       });
 
       // Validate if branch exists
-      const branchPresence = await this.prisma.branch.count({
+      const branchPresence = await this.prisma.branch.findUnique({
         where: { id: branch },
       });
       if (!branchPresence) {
@@ -633,12 +646,29 @@ export class BookingService {
           },
         });
 
+        const bookedRooms = await this.prisma.bookingRoomRelation.findMany({
+          where: {
+            bookingId: id,
+          },
+          include: {
+            room: {
+              select: {
+                roomName: true,
+              },
+            },
+          },
+        });
+
+        const finalRooms = bookedRooms.map((rooms) => {
+          return rooms.room.roomName;
+        });
+
         await this.prisma.notification.create({
           data: {
             bookedById,
             userType: UserRole.ADMIN,
             bookingId: id,
-            description: `The booking status is being changed from ${Booking.bookingStatus} to ${bookingStatus}`,
+            description: `The booking status is being changed from ${Booking.bookingStatus} to ${bookingStatus} for ${branchPresence.name} branch of room ${[...finalRooms]}.`,
             customerNumber: contactNumber,
           },
         });
