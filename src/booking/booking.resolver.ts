@@ -94,7 +94,7 @@ export class BookingResolver {
   @Mutation(() => Message)
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
+  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.EDIT])
   notificationsRead(
     @Args("notificationId")
     notificationId: UniqueIdentifierInput

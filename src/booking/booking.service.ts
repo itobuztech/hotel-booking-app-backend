@@ -945,6 +945,28 @@ export class BookingService {
 
   async notificationsReadService(notificationId) {
     try {
+      const { id } = notificationId;
+
+      const notificationPresent = await this.prisma.notification.count({
+        where: {
+          id,
+        },
+      });
+
+      if (!notificationPresent) {
+        throw new NotFoundException("No notification found with this ID!");
+      }
+
+      await this.prisma.notification.update({
+        where: {
+          id,
+        },
+        data: {
+          status: true,
+        },
+      });
+
+      return { message: "Notification read." };
     } catch (error) {
       console.error("Error=", error);
 
