@@ -4,7 +4,6 @@ import BookingStatus from "../../enums/bookingStatus.enum";
 
 @InputType()
 export class UpdateBookingInput extends OmitType(CreateBookingInput, [
-  "email",
   "region",
 ] as const) {
   @Field(() => ID)

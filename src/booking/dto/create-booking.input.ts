@@ -11,8 +11,8 @@ export class CreateBookingInput {
   @Field(() => String)
   contactNumber: string;
 
-  @Field(() => String, { nullable: true })
-  email?: string;
+  @Field(() => String)
+  email: string;
 
   @Field(() => String, { nullable: true })
   region?: string;

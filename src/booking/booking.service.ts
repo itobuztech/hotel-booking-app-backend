@@ -30,13 +30,12 @@ export class BookingService {
         checkInDate,
         checkOutDate,
         description,
-        email = "",
+        email,
         region = "",
         numberOfRooms,
       } = CreateBookingInput;
 
       const bookedById = ctx.req.user.userId;
-      const loggedInEmail = ctx.req.user.email;
       const loggedInUserRole = ctx.req.user.role.userType;
 
       // Validate if branch exists
@@ -247,7 +246,7 @@ export class BookingService {
           bookingId: booking.id,
           description: `Booking request generated from ${loggedInUserRole === "ADMIN" ? "walk-in" : "online"} for ${branchPresence.name} branch ${loggedInUserRole === "ADMIN" ? `of room ${[...finalRooms]}` : ""}`,
           customerNumber: contactNumber,
-          customerEmail: email ? email : loggedInEmail,
+          customerEmail: email,
         },
       });
 
@@ -276,14 +275,16 @@ export class BookingService {
           id,
         },
         include: {
-          branch: true,
+          branch: {
+            select: { id: true, name: true },
+          },
           upload: true,
           BookingRoomRelation: {
             select: { roomId: true, room: true },
           },
           BranchRoomTypeRelation: {
             include: {
-              roomType: true,
+              roomType: { select: { id: true, name: true } },
             },
           },
         },
@@ -293,8 +294,7 @@ export class BookingService {
         throw new NotFoundException("No booking found!");
       }
 
-      Booking["branchName"] = Booking.branch.name;
-      Booking["roomtypeName"] = Booking.BranchRoomTypeRelation.roomType.name;
+      Booking["roomType"] = Booking.BranchRoomTypeRelation.roomType;
       Booking["setPrice"] = Number(Booking.BranchRoomTypeRelation.setPrice);
       Booking["offerPrice"] = Number(Booking.BranchRoomTypeRelation.offerPrice);
       Booking["roomNumbers"] =
@@ -316,7 +316,6 @@ export class BookingService {
         delete Booking.upload;
       }
 
-      delete Booking.branch;
       delete Booking.BranchRoomTypeRelation;
       delete Booking.BookingRoomRelation;
 
@@ -356,6 +355,7 @@ export class BookingService {
         checkOutDate,
         description,
         numberOfRooms,
+        email,
       } = UpdateBookingInput;
 
       const bookedById = ctx.req.user.userId;
@@ -514,6 +514,9 @@ export class BookingService {
 
       if (Booking.fullName !== fullName) {
         updateDataObj = { ...updateDataObj, fullName };
+      }
+      if (Booking.email !== email) {
+        updateDataObj = { ...updateDataObj, email };
       }
       if (Booking.contactNumber !== contactNumber) {
         updateDataObj = { ...updateDataObj, contactNumber };
@@ -827,9 +830,7 @@ export class BookingService {
 
       if (bookings.length > 0) {
         bookings?.map((booking) => {
-          booking["branchName"] = booking?.branch?.name;
-          booking["roomtypeName"] =
-            booking?.BranchRoomTypeRelation?.roomType.name;
+          booking["roomType"] = booking.BranchRoomTypeRelation.roomType;
           booking["setPrice"] = Number(
             booking?.BranchRoomTypeRelation?.setPrice
           );

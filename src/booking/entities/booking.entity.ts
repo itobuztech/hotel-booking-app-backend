@@ -2,6 +2,7 @@ import { ObjectType, Field, ID, Int } from "@nestjs/graphql";
 import { Booking as BookingDB } from "@prisma/client";
 import { File } from "../../upload/entities/files.entity";
 import { TotalCount } from "../../types/inputtypes/toalCount.entity";
+import BookingStatus from "../../enums/bookingStatus.enum";
 
 @ObjectType()
 export class roomNumbers {
@@ -10,6 +11,22 @@ export class roomNumbers {
 
   @Field(() => String)
   roomNumber: string;
+}
+@ObjectType()
+export class branchBooked {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => String)
+  name: string;
+}
+@ObjectType()
+export class roomTypeBooked {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => String)
+  name: string;
 }
 
 @ObjectType()
@@ -32,11 +49,11 @@ export class Booking {
   @Field(() => String)
   source: string;
 
-  @Field(() => String)
-  branchName: string;
+  @Field(() => branchBooked)
+  branch: branchBooked;
 
-  @Field(() => String)
-  roomtypeName: string;
+  @Field(() => roomTypeBooked)
+  roomType: roomTypeBooked;
 
   @Field(() => Int)
   setPrice: number;
@@ -53,7 +70,7 @@ export class Booking {
   @Field(() => String)
   description: BookingDB["description"];
 
-  @Field(() => String)
+  @Field(() => BookingStatus)
   bookingStatus: BookingDB["bookingStatus"];
 
   @Field(() => Date)
