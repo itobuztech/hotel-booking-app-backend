@@ -49,6 +49,9 @@ export class Booking {
   @Field(() => String)
   source: string;
 
+  @Field(() => String)
+  email: string;
+
   @Field(() => branchBooked)
   branch: branchBooked;
 

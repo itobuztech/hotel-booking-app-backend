@@ -89,4 +89,16 @@ export class BookingResolver {
   notifications(@Context() ctx: any) {
     return this.BookingService.notificationsService(ctx);
   }
+
+  // Notification read
+  @Mutation(() => Message)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
+  @Roles(UserRole.ADMIN)
+  @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
+  notificationsRead(
+    @Args("notificationId")
+    notificationId: UniqueIdentifierInput
+  ) {
+    return this.BookingService.notificationsReadService(notificationId);
+  }
 }
