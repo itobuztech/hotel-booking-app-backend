@@ -47,6 +47,7 @@ type Booking {
   contactNumber: String!
   createdAt: DateTime!
   description: String!
+  email: String!
   fullName: String!
   id: ID!
   image: File
@@ -289,6 +290,7 @@ type Mutation {
   forgotPassword(forgotPasswordInput: ForgotPasswordInput!): ForgotPasswordResponse!
   itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
+  notificationsRead(notificationId: UniqueIdentifierInput!): Message!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   roomCreateOrUpdate(actionTypeInput: ActionTypeInput!, createOrUpdateRoomInput: CreateOrUpdateRoomInput!): Message!
   roomDelete(roomId: UniqueIdentifierInput!): Message!

@@ -419,13 +419,28 @@ export class BranchService {
     return "Branch deleted successfully";
   }
 
+  private async getNotIdenticalElements<T>(
+    array1: T[],
+    array2: T[]
+  ): Promise<T[]> {
+    return array1.filter((item) => !array2.includes(item));
+  }
+
   async update(
     getBranchInput: GetBranchInput,
     updateBranchInput: UpdateBranchInput
   ) {
     const { id } = getBranchInput;
+    const { amenityIds, uploadFileIds } = updateBranchInput;
+
+    delete updateBranchInput?.amenityIds;
+    delete updateBranchInput?.uploadFileIds;
 
     try {
+      if (uploadFileIds && uploadFileIds.length < 4) {
+        throw new NotFoundException("Upload atleast 4 files");
+      }
+
       // Validate if branch exists
       const branchPresence = await this.prisma.branch.findUnique({
         where: { id },
@@ -446,6 +461,137 @@ export class BranchService {
         },
         data,
       });
+
+      // Handling Amenities!
+      if (amenityIds.length > 0) {
+        const amenityIdsExist = await this.prisma.amenities.findMany({
+          where: {
+            id: {
+              in: amenityIds,
+            },
+          },
+        });
+
+        if (amenityIdsExist.length !== amenityIds.length) {
+          throw new NotFoundException(`Some amenities are not found!}`);
+        }
+
+        const branchAmenities =
+          await this.prisma.branchAmenitiesRelation.findMany({
+            select: { amenitiesId: true },
+            where: {
+              branchId: id,
+            },
+          });
+
+        const branchAmenitiesIdArr = branchAmenities.map(
+          (item) => item.amenitiesId
+        );
+
+        const amenitiesToCreate = await this.getNotIdenticalElements(
+          amenityIds,
+          branchAmenitiesIdArr
+        );
+        const amenitiesToDelete = await this.getNotIdenticalElements(
+          branchAmenitiesIdArr,
+          amenityIds
+        );
+
+        // Create Amenity
+        if (amenitiesToCreate.length > 0) {
+          const amenitiesCreateArr = amenitiesToCreate.map((amenity) => {
+            return {
+              amenitiesId: amenity,
+              branchId: id,
+            };
+          });
+
+          await this.prisma.branchAmenitiesRelation.createMany({
+            data: amenitiesCreateArr,
+          });
+        }
+        // Delete Amenity
+        if (amenitiesToDelete.length > 0) {
+          const amenitiesDeleteArr = amenitiesToDelete.map((amenity) => {
+            return {
+              amenitiesId: amenity,
+              branchId: id,
+            };
+          });
+
+          await this.prisma.branchAmenitiesRelation.deleteMany({
+            where: {
+              OR: amenitiesDeleteArr,
+            },
+          });
+        }
+      } else if (amenityIds && amenityIds.length === 0) {
+        await this.prisma.branchAmenitiesRelation.deleteMany({
+          where: {
+            branchId: id,
+          },
+        });
+      }
+
+      // Handeling Images
+      if (uploadFileIds && uploadFileIds.length === 4) {
+        const selectedFiles: any = await this.prisma.upload.findMany({
+          where: {
+            id: { in: uploadFileIds },
+          },
+        });
+
+        if (selectedFiles.length !== uploadFileIds.length) {
+          throw new NotFoundException(`Some files are not found!`);
+        }
+
+        const branchImages = await this.prisma.uploadRelation.findMany({
+          select: { uploadId: true },
+          where: {
+            branchId: id,
+          },
+        });
+
+        const branchImagesIdArr = branchImages.map((item) => item.uploadId);
+
+        const imagesToCreate = await this.getNotIdenticalElements(
+          uploadFileIds,
+          branchImagesIdArr
+        );
+        const imagesToDelete = await this.getNotIdenticalElements(
+          branchImagesIdArr,
+          uploadFileIds
+        );
+
+        // Create Images
+        if (imagesToCreate.length > 0) {
+          const imageCreateArr = imagesToCreate.map((image) => {
+            return {
+              uploadId: image,
+              branchId: id,
+            };
+          });
+
+          await this.prisma.uploadRelation.createMany({
+            data: imageCreateArr,
+          });
+        }
+        // Delete Images
+        if (imagesToDelete.length > 0) {
+          const imageDeleteArr = imagesToDelete.map((image) => {
+            return {
+              uploadId: image,
+              branchId: id,
+            };
+          });
+
+          await this.prisma.uploadRelation.deleteMany({
+            where: {
+              OR: imageDeleteArr,
+            },
+          });
+        }
+      }
 
       return { message: "Branch updated Successfully!" };
     } catch (error) {
