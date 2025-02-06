@@ -40,8 +40,8 @@ type AvailabilityStatus {
 }
 
 type Booking {
-  bookingStatus: String!
-  branchName: String!
+  bookingStatus: BookingStatus!
+  branch: branchBooked!
   checkInDate: DateTime!
   checkOutDate: DateTime!
   contactNumber: String!
@@ -52,7 +52,7 @@ type Booking {
   image: File
   offerPrice: Int!
   roomNumbers: [roomNumbers!]!
-  roomtypeName: String!
+  roomType: roomTypeBooked!
   setPrice: Int!
   source: String!
 }
@@ -140,7 +140,7 @@ input CreateBookingInput {
   checkOutDate: DateTime!
   contactNumber: String!
   description: String!
-  email: String
+  email: String!
   finalPrice: Int!
   fullName: String!
   image: ID
@@ -445,6 +445,7 @@ input UpdateBookingInput {
   checkOutDate: DateTime!
   contactNumber: String!
   description: String!
+  email: String!
   finalPrice: Int!
   fullName: String!
   id: ID!
@@ -526,7 +527,17 @@ type ValidateForgotPasswordResponse {
   message: String!
 }
 
+type branchBooked {
+  id: ID!
+  name: String!
+}
+
 type roomNumbers {
   id: ID!
   roomNumber: String!
+}
+
+type roomTypeBooked {
+  id: ID!
+  name: String!
 }

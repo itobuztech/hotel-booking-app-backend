@@ -12,10 +12,14 @@ import { PaginationArgs } from "src/types/inputtypes/pagination.input";
 import { FilterBookingInputs } from "./dto/filter-booking.input";
 import { SortBookingInputs } from "./dto/sort-booking.input";
 import { GraphQLError } from "graphql";
+import { EmailService } from "../email/email.service";
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService
+  ) {}
 
   async bookingService(ctx, CreateBookingInput: CreateBookingInput) {
     try {
@@ -30,13 +34,12 @@ export class BookingService {
         checkInDate,
         checkOutDate,
         description,
-        email = "",
+        email,
         region = "",
         numberOfRooms,
       } = CreateBookingInput;
 
       const bookedById = ctx.req.user.userId;
-      const loggedInEmail = ctx.req.user.email;
       const loggedInUserRole = ctx.req.user.role.userType;
 
       // Validate if branch exists
@@ -247,9 +250,30 @@ export class BookingService {
           bookingId: booking.id,
           description: `Booking request generated from ${loggedInUserRole === "ADMIN" ? "walk-in" : "online"} for ${branchPresence.name} branch ${loggedInUserRole === "ADMIN" ? `of room ${[...finalRooms]}` : ""}`,
           customerNumber: contactNumber,
-          customerEmail: email ? email : loggedInEmail,
+          customerEmail: email,
         },
       });
+
+      const rawCheckInDate = new Date(checkInDate);
+      const formattedCheckedInDate = rawCheckInDate.toLocaleDateString("en-GB"); // en-GB uses DD/MM/YYYY
+      const rawCheckOutDate = new Date(checkOutDate);
+      const formattedCheckedOutDate =
+        rawCheckOutDate.toLocaleDateString("en-GB"); // en-GB uses DD/MM/YYYY
+
+      const subject = "Booking request!";
+      const body = `<p>Hello ${fullName},</p> 
+        <p>Your booking request for the ${branchPresence.name} branch for ${numberOfRooms} ${numberOfRooms === 1 ? "room" : "rooms"} from date ${formattedCheckedInDate} to ${formattedCheckedOutDate} is generated successfully.
+        <p>You will get a call from your branch shortly.</p>
+        <p>Best regards,<br>The Hotel Management Team</p>
+        `;
+
+      const emailSent = await this.emailService.run(email, subject, body);
+
+      if (!emailSent) {
+        throw new Error(
+          "No Confirmation email is sent. Please try again after some time!"
+        );
+      }
 
       return { message: "Bookings successful!" };
     } catch (error) {
@@ -276,14 +300,16 @@ export class BookingService {
           id,
         },
         include: {
-          branch: true,
+          branch: {
+            select: { id: true, name: true },
+          },
           upload: true,
           BookingRoomRelation: {
             select: { roomId: true, room: true },
           },
           BranchRoomTypeRelation: {
             include: {
-              roomType: true,
+              roomType: { select: { id: true, name: true } },
             },
           },
         },
@@ -293,8 +319,7 @@ export class BookingService {
         throw new NotFoundException("No booking found!");
       }
 
-      Booking["branchName"] = Booking.branch.name;
-      Booking["roomtypeName"] = Booking.BranchRoomTypeRelation.roomType.name;
+      Booking["roomType"] = Booking.BranchRoomTypeRelation.roomType;
       Booking["setPrice"] = Number(Booking.BranchRoomTypeRelation.setPrice);
       Booking["offerPrice"] = Number(Booking.BranchRoomTypeRelation.offerPrice);
       Booking["roomNumbers"] =
@@ -316,7 +341,6 @@ export class BookingService {
         delete Booking.upload;
       }
 
-      delete Booking.branch;
       delete Booking.BranchRoomTypeRelation;
       delete Booking.BookingRoomRelation;
 
@@ -356,6 +380,7 @@ export class BookingService {
         checkOutDate,
         description,
         numberOfRooms,
+        email,
       } = UpdateBookingInput;
 
       const bookedById = ctx.req.user.userId;
@@ -515,6 +540,9 @@ export class BookingService {
       if (Booking.fullName !== fullName) {
         updateDataObj = { ...updateDataObj, fullName };
       }
+      if (Booking.email !== email) {
+        updateDataObj = { ...updateDataObj, email };
+      }
       if (Booking.contactNumber !== contactNumber) {
         updateDataObj = { ...updateDataObj, contactNumber };
       }
@@ -672,6 +700,27 @@ export class BookingService {
             customerNumber: contactNumber,
           },
         });
+
+        const rawCheckInDate = new Date(checkInDate);
+        const formattedCheckedInDate =
+          rawCheckInDate.toLocaleDateString("en-GB"); // en-GB uses DD/MM/YYYY
+        const rawCheckOutDate = new Date(checkOutDate);
+        const formattedCheckedOutDate =
+          rawCheckOutDate.toLocaleDateString("en-GB"); // en-GB uses DD/MM/YYYY
+
+        const subject = "Booking status changed!";
+        const body = `<p>Hello ${fullName},</p> 
+        <p>Your booking status for the ${branchPresence.name} branch for ${numberOfRooms} ${numberOfRooms === 1 ? "room" : "rooms"} from date ${formattedCheckedInDate} to ${formattedCheckedOutDate} is being changed from ${Booking.bookingStatus} to ${bookingStatus}.
+        <p>Best regards,<br>The Hotel Management Team</p>
+        `;
+
+        const emailSent = await this.emailService.run(email, subject, body);
+
+        if (!emailSent) {
+          throw new Error(
+            "No Confirmation email is sent. Please try again after some time!"
+          );
+        }
       }
 
       return { message: "Booking Updated!" };
@@ -827,9 +876,7 @@ export class BookingService {
 
       if (bookings.length > 0) {
         bookings?.map((booking) => {
-          booking["branchName"] = booking?.branch?.name;
-          booking["roomtypeName"] =
-            booking?.BranchRoomTypeRelation?.roomType.name;
+          booking["roomType"] = booking.BranchRoomTypeRelation.roomType;
           booking["setPrice"] = Number(
             booking?.BranchRoomTypeRelation?.setPrice
           );
