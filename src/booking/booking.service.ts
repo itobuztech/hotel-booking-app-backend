@@ -12,10 +12,14 @@ import { PaginationArgs } from "src/types/inputtypes/pagination.input";
 import { FilterBookingInputs } from "./dto/filter-booking.input";
 import { SortBookingInputs } from "./dto/sort-booking.input";
 import { GraphQLError } from "graphql";
+import { EmailService } from "../email/email.service";
 
 @Injectable()
 export class BookingService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService
+  ) {}
 
   async bookingService(ctx, CreateBookingInput: CreateBookingInput) {
     try {
@@ -249,6 +253,27 @@ export class BookingService {
           customerEmail: email,
         },
       });
+
+      const rawCheckInDate = new Date(checkInDate);
+      const formattedCheckedInDate = rawCheckInDate.toLocaleDateString("en-GB"); // en-GB uses DD/MM/YYYY
+      const rawCheckOutDate = new Date(checkOutDate);
+      const formattedCheckedOutDate =
+        rawCheckOutDate.toLocaleDateString("en-GB"); // en-GB uses DD/MM/YYYY
+
+      const subject = "Booking request!";
+      const body = `<p>Hello ${fullName},</p> 
+        <p>Your booking request for the ${branchPresence.name} branch for ${numberOfRooms} ${numberOfRooms === 1 ? "room" : "rooms"} from date ${formattedCheckedInDate} to ${formattedCheckedOutDate} is generated successfully.
+        <p>You will get a call from your branch shortly.</p>
+        <p>Best regards,<br>The Hotel Management Team</p>
+        `;
+
+      const emailSent = await this.emailService.run(email, subject, body);
+
+      if (!emailSent) {
+        throw new Error(
+          "No Confirmation email is sent. Please try again after some time!"
+        );
+      }
 
       return { message: "Bookings successful!" };
     } catch (error) {
@@ -675,6 +700,27 @@ export class BookingService {
             customerNumber: contactNumber,
           },
         });
+
+        const rawCheckInDate = new Date(checkInDate);
+        const formattedCheckedInDate =
+          rawCheckInDate.toLocaleDateString("en-GB"); // en-GB uses DD/MM/YYYY
+        const rawCheckOutDate = new Date(checkOutDate);
+        const formattedCheckedOutDate =
+          rawCheckOutDate.toLocaleDateString("en-GB"); // en-GB uses DD/MM/YYYY
+
+        const subject = "Booking status changed!";
+        const body = `<p>Hello ${fullName},</p> 
+        <p>Your booking status for the ${branchPresence.name} branch for ${numberOfRooms} ${numberOfRooms === 1 ? "room" : "rooms"} from date ${formattedCheckedInDate} to ${formattedCheckedOutDate} is being changed from ${Booking.bookingStatus} to ${bookingStatus}.
+        <p>Best regards,<br>The Hotel Management Team</p>
+        `;
+
+        const emailSent = await this.emailService.run(email, subject, body);
+
+        if (!emailSent) {
+          throw new Error(
+            "No Confirmation email is sent. Please try again after some time!"
+          );
+        }
       }
 
       return { message: "Booking Updated!" };
