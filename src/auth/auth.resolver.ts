@@ -23,6 +23,8 @@ import {
 } from "./dto/forgot-password";
 import { TokenConfirmationInput } from "./dto/token-confirmation.input";
 import { Message } from "src/types/inputtypes/message.entity";
+import { SignupResponse } from "./dto/signup-response";
+import { RefreshToAccessTokenInput } from "./dto/refresh-to-access-token.input";
 @Resolver()
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
@@ -78,6 +80,18 @@ export class AuthResolver {
       return this.authService.validateForgotPasswordToken(
         forgotPasswordConfirmationInput
       );
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+
+  @Mutation(() => SignupResponse)
+  async refreshToAccessToken(
+    @Args("refreshToAccessTokenInput")
+    refreshToAccessTokenInput: RefreshToAccessTokenInput
+  ) {
+    try {
+      return this.authService.refreshToAccessToken(refreshToAccessTokenInput);
     } catch (error) {
       throw new BadRequestException(error);
     }

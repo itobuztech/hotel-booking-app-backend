@@ -25,6 +25,7 @@ import {
 import { generateToken } from "../util/helper";
 import { EmailService } from "../email/email.service";
 import { TokenConfirmationInput } from "./dto/token-confirmation.input";
+import { ApolloError, AuthenticationError } from "apollo-server-express";
 
 @Injectable()
 export class AuthService {
@@ -263,5 +264,59 @@ export class AuthService {
     }
 
     return { message: "Password has been reset. Try loggin in." };
+  }
+
+  async refreshToAccessToken(refreshToAccessTokenInput) {
+    try {
+      const { refreshToken } = refreshToAccessTokenInput;
+
+      const user = await this.jwtService.verifyAsync(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+
+      const access_token = await this.generateAccessToken({
+        email: user.email,
+        sub: user.sub,
+        role: user.role,
+      });
+
+      const refresh_token = await this.generateRefreshToken({
+        email: user.email,
+        sub: user.sub,
+        role: user.role,
+      });
+
+      if (!access_token) {
+        throw new ApolloError(
+          "Failed to generate access token",
+          "TOKEN_GENERATION_FAILED"
+        );
+      }
+
+      return { access_token, refresh_token };
+    } catch (error) {
+      // Detailed logging for debugging purposes
+      console.error("Error refreshing access token:", error);
+
+      // Handle specific JWT errors
+      if (error.name === "TokenExpiredError") {
+        throw new AuthenticationError("Refresh token has expired");
+      }
+
+      if (error.name === "JsonWebTokenError") {
+        throw new AuthenticationError("Invalid refresh token");
+      }
+
+      // Custom handling for application-specific errors
+      if (error instanceof NotFoundException) {
+        throw new ApolloError(error.message, "RESOURCE_NOT_FOUND");
+      }
+
+      // Generic error handling with default message and code
+      throw new ApolloError(
+        error.message || "Failed to refresh access token",
+        error.code || "INTERNAL_SERVER_ERROR"
+      );
+    }
   }
 }

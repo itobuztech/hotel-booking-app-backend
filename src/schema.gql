@@ -291,6 +291,7 @@ type Mutation {
   itemsToggle(itemArg: FilterItemInput!, itemId: UniqueIdentifierInput!): Message!
   login(loginUserInput: LoginUserInput!): LoginResponse!
   notificationsRead(notificationId: UniqueIdentifierInput!): Message!
+  refreshToAccessToken(refreshToAccessTokenInput: RefreshToAccessTokenInput!): SignupResponse!
   resetPassword(resetPasswordInput: ResetPasswordInput!): Boolean!
   roomCreateOrUpdate(actionTypeInput: ActionTypeInput!, createOrUpdateRoomInput: CreateOrUpdateRoomInput!): Message!
   roomDelete(roomId: UniqueIdentifierInput!): Message!
@@ -372,6 +373,10 @@ type Query {
   users: [User!]
 }
 
+input RefreshToAccessTokenInput {
+  refreshToken: String!
+}
+
 input ResetPasswordInput {
   newPassword: String!
   oldPassword: String!
@@ -421,6 +426,11 @@ type RoomsWithInitialArr {
 
 input SearchInput {
   search: String!
+}
+
+type SignupResponse {
+  access_token: String!
+  refresh_token: String!
 }
 
 input SortBookingInputs {
