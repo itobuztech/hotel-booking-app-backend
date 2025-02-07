@@ -35,7 +35,6 @@ export class BranchResolver {
     return this.branchService.create(createBranchInput);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Query(() => BranchListResponse)
   listBranches(
     @Args("paginationArgs", { nullable: true }) paginationArgs: PaginationArgs,
@@ -44,7 +43,6 @@ export class BranchResolver {
     return this.branchService.list(paginationArgs, searchInput);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @Query(() => BranchResponse)
   getBranch(@Args("getBranchInput") getBranchInput: GetBranchInput) {
     return this.branchService.get(getBranchInput);
