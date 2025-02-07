@@ -18,6 +18,7 @@ import { FilterBookingInputs } from "./dto/filter-booking.input";
 import { SortBookingInputs } from "./dto/sort-booking.input";
 import { PaginatedNotification } from "./entities/notification.entity";
 import { BookingCalender } from "./entities/booking-calender.entity";
+import { FilterBookingCalenderInputs } from "./dto/filter-booking-calender.input";
 
 @Resolver()
 export class BookingResolver {
@@ -108,7 +109,11 @@ export class BookingResolver {
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
-  bookingCalender() {
-    return this.BookingService.bookingCalenderService();
+  bookingCalender(
+    @Args("searchText", { nullable: true }) searchText: string,
+    @Args("filterArgs", { nullable: true })
+    filterArgs: FilterBookingCalenderInputs
+  ) {
+    return this.BookingService.bookingCalenderService(searchText, filterArgs);
   }
 }

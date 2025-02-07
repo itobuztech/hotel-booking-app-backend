@@ -217,6 +217,12 @@ type File {
   id: ID!
 }
 
+input FilterBookingCalenderInputs {
+  bookingStatus: BookingStatus
+  branch: ID
+  roomType: ID
+}
+
 input FilterBookingInputs {
   bookingDate: DateTime
   bookingStatus: BookingStatus
@@ -367,7 +373,7 @@ type PaginationResponse {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
-  bookingCalender: [BookingCalender!]!
+  bookingCalender(filterArgs: FilterBookingCalenderInputs, searchText: String): [BookingCalender!]!
   bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
   bookingList(filterArgs: FilterBookingInputs, paginationArgs: PaginationArgs, searchText: String, sortInputs: SortBookingInputs): PaginatedBooking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!

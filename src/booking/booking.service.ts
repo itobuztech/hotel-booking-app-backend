@@ -737,9 +737,8 @@ export class BookingService {
     }
   }
 
-  // This is the function that returns the Custom Where Clause. STARTS.
-
-  async generatingWhereClause({ ...whereArgs }) {
+  // This is the function that returns the Custom BookingList Where Clause. STARTS.
+  async generatingBookingListWhereClause({ ...whereArgs }) {
     const {
       searchText = null,
       sortInputs = null,
@@ -827,7 +826,7 @@ export class BookingService {
       );
     }
   }
-  // This is the function that returns the Custom Where Clause. ENDS.
+  // This is the function that returns the Custom BookingList Where Clause. ENDS.
 
   async bookingListService(
     paginationArgs: PaginationArgs,
@@ -840,7 +839,7 @@ export class BookingService {
       skip = skip ?? 0;
       limit = limit ?? 10;
 
-      const whereClause = await this.generatingWhereClause({
+      const whereClause = await this.generatingBookingListWhereClause({
         searchText,
         sortInputs,
         filterArgs,
@@ -980,9 +979,72 @@ export class BookingService {
     }
   }
 
-  async bookingCalenderService() {
+  // This is the function that returns the Custom BookingList Where Clause. STARTS.
+  async generatingBookingCalenderWhereClause({ ...whereArgs }) {
+    const { searchText = null, filterArgs = null } = whereArgs;
+
     try {
+      const searchQuery = [];
+      if (searchText) {
+        searchQuery.push({
+          roomName: {
+            contains: searchText,
+            mode: "insensitive",
+          },
+        });
+      }
+
+      let where = {};
+      if (filterArgs) {
+        const { branch, roomType, bookingStatus } = filterArgs;
+
+        if (branch) {
+          where = {
+            ...where,
+            branchRoomType: { branchId: branch },
+          };
+        }
+
+        if (roomType) {
+          where = {
+            ...where,
+            branchRoomType: { roomTypeId: roomType },
+          };
+        }
+
+        if (bookingStatus) {
+          where = {
+            ...where,
+            BookingRoomRelation: { booking: { bookingStatus } },
+          };
+        }
+      }
+
+      if (searchQuery.length > 0) {
+        where = { ...where, OR: searchQuery };
+      }
+
+      return { where };
+    } catch (error) {
+      console.log("Error:", error);
+      throw new GraphQLError(
+        "Internal Server Error. Please try after sometime!"
+      );
+    }
+  }
+  // This is the function that returns the Custom BookingList Where Clause. ENDS.
+
+  async bookingCalenderService(searchText, filterArgs) {
+    try {
+      const whereClause = await this.generatingBookingCalenderWhereClause({
+        searchText,
+        filterArgs,
+      });
+
+      let { where } = whereClause;
+
       const BookingCalender: any = await this.prisma.room.findMany({
+        where,
         select: {
           id: true,
           roomName: true,
@@ -1025,11 +1087,6 @@ export class BookingService {
           delete room?.BookingRoomRelation;
         });
       }
-
-      console.log(
-        "BookingCalender2=",
-        JSON.stringify(BookingCalender, null, 2)
-      );
 
       return BookingCalender;
     } catch (error) {
