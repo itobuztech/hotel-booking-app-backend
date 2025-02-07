@@ -3,7 +3,7 @@
 # ------------------------------------------------------
 
 type Account {
-  contactNumber: String!
+  contactNumber: String
   createdAt: DateTime!
   email: String!
   id: String!
@@ -56,6 +56,15 @@ type Booking {
   roomType: roomTypeBooked!
   setPrice: Int!
   source: String!
+}
+
+type BookingCalender {
+  booking: [roomBooking!]
+  branch: bookedBranch!
+  createdAt: DateTime!
+  id: ID!
+  roomName: ID!
+  roomType: bookedRoomType!
 }
 
 enum BookingStatus {
@@ -358,6 +367,7 @@ type PaginationResponse {
 type Query {
   File(getUploadedFile: GetUploadedFile!): File!
   account: Account!
+  bookingCalender: [BookingCalender!]!
   bookingDetails(bookingId: UniqueIdentifierInput!): Booking!
   bookingList(filterArgs: FilterBookingInputs, paginationArgs: PaginationArgs, searchText: String, sortInputs: SortBookingInputs): PaginatedBooking!
   branchRoomTypeDetails(branchRoomTypeId: UniqueIdentifierInput!): BranchRoomType!
@@ -514,7 +524,7 @@ type UploadMultipleFileResponse {
 }
 
 type User {
-  contactNumber: String!
+  contactNumber: String
   createdAt: DateTime!
   email: String!
   id: String!
@@ -539,9 +549,27 @@ type ValidateForgotPasswordResponse {
   message: String!
 }
 
+type bookedBranch {
+  id: ID!
+  name: String!
+}
+
+type bookedRoomType {
+  id: ID!
+  name: String!
+}
+
 type branchBooked {
   id: ID!
   name: String!
+}
+
+type roomBooking {
+  bookingStatus: BookingStatus!
+  checkInDate: DateTime!
+  checkOutDate: DateTime!
+  fullName: String!
+  id: ID!
 }
 
 type roomNumbers {

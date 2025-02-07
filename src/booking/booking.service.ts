@@ -982,7 +982,54 @@ export class BookingService {
 
   async bookingCalenderService() {
     try {
-      const BookingCalender = await this.prisma.room.findMany({});
+      const BookingCalender: any = await this.prisma.room.findMany({
+        select: {
+          id: true,
+          roomName: true,
+          createdAt: true,
+          branchRoomType: {
+            select: {
+              branch: {
+                select: { id: true, name: true },
+              },
+              roomType: {
+                select: { id: true, name: true, roomInitial: true },
+              },
+            },
+          },
+          BookingRoomRelation: {
+            select: {
+              booking: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  checkInDate: true,
+                  checkOutDate: true,
+                  bookingStatus: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (BookingCalender.length > 0) {
+        BookingCalender.map((room) => {
+          room["branch"] = room?.branchRoomType?.branch;
+          room["roomType"] = room?.branchRoomType?.roomType;
+          room["booking"] = room?.BookingRoomRelation?.map((booking) => {
+            return booking.booking;
+          });
+
+          delete room?.branchRoomType;
+          delete room?.BookingRoomRelation;
+        });
+      }
+
+      console.log(
+        "BookingCalender2=",
+        JSON.stringify(BookingCalender, null, 2)
+      );
 
       return BookingCalender;
     } catch (error) {

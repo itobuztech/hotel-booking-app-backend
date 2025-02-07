@@ -20,6 +20,7 @@ export class roomBooking {
   bookingStatus: BookingStatus;
 }
 
+@ObjectType()
 export class bookedBranch {
   @Field(() => ID)
   id: string;
@@ -27,6 +28,7 @@ export class bookedBranch {
   @Field(() => String)
   name: string;
 }
+
 @ObjectType()
 export class bookedRoomType {
   @Field(() => ID)
@@ -41,14 +43,17 @@ export class BookingCalender {
   @Field(() => ID)
   id: RoomDB["id"];
 
+  @Field(() => ID)
+  roomName: RoomDB["roomName"];
+
   @Field(() => bookedBranch)
   branch: bookedBranch;
 
   @Field(() => bookedRoomType)
   roomType: bookedRoomType;
 
-  @Field(() => roomBooking)
-  booking: roomBooking;
+  @Field(() => [roomBooking], { nullable: true })
+  booking?: roomBooking[];
 
   @Field(() => Date)
   createdAt: RoomDB["createdAt"];

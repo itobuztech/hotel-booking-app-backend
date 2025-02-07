@@ -104,7 +104,7 @@ export class BookingResolver {
   }
 
   // Booking Calender
-  @Query(() => BookingCalender)
+  @Query(() => [BookingCalender])
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
