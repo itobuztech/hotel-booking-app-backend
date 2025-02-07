@@ -71,6 +71,9 @@ export class Booking {
   checkOutDate: BookingDB["checkOutDate"];
 
   @Field(() => String)
+  numberOfRooms: BookingDB["numberOfRooms"];
+
+  @Field(() => String)
   description: BookingDB["description"];
 
   @Field(() => BookingStatus)

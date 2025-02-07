@@ -51,6 +51,7 @@ type Booking {
   fullName: String!
   id: ID!
   image: File
+  numberOfRooms: String!
   offerPrice: Int!
   roomNumbers: [roomNumbers!]!
   roomType: roomTypeBooked!
