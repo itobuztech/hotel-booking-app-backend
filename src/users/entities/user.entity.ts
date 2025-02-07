@@ -28,8 +28,8 @@ export class User {
   @Field(() => String)
   email: UserDB["email"];
 
-  @Field(() => String)
-  contactNumber: UserDB["contactNumber"];
+  @Field(() => String, { nullable: true })
+  contactNumber?: UserDB["contactNumber"];
 
   @Field(() => File, { nullable: true })
   image?: File;

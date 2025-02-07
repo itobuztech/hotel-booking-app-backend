@@ -211,13 +211,15 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException("User not found");
     }
-    const { email, id, name } = user;
+    const { email, id, name, role } = user;
+
+    const userType = role.userType;
 
     const confirmationToken = await generateToken();
     const subject = "Forgot Password Request!";
     const body = `<p>Hello ${name}</p>
         <p>We received a request to reset the password for your [Service Name] account. To ensure the security of your account, please click the link below to set a new password:.</p> 
-        <p>By clicking on this link ${process.env.FRONTEND_BASE_URL}/forgotpasswordconfirmation?confirmation_token=${confirmationToken}</p> 
+        <p>By clicking on this link ${userType === "ADMIN" ? `${process.env.FRONTEND_BASE_URL}/forgotpasswordconfirmation?confirmation_token=${confirmationToken}` : `${process.env.FRONTEND_BASE_URL}/user/forgotpasswordconfirmation?confirmation_token=${confirmationToken}`} </p> 
         <p>Thanks</p>`;
 
     const emailSent = await this.emailService.run(email, subject, body);

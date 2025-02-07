@@ -36,7 +36,6 @@ export class BranchResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
   @Query(() => BranchListResponse)
   listBranches(
     @Args("paginationArgs", { nullable: true }) paginationArgs: PaginationArgs,
@@ -46,7 +45,6 @@ export class BranchResolver {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
   @Query(() => BranchResponse)
   getBranch(@Args("getBranchInput") getBranchInput: GetBranchInput) {
     return this.branchService.get(getBranchInput);
