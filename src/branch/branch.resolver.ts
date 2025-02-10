@@ -19,6 +19,7 @@ import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
 import { checkIfExists } from "../helpers/custom-decorators/checkIfExists-decorators";
 import { Message } from "../types/inputtypes/message.entity";
+import { FilterBookingBranchInputs } from "./dto/filter-booking-branch.input";
 
 @Resolver(() => Branch)
 export class BranchResolver {
@@ -41,6 +42,17 @@ export class BranchResolver {
     @Args("searchInput", { nullable: true }) searchInput: SearchInput
   ) {
     return this.branchService.list(paginationArgs, searchInput);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
+  @Query(() => BranchListResponse)
+  listBookingBranches(
+    @Args("filterInput", { nullable: true })
+    filterInput: FilterBookingBranchInputs,
+    @Args("searchInput", { nullable: true }) searchInput: SearchInput
+  ) {
+    return this.branchService.listBookingBranches(filterInput, searchInput);
   }
 
   @Query(() => BranchResponse)

@@ -51,7 +51,7 @@ type Booking {
   fullName: String!
   id: ID!
   image: File
-  numberOfRooms: String!
+  numberOfRooms: Int!
   offerPrice: Int!
   roomNumbers: [roomNumbers!]!
   roomType: roomTypeBooked!
@@ -218,6 +218,13 @@ type File {
   id: ID!
 }
 
+input FilterBookingBranchInputs {
+  checkInDate: DateTime
+  checkOutDate: DateTime
+  city: Int
+  numberOfDays: Int
+}
+
 input FilterBookingCalenderInputs {
   bookingStatus: BookingStatus
   branch: ID
@@ -382,6 +389,7 @@ type Query {
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
+  listBookingBranches(filterInput: FilterBookingBranchInputs, searchInput: SearchInput): BranchListResponse!
   listBranches(paginationArgs: PaginationArgs, searchInput: SearchInput): BranchListResponse!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   notifications: PaginatedNotification!

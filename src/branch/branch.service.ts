@@ -10,6 +10,7 @@ import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
+import { FilterBookingBranchInputs } from "./dto/filter-booking-branch.input";
 
 @Injectable()
 export class BranchService {
@@ -406,6 +407,142 @@ export class BranchService {
         totalPages: Math.ceil(recordCount / limit),
         currentPage: currentPage,
       },
+    };
+  }
+
+  async listBookingBranches(
+    filterInput: FilterBookingBranchInputs,
+    searchInput: SearchInput
+  ) {
+    const { search = "" } = searchInput;
+    const filteredBranches = await this.prisma.branch.findMany({
+      where: {
+        OR: [
+          {
+            name: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            address: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            city: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            location: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            description: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        ],
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        UploadRelation: {
+          include: {
+            upload: true,
+          },
+        },
+        BranchRoomTypeRelation: {
+          select: {
+            id: true,
+            offerPrice: true,
+            roomType: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            Room: {
+              select: {
+                id: true,
+              },
+            },
+          },
+          orderBy: {
+            offerPrice: "asc",
+          },
+        },
+        Booking: {
+          where: {
+            checkInDate: {
+              lte: new Date(),
+            },
+            checkOutDate: {
+              gte: new Date(),
+            },
+          },
+          select: {
+            BranchRoomTypeRelation: {
+              select: {
+                roomTypeId: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (filteredBranches.length > 0) {
+      filteredBranches.map((branch: any) => {
+        branch["image"] = branch?.UploadRelation?.map((item) => {
+          return {
+            id: item.upload.id,
+            file: item.upload.file,
+            fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${item.upload.file}`,
+          };
+        });
+
+        delete branch.UploadRelation;
+
+        branch["startingPrice"] = Number(
+          branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
+        );
+
+        branch["status"] = branch.BranchRoomTypeRelation.map((relation) => {
+          let bookedRooms = 0;
+          if (branch?.Booking?.length === 0) {
+            bookedRooms = 0;
+          } else {
+            branch?.Booking?.map((room) => {
+              if (
+                relation?.roomType?.id ===
+                room?.BranchRoomTypeRelation?.roomTypeId
+              ) {
+                bookedRooms++;
+              }
+            });
+          }
+
+          return {
+            ...relation.roomType,
+            totalRooms: relation?.Room?.length,
+            availabeRooms: relation?.Room?.length - bookedRooms,
+          };
+        });
+
+        branch.geoLocation = JSON.parse(branch.geoLocation);
+      });
+    }
+
+    return {
+      branches: filteredBranches,
     };
   }
 
