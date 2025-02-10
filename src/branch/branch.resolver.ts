@@ -3,6 +3,7 @@ import { BranchService } from "./branch.service";
 import { Branch } from "./entities/branch.entity";
 import { CreateBranchInput } from "./dto/create-branch.input";
 import {
+  BookingBranchResponse,
   BranchCreationMessage,
   BranchListResponse,
   BranchResponse,
@@ -19,6 +20,7 @@ import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
 import { checkIfExists } from "../helpers/custom-decorators/checkIfExists-decorators";
 import { Message } from "../types/inputtypes/message.entity";
+import { FilterBookingBranchInputs } from "./dto/filter-booking-branch.input";
 
 @Resolver(() => Branch)
 export class BranchResolver {
@@ -41,6 +43,15 @@ export class BranchResolver {
     @Args("searchInput", { nullable: true }) searchInput: SearchInput
   ) {
     return this.branchService.list(paginationArgs, searchInput);
+  }
+
+  @Query(() => [BookingBranchResponse])
+  listBookingBranches(
+    @Args("filterInput", { nullable: true })
+    filterInput: FilterBookingBranchInputs,
+    @Args("searchInput", { nullable: true }) searchInput: SearchInput
+  ) {
+    return this.branchService.listBookingBranches(filterInput, searchInput);
   }
 
   @Query(() => BranchResponse)

@@ -10,6 +10,8 @@ import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
+import { FilterBookingBranchInputs } from "./dto/filter-booking-branch.input";
+import { GraphQLError } from "graphql";
 
 @Injectable()
 export class BranchService {
@@ -407,6 +409,123 @@ export class BranchService {
         currentPage: currentPage,
       },
     };
+  }
+
+  async listBookingBranches(
+    filterInput: FilterBookingBranchInputs,
+    searchInput: SearchInput
+  ) {
+    const { checkInDate, checkOutDate, numberOfRooms } = filterInput;
+
+    const searchQuery = [];
+    let where = {};
+
+    if (searchInput) {
+      searchQuery.push(
+        {
+          city: {
+            contains: searchInput?.search || "",
+            mode: "insensitive",
+          },
+        },
+        {
+          location: {
+            contains: searchInput?.search || "",
+            mode: "insensitive",
+          },
+        }
+      );
+    }
+
+    if (searchQuery.length > 0) {
+      where = { OR: searchQuery };
+    }
+
+    const filteredBranches = await this.prisma.branch.findMany({
+      where,
+      include: {
+        UploadRelation: {
+          include: {
+            upload: true,
+          },
+        },
+        BranchRoomTypeRelation: {
+          select: {
+            id: true,
+            offerPrice: true,
+            roomType: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            Room: {
+              where: {
+                NOT: {
+                  BookingRoomRelation: {
+                    some: {
+                      booking: {
+                        AND: [
+                          { checkInDate: { lt: checkOutDate } }, // Booking starts before given checkOutDate
+                          { checkOutDate: { gt: checkInDate } }, // Booking ends after given checkInDate
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+              select: {
+                id: true,
+              },
+            },
+          },
+          orderBy: {
+            offerPrice: "asc",
+          },
+        },
+      },
+    });
+
+    let filteredBranchesWithRooms;
+    if (filteredBranches.length > 0) {
+      filteredBranches.map((branch: any) => {
+        branch["availableRooms"] = 0;
+
+        if (branch?.BranchRoomTypeRelation?.length > 0) {
+          let totalAvailableRooms = 0;
+          branch?.BranchRoomTypeRelation?.map((roomType) => {
+            totalAvailableRooms = totalAvailableRooms + roomType?.Room?.length;
+          });
+
+          branch["availableRooms"] = totalAvailableRooms;
+        }
+
+        branch["image"] = branch?.UploadRelation?.map((item) => {
+          return {
+            id: item.upload.id,
+            file: item.upload.file,
+            fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${item.upload.file}`,
+          };
+        });
+
+        delete branch.UploadRelation;
+
+        branch["startingPrice"] = Number(
+          branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
+        );
+
+        branch.geoLocation = JSON.parse(branch.geoLocation);
+
+        delete branch.BranchRoomTypeRelation;
+      });
+
+      filteredBranchesWithRooms = filteredBranches.filter(
+        (branch: any) =>
+          branch.availableRooms > 0 && branch.availableRooms >= numberOfRooms
+      );
+    }
+
+    return filteredBranchesWithRooms;
   }
 
   async delete(deleteBranchInput: DeleteBranchInput): Promise<string> {

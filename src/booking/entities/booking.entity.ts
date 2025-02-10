@@ -70,7 +70,7 @@ export class Booking {
   @Field(() => Date)
   checkOutDate: BookingDB["checkOutDate"];
 
-  @Field(() => String)
+  @Field(() => Int)
   numberOfRooms: BookingDB["numberOfRooms"];
 
   @Field(() => String)
