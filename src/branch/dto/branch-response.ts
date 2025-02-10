@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from "@nestjs/graphql";
+import { ObjectType, Field, ID, OmitType } from "@nestjs/graphql";
 import { PaginationResponse } from "src/types/response-types/pagination-response";
 import { File } from "../../upload/entities/files.entity";
 import { Aminity } from "../../item/entities/items.entity";
@@ -92,3 +92,9 @@ export class BranchListResponse {
   @Field(() => PaginationResponse)
   pagination?: PaginationResponse;
 }
+
+@ObjectType()
+export class BookingBranchResponse extends OmitType(BranchResponse, [
+  "amenities",
+  "status",
+] as const) {}

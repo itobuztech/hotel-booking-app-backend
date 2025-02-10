@@ -3,6 +3,7 @@ import { BranchService } from "./branch.service";
 import { Branch } from "./entities/branch.entity";
 import { CreateBranchInput } from "./dto/create-branch.input";
 import {
+  BookingBranchResponse,
   BranchCreationMessage,
   BranchListResponse,
   BranchResponse,
@@ -44,9 +45,7 @@ export class BranchResolver {
     return this.branchService.list(paginationArgs, searchInput);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRole.ADMIN, UserRole.CUSTOMER)
-  @Query(() => BranchListResponse)
+  @Query(() => [BookingBranchResponse])
   listBookingBranches(
     @Args("filterInput", { nullable: true })
     filterInput: FilterBookingBranchInputs,

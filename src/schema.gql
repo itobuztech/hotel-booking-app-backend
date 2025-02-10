@@ -59,6 +59,20 @@ type Booking {
   source: String!
 }
 
+type BookingBranchResponse {
+  address: String!
+  areaPincode: String!
+  city: String!
+  contactNumber: String!
+  description: String!
+  geoLocation: GeoLocationRes!
+  id: String!
+  image: [File!]!
+  location: String!
+  name: String!
+  startingPrice: Float!
+}
+
 type BookingCalender {
   booking: [roomBooking!]
   branch: bookedBranch!
@@ -221,7 +235,6 @@ type File {
 input FilterBookingBranchInputs {
   checkInDate: DateTime
   checkOutDate: DateTime
-  city: Int
   numberOfDays: Int
 }
 
@@ -389,7 +402,7 @@ type Query {
   getBranch(getBranchInput: GetBranchInput!): BranchResponse!
   getpermissions: JSON!
   itemsListing(filterArg: FilterItemInput!): PaginatedAminityOrRoomType!
-  listBookingBranches(filterInput: FilterBookingBranchInputs, searchInput: SearchInput): BranchListResponse!
+  listBookingBranches(filterInput: FilterBookingBranchInputs, searchInput: SearchInput): [BookingBranchResponse!]!
   listBranches(paginationArgs: PaginationArgs, searchInput: SearchInput): BranchListResponse!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
   notifications: PaginatedNotification!
