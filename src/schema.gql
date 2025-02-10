@@ -235,7 +235,7 @@ type File {
 input FilterBookingBranchInputs {
   checkInDate: DateTime
   checkOutDate: DateTime
-  numberOfDays: Int
+  numberOfRooms: Int
 }
 
 input FilterBookingCalenderInputs {

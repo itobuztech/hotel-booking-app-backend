@@ -411,122 +411,121 @@ export class BranchService {
     };
   }
 
-  // This is the function that returns the Custom BookingList Where Clause. STARTS.
-  async generatingBookingBranchListWhereClause({ ...whereArgs }) {
-    const { searchText = null, filterArgs = null } = whereArgs;
-
-    try {
-      const searchQuery = [];
-      if (searchText) {
-        searchQuery.push(
-          {
-            city: {
-              contains: searchText,
-              mode: "insensitive",
-            },
-          },
-          {
-            location: {
-              name: {
-                contains: searchText,
-                mode: "insensitive",
-              },
-            },
-          }
-        );
-      }
-
-      let where = {};
-      if (filterArgs) {
-        const { checkInDate, checkOutDate, numberOfDays } = filterArgs;
-
-        if (checkInDate) {
-          where = { ...where, checkInDate: { gte: new Date(checkInDate) } };
-        }
-
-        if (checkOutDate) {
-          where = { ...where, checkOutDate: { lte: new Date(checkOutDate) } };
-        }
-
-        if (numberOfDays) {
-          where = { ...where, numberOfDays };
-        }
-      }
-
-      if (searchQuery.length > 0) {
-        where = { ...where, OR: searchQuery };
-      }
-
-      return { where };
-    } catch (error) {
-      console.log("Error:", error);
-      throw new GraphQLError(
-        "Internal Server Error. Please try after sometime!"
-      );
-    }
-  }
-  // This is the function that returns the Custom BookingList Where Clause. ENDS.
-
   async listBookingBranches(
     filterInput: FilterBookingBranchInputs,
     searchInput: SearchInput
   ) {
-    const whereClause = await this.generatingBookingBranchListWhereClause({
-      searchInput,
-      filterInput,
+    const { checkInDate, checkOutDate, numberOfRooms } = filterInput;
+
+    const searchQuery = [];
+    let where = {};
+
+    if (searchInput) {
+      searchQuery.push(
+        {
+          city: {
+            contains: searchInput?.search || "",
+            mode: "insensitive",
+          },
+        },
+        {
+          location: {
+            contains: searchInput?.search || "",
+            mode: "insensitive",
+          },
+        }
+      );
+    }
+
+    if (searchQuery.length > 0) {
+      where = { OR: searchQuery };
+    }
+
+    const filteredBranches = await this.prisma.branch.findMany({
+      where,
+      include: {
+        UploadRelation: {
+          include: {
+            upload: true,
+          },
+        },
+        BranchRoomTypeRelation: {
+          select: {
+            id: true,
+            offerPrice: true,
+            roomType: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            Room: {
+              where: {
+                NOT: {
+                  BookingRoomRelation: {
+                    some: {
+                      booking: {
+                        AND: [
+                          { checkInDate: { lt: checkOutDate } }, // Booking starts before given checkOutDate
+                          { checkOutDate: { gt: checkInDate } }, // Booking ends after given checkInDate
+                        ],
+                      },
+                    },
+                  },
+                },
+              },
+              select: {
+                id: true,
+              },
+            },
+          },
+          orderBy: {
+            offerPrice: "asc",
+          },
+        },
+      },
     });
 
-    console.log("whereClause=", whereClause);
+    let filteredBranchesWithRooms;
+    if (filteredBranches.length > 0) {
+      filteredBranches.map((branch: any) => {
+        branch["availableRooms"] = 0;
 
-    // const filteredBranches = await this.prisma.branch.findMany({
-    //   where: whereClause,
-    // });
+        if (branch?.BranchRoomTypeRelation?.length > 0) {
+          let totalAvailableRooms = 0;
+          branch?.BranchRoomTypeRelation?.map((roomType) => {
+            totalAvailableRooms = totalAvailableRooms + roomType?.Room?.length;
+          });
 
-    // if (filteredBranches.length > 0) {
-    //   filteredBranches.map((branch: any) => {
-    //     branch["image"] = branch?.UploadRelation?.map((item) => {
-    //       return {
-    //         id: item.upload.id,
-    //         file: item.upload.file,
-    //         fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${item.upload.file}`,
-    //       };
-    //     });
+          branch["availableRooms"] = totalAvailableRooms;
+        }
 
-    //     delete branch.UploadRelation;
+        branch["image"] = branch?.UploadRelation?.map((item) => {
+          return {
+            id: item.upload.id,
+            file: item.upload.file,
+            fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${item.upload.file}`,
+          };
+        });
 
-    //     branch["startingPrice"] = Number(
-    //       branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
-    //     );
+        delete branch.UploadRelation;
 
-    //     branch["status"] = branch.BranchRoomTypeRelation.map((relation) => {
-    //       let bookedRooms = 0;
-    //       if (branch?.Booking?.length === 0) {
-    //         bookedRooms = 0;
-    //       } else {
-    //         branch?.Booking?.map((room) => {
-    //           if (
-    //             relation?.roomType?.id ===
-    //             room?.BranchRoomTypeRelation?.roomTypeId
-    //           ) {
-    //             bookedRooms++;
-    //           }
-    //         });
-    //       }
+        branch["startingPrice"] = Number(
+          branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
+        );
 
-    //       return {
-    //         ...relation.roomType,
-    //         totalRooms: relation?.Room?.length,
-    //         availabeRooms: relation?.Room?.length - bookedRooms,
-    //       };
-    //     });
+        branch.geoLocation = JSON.parse(branch.geoLocation);
 
-    //     branch.geoLocation = JSON.parse(branch.geoLocation);
-    //   });
-    // }
+        delete branch.BranchRoomTypeRelation;
+      });
 
-    // return {
-    //   branches: filteredBranches,
-    // };
+      filteredBranchesWithRooms = filteredBranches.filter(
+        (branch: any) =>
+          branch.availableRooms > 0 && branch.availableRooms >= numberOfRooms
+      );
+    }
+
+    return filteredBranchesWithRooms;
   }
 
   async delete(deleteBranchInput: DeleteBranchInput): Promise<string> {
