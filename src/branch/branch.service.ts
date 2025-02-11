@@ -470,6 +470,7 @@ export class BranchService {
         BranchRoomTypeRelation: {
           select: {
             id: true,
+            setPrice: true,
             offerPrice: true,
             roomType: {
               select: {
@@ -530,6 +531,9 @@ export class BranchService {
 
         branch["startingPrice"] = Number(
           branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
+        );
+        branch["setPrice"] = Number(
+          branch?.BranchRoomTypeRelation?.[0]?.setPrice || 0
         );
 
         branch.geoLocation = JSON.parse(branch.geoLocation);

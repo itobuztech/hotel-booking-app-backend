@@ -97,4 +97,7 @@ export class BranchListResponse {
 export class BookingBranchResponse extends OmitType(BranchResponse, [
   "amenities",
   "status",
-] as const) {}
+] as const) {
+  @Field(() => Number)
+  setPrice: number;
+}
