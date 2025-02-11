@@ -48,6 +48,15 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findOne(email);
+
+    if (!user) {
+      throw new UnauthorizedException({
+        statusCode: 401,
+        message: "Email not found!",
+        errorCode: "USER_NOT_FOUND", // Custom error code
+      });
+    }
+
     const valid = user && (await bcrypt.compare(password, user?.password));
 
     if (user && valid) {
