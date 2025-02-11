@@ -38,6 +38,6 @@ export class CreateBranchInput {
   @Field(() => [String], { nullable: true })
   amenityIds: string[];
 
-  @Field(() => [ID], { nullable: true })
+  @Field(() => [ID])
   uploadFileIds: string[];
 }

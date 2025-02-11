@@ -2,6 +2,7 @@ import {
   NotFoundException,
   Injectable,
   BadRequestException,
+  ConflictException,
 } from "@nestjs/common";
 import { CreateBranchInput } from "./dto/create-branch.input";
 import { PrismaService } from "../prisma/prisma.service";
@@ -179,30 +180,39 @@ export class BranchService {
       uploadFileIds,
     } = createBranchInput;
 
-    const amenityIdsExist = await this.prisma.amenities.findMany({
-      where: {
-        id: {
-          in: amenityIds,
-        },
-      },
-    });
+    const [branchNameExists, contactNumberExists] = await Promise.all([
+      this.prisma.branch.findFirst({ where: { name } }),
+      this.prisma.branch.findFirst({ where: { contactNumber } }),
+    ]);
 
-    if (amenityIdsExist.length !== amenityIds.length) {
-      const foundAmenityIds = amenityIdsExist.map((amenityId) => amenityId.id);
-      const missingAmenityIds = amenityIds.filter(
-        (id) => !foundAmenityIds.includes(id)
-      );
+    if (branchNameExists || contactNumberExists) {
+      const errMsg = branchNameExists
+        ? `Name '${name}' already exists!`
+        : `Contact number '${contactNumber}' already exists!`;
 
-      throw new NotFoundException(
-        `Amenities not found : ${missingAmenityIds.join(", ")}`
-      );
+      throw new BadRequestException(errMsg);
     }
 
-    const amenityIdsArr = amenityIds.map((amenitiesId) => {
-      return {
-        amenitiesId,
-      };
-    });
+    let amenityIdsArr = [];
+    if (amenityIds?.length > 0) {
+      const amenityIdsExist = await this.prisma.amenities.findMany({
+        where: {
+          id: {
+            in: amenityIds,
+          },
+        },
+      });
+
+      if (amenityIdsExist?.length !== amenityIds?.length) {
+        throw new NotFoundException(`Some amenities are not found!`);
+      }
+
+      amenityIdsArr = amenityIds.map((amenitiesId) => {
+        return {
+          amenitiesId,
+        };
+      });
+    }
 
     if (uploadFileIds.length < 4) {
       throw new NotFoundException("Upload atleast 4 files");
@@ -264,7 +274,15 @@ export class BranchService {
         message: "Branch created successfully!",
       };
     } catch (error) {
-      throw new Error(`Error : ${error}`);
+      console.error("Error=", error);
+
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try again later.");
+      }
     }
   }
 
@@ -452,6 +470,7 @@ export class BranchService {
         BranchRoomTypeRelation: {
           select: {
             id: true,
+            setPrice: true,
             offerPrice: true,
             roomType: {
               select: {
@@ -512,6 +531,9 @@ export class BranchService {
 
         branch["startingPrice"] = Number(
           branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
+        );
+        branch["setPrice"] = Number(
+          branch?.BranchRoomTypeRelation?.[0]?.setPrice || 0
         );
 
         branch.geoLocation = JSON.parse(branch.geoLocation);

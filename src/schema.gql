@@ -70,6 +70,7 @@ type BookingBranchResponse {
   image: [File!]!
   location: String!
   name: String!
+  setPrice: Float!
   startingPrice: Float!
 }
 
@@ -185,7 +186,7 @@ input CreateBranchInput {
   geoLocation: GeoLocation!
   location: String!
   name: String!
-  uploadFileIds: [ID!]
+  uploadFileIds: [ID!]!
 }
 
 input CreateOrUpdateRoomInput {
