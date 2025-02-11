@@ -18,7 +18,6 @@ import { SearchInput } from "../types/inputtypes/search-input";
 import { GetBranchInput } from "./dto/get-branch.input";
 import { DeleteBranchInput } from "./dto/delete-branch.input";
 import { UpdateBranchInput } from "./dto/update-branch.input";
-import { checkIfExists } from "../helpers/custom-decorators/checkIfExists-decorators";
 import { Message } from "../types/inputtypes/message.entity";
 import { FilterBookingBranchInputs } from "./dto/filter-booking-branch.input";
 
@@ -29,10 +28,8 @@ export class BranchResolver {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(UserRole.ADMIN)
   @Mutation(() => BranchCreationMessage)
-  createBranch(
-    @Args("createBranchInput") createBranchInput: CreateBranchInput,
-    @checkIfExists("createBranchInputData")
-    createBranchInputData: CreateBranchInput
+  async createBranch(
+    @Args("createBranchInput") createBranchInput: CreateBranchInput
   ) {
     return this.branchService.create(createBranchInput);
   }

@@ -85,9 +85,9 @@ model RoomType {
 
 model Branch {
   id                      String                    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name                    String                    @unique
+  name                    String
   address                 String
-  contactNumber           String                    @unique @map("contact_number")
+  contactNumber           String                    @map("contact_number")
   city                    String                    @db.VarChar(255)
   areaPincode             String                    @map("area_pincode")
   location                String                    @db.VarChar(500)

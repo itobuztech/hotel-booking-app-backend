@@ -185,7 +185,7 @@ input CreateBranchInput {
   geoLocation: GeoLocation!
   location: String!
   name: String!
-  uploadFileIds: [ID!]
+  uploadFileIds: [ID!]!
 }
 
 input CreateOrUpdateRoomInput {
