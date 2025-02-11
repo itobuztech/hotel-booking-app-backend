@@ -1,4 +1,4 @@
-# NestJS Authentication and Role Based Access Control with GraphQL example
+# Hotel Management
 
 [![License](https://img.shields.io/github/license/saluki/nestjs-template.svg)](https://github.com/pgm-arthtemm/nestjs-auth-rbac-starter/blob/main/LICENSE)
 
@@ -10,6 +10,7 @@ This template uses:
 - Postgres
 - Apollo Server
 - Passport-JWT
+- AWS
 
 ## Setup
 
@@ -50,11 +51,14 @@ Running this mutation will create a new entry in the Users table **if the email 
 The default Role will be set as USER. you can change this by creating a new role in the `roles` table and changing the default role in the `create` method of the `users.service.ts` file.
 
 ```js
-  const defaultRole = await this.prisma.role.findFirst({
-    select: {
-      id: true,
-    }
-  });
+const defaultRole = await this.prisma.role.findFirst({
+  where: {
+    userType: UserRole.CUSTOMER,
+  },
+  select: {
+    id: true,
+  },
+});
 ```
 
 To login a user:
@@ -65,9 +69,19 @@ To login a user:
 Running this mutation will check the credentials of the user, if the credentials are correct, the mutation will return a JWT.
 This token contains the user information, including the user role.
 
+## Running Prisma Migration
+
+```
+npx prisma migrate deploy
+```
+
+```
+npx prisma generate
+```
+
 ## Jwt Guards
 
-To protect an API route, you can use a **JwtGuard**. This guard checks if the user has a valid JWT. You can apply this guard to the **UseGuard decorator** to queries and mutations inside a resolver.
+To protect an API route, you can use a **JwtAuthGuard**. This guard checks if the user has a valid JWT. You can apply this guard to the **UseGuard decorator** to queries and mutations inside a resolver.
 In this example the findAll users query inside the `users.resolver.ts` file is protected using this guard.
 
 ```js
@@ -95,31 +109,45 @@ In this example the findAll users query inside the `users.resolver.ts` file is p
 Only a user with the OWNER role can access this endpoint.
 
 ```js
-  @Query(() => [User], { name: 'users' })
+  @Query(() => [User], { name: "users", nullable: true })
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(UserRoles.OWNER)
+  @Roles(UserRole.ADMIN)
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 ```
 
-
 ## Permissions Guards
 
 The protect an API route from a specific user Permission, you can use a **PermissionsAND** or **PermissionsOR** guard. These guards check if the user has the correct privilege to access the specified resolver.
 
-
 ```js
-  @Query(() => User, { name: 'account' })
+  @Query(() => Account, { name: "account" })
   @UseGuards(JwtAuthGuard, PermissionsGuardOR)
   @Permissions([PrivilegesList.PROFILE.CAPABILITIES.VIEW])
   findOne(@Context() ctx: any): Promise<User> {
-    return this.accountService.findOne();
+    return this.accountService.findOne(ctx);
   }
 ```
 
-##  E2E Tests:
+## SoftDelete Middleware
+
+Softdelete middleware is implemented for models excluding a few a model. Those are listed below.
+
+```js
+const excludedModels = [
+  "Role",
+  "Upload",
+  "BookingStatusHistory",
+  "UploadRelation",
+  "BranchRoomTypeAmenitiesRelation",
+  "BranchAmenitiesRelation",
+  "BookingRoomRelation",
+  "Notification",
+];
+```
+
+## E2E Tests:
 
 You need to have `dotenv` installed globally. Create a separate database for testing and update in the **.env.test** accordingly.
 Run `dotenv -e .env.test -- npx prisma migrate dev` and `dotenv -e .env.test -- npx prisma db seed` to create the tables and populate the test database. Run migrations using `yarn run test:e2e`.
-
