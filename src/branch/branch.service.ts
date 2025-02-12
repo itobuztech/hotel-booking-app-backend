@@ -41,6 +41,22 @@ export class BranchService {
             select: {
               id: true,
               offerPrice: true,
+              setPrice: true,
+              BranchRoomTypeAmenitiesRelation: {
+                select: {
+                  amenities: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
+                },
+              },
+              UploadRelation: {
+                select: {
+                  upload: true,
+                },
+              },
               roomType: {
                 select: {
                   id: true,
@@ -149,6 +165,19 @@ export class BranchService {
             ...relation.roomType,
             totalRooms: relation?.Room?.length,
             availabeRooms: relation?.Room?.length - bookedRooms,
+            offerPrice: Number(relation.offerPrice),
+            roomTypeAmenities:
+              relation?.BranchRoomTypeAmenitiesRelation?.map((amenity) => {
+                return amenity.amenities;
+              }) || [],
+            roomTypeImages:
+              relation?.UploadRelation?.map((uploads) => {
+                return {
+                  id: uploads.upload.id,
+                  file: uploads.upload.file,
+                  fileUrl: `${process.env.BACKEND_BASE_URL}/uploads/${uploads.upload.file}`,
+                };
+              }) || [],
           };
         });
 

@@ -36,6 +36,9 @@ type AvailabilityStatus {
   availabeRooms: Float!
   id: ID!
   name: String!
+  offerPrice: Float!
+  roomTypeAmenities: [BranchRoomTypeAmenities!]
+  roomTypeImages: [File!]!
   totalRooms: Float!
 }
 
@@ -141,6 +144,11 @@ type BranchRoomType {
   roomTypeName: String!
   setPriceEditable: Int!
   totalRooms: Int!
+}
+
+type BranchRoomTypeAmenities {
+  id: ID!
+  name: String!
 }
 
 type BranchRoomTypeAmenitiesUsed {
@@ -565,9 +573,9 @@ type User {
 }
 
 type UserNotification {
-  email: ID!
+  email: String!
   id: ID!
-  name: ID!
+  name: String
 }
 
 """The roles available for users"""

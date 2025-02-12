@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, OmitType } from "@nestjs/graphql";
+import { ObjectType, Field, ID, OmitType, Float } from "@nestjs/graphql";
 import { PaginationResponse } from "src/types/response-types/pagination-response";
 import { File } from "../../upload/entities/files.entity";
 import { Aminity } from "../../item/entities/items.entity";
@@ -19,6 +19,15 @@ export class BranchCreationMessage {
 }
 
 @ObjectType()
+export class BranchRoomTypeAmenities {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => String)
+  name: string;
+}
+
+@ObjectType()
 export class AvailabilityStatus {
   @Field(() => ID)
   id: string;
@@ -31,6 +40,15 @@ export class AvailabilityStatus {
 
   @Field(() => Number)
   availabeRooms: number;
+
+  @Field(() => [BranchRoomTypeAmenities], { nullable: true })
+  roomTypeAmenities?: BranchRoomTypeAmenities[];
+
+  @Field(() => [File])
+  roomTypeImages: File[];
+
+  @Field(() => Float)
+  offerPrice: number;
 }
 
 @ObjectType()
