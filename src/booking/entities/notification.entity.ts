@@ -11,10 +11,10 @@ export class UserNotification {
   @Field(() => ID)
   id: string;
 
-  @Field(() => ID)
-  name: UserDB["name"];
+  @Field(() => String, { nullable: true })
+  name?: UserDB["name"];
 
-  @Field(() => ID)
+  @Field(() => String)
   email: UserDB["email"];
 }
 
