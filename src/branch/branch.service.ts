@@ -505,7 +505,7 @@ export class BranchService {
       },
     });
 
-    let filteredBranchesWithRooms;
+    let filteredBranchesWithRooms = [];
     if (filteredBranches.length > 0) {
       filteredBranches.map((branch: any) => {
         branch["availableRooms"] = 0;
