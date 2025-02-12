@@ -994,7 +994,7 @@ export class BookingService {
         });
       }
 
-      let where = {};
+      let where: any = {};
       if (filterArgs) {
         const { branch, roomType, bookingStatus } = filterArgs;
 
@@ -1008,14 +1008,22 @@ export class BookingService {
         if (roomType) {
           where = {
             ...where,
-            branchRoomType: { roomTypeId: roomType },
+            branchRoomType: { ...where.branchRoomType, roomTypeId: roomType },
           };
         }
 
         if (bookingStatus) {
           where = {
             ...where,
-            BookingRoomRelation: { booking: { bookingStatus } },
+            BookingRoomRelation: {
+              some: {
+                booking: {
+                  bookingStatus: {
+                    in: bookingStatus,
+                  },
+                },
+              },
+            },
           };
         }
       }
@@ -1088,7 +1096,7 @@ export class BookingService {
         });
       }
 
-      return BookingCalender;
+      return BookingCalender || [];
     } catch (error) {
       console.error("Error=", error);
 
