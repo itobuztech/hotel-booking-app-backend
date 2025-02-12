@@ -256,6 +256,8 @@ input FilterBookingInputs {
 
 input FilterBranchRoomTypeInput {
   branchId: ID!
+  checkInDate: DateTime
+  checkOutDate: DateTime
   roomTypeId: ID
 }
 
