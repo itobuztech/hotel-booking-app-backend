@@ -240,7 +240,7 @@ input FilterBookingBranchInputs {
 }
 
 input FilterBookingCalenderInputs {
-  bookingStatus: BookingStatus
+  bookingStatus: [BookingStatus!]
   branch: ID
   roomType: ID
 }

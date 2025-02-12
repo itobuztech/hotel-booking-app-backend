@@ -9,6 +9,6 @@ export class FilterBookingCalenderInputs {
   @Field(() => ID, { nullable: true })
   roomType?: string;
 
-  @Field(() => BookingStatus, { nullable: true })
-  bookingStatus: BookingStatus;
+  @Field(() => [BookingStatus], { nullable: true })
+  bookingStatus?: BookingStatus[];
 }
