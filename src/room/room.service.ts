@@ -435,7 +435,12 @@ export class RoomService {
     filterArgs: FilterBranchRoomTypeInput,
     search: SearchInput
   ) {
-    const { branchId, roomTypeId = null } = filterArgs;
+    const {
+      branchId,
+      roomTypeId = null,
+      checkInDate,
+      checkOutDate,
+    } = filterArgs;
 
     try {
       // Validate if branch exists
@@ -478,6 +483,21 @@ export class RoomService {
                   mode: "insensitive",
                 },
                 deletedAt: null,
+                NOT:
+                  roomTypeId && checkInDate && checkOutDate
+                    ? {
+                        BookingRoomRelation: {
+                          some: {
+                            booking: {
+                              AND: [
+                                { checkInDate: { lt: checkOutDate } }, // Booking starts before given checkOutDate
+                                { checkOutDate: { gt: checkInDate } }, // Booking ends after given checkInDate
+                              ],
+                            },
+                          },
+                        },
+                      }
+                    : {},
               },
             },
           },

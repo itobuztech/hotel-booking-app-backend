@@ -55,9 +55,6 @@ export class ItemResolver {
 
   // Items Listing
   @Query(() => PaginatedAminityOrRoomType)
-  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
-  @Roles(UserRole.ADMIN)
-  @Permissions([PrivilegesList.ITEM_MANAGEMENT.CAPABILITIES.VIEW])
   itemsListing(
     @Args("filterArg")
     filterArg: FilterItemInput
