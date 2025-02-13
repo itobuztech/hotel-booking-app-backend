@@ -92,8 +92,8 @@ export class BranchResponse {
   @Field(() => [BranchAmenitiesUsed], { nullable: true })
   amenities: BranchAmenitiesUsed[];
 
-  @Field(() => Number)
-  startingPrice: number;
+  @Field(() => Number, { nullable: true })
+  startingPrice?: number;
 
   @Field(() => GeoLocationRes)
   geoLocation: GeoLocationRes;

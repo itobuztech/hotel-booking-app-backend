@@ -143,7 +143,7 @@ export class BranchService {
         });
 
         branch["startingPrice"] = Number(
-          branch?.BranchRoomTypeRelation?.[0]?.offerPrice
+          branch?.BranchRoomTypeRelation?.[0]?.offerPrice || 0
         );
 
         branch["status"] = branch.BranchRoomTypeRelation.map((relation) => {
