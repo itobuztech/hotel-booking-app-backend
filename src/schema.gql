@@ -74,7 +74,7 @@ type BookingBranchResponse {
   location: String!
   name: String!
   setPrice: Float!
-  startingPrice: Float!
+  startingPrice: Float
 }
 
 type BookingCalender {
@@ -128,7 +128,7 @@ type BranchResponse {
   image: [File!]!
   location: String!
   name: String!
-  startingPrice: Float!
+  startingPrice: Float
   status: [AvailabilityStatus!]
 }
 
