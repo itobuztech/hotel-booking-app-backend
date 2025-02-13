@@ -357,6 +357,7 @@ type Notification {
   User: UserNotification!
   createdAt: DateTime!
   customerEmail: String
+  customerName: String
   customerNumber: String!
   description: String!
   id: ID!
