@@ -915,6 +915,11 @@ export class BookingService {
           User: {
             select: { id: true, name: true, email: true },
           },
+          booking: {
+            select: {
+              fullName: true,
+            },
+          },
         },
         orderBy: {
           status: "asc", // Assuming 'false' is represented as 0 and 'true' as 1
@@ -923,6 +928,13 @@ export class BookingService {
       const unreadNotificationCount = await this.prisma.notification.count({
         where: { status: false },
       });
+
+      if (notifications) {
+        notifications.map((notification) => {
+          notification["customerName"] =
+            notification?.booking?.fullName || null;
+        });
+      }
 
       return {
         notifications,

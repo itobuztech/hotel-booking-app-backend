@@ -30,6 +30,9 @@ export class Notification {
   customerNumber: NotificationDB["customerNumber"];
 
   @Field(() => String, { nullable: true })
+  customerName?: string;
+
+  @Field(() => String, { nullable: true })
   customerEmail?: NotificationDB["customerEmail"];
 
   @Field(() => String)
