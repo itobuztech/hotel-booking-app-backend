@@ -71,6 +71,10 @@ export class AuthService {
     const user = await this.usersService.findOne(loginUserInput.email);
     const { password, ...result } = user;
 
+    if (!user.isEmailConfirmed) {
+      throw new UnauthorizedException("Email yet to be confirmed!");
+    }
+
     const match = await bcrypt.compare(loginUserInput.password, password);
 
     if (!match) throw new UnauthorizedException("Unauthorized");
