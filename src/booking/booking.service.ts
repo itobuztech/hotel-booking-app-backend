@@ -1107,9 +1107,11 @@ export class BookingService {
         BookingCalender.map((room) => {
           room["branch"] = room?.branchRoomType?.branch;
           room["roomType"] = room?.branchRoomType?.roomType;
-          room["booking"] = room?.BookingRoomRelation?.map((booking) => {
-            return booking.booking;
-          });
+          room["booking"] = room?.BookingRoomRelation?.filter(
+            (booking) =>
+              !filterArgs?.bookingStatus || // If bookingStatus is not provided, include all bookings
+              filterArgs.bookingStatus.includes(booking.booking.bookingStatus)
+          ).map((booking) => booking.booking);
 
           delete room?.branchRoomType;
           delete room?.BookingRoomRelation;
