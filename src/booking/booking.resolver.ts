@@ -88,8 +88,11 @@ export class BookingResolver {
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuardOR)
   @Roles(UserRole.ADMIN)
   @Permissions([PrivilegesList.BOOKING_MANAGEMENT.CAPABILITIES.VIEW])
-  notifications(@Context() ctx: any) {
-    return this.BookingService.notificationsService(ctx);
+  notifications(
+    @Context() ctx: any,
+    @Args("paginationArgs", { nullable: true }) paginationArgs: PaginationArgs
+  ) {
+    return this.BookingService.notificationsService(ctx, paginationArgs);
   }
 
   // Notification read

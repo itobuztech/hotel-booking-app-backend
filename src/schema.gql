@@ -417,7 +417,7 @@ type Query {
   listBookingBranches(filterInput: FilterBookingBranchInputs, searchInput: SearchInput): [BookingBranchResponse!]!
   listBranches(paginationArgs: PaginationArgs, searchInput: SearchInput): BranchListResponse!
   listFiles(paginationArgs: PaginationArgs): PaginatedFile!
-  notifications: PaginatedNotification!
+  notifications(paginationArgs: PaginationArgs): PaginatedNotification!
   roomTypeDetail(roomTypeId: UniqueIdentifierInput!): RoomType!
   user(email: String!): User!
   users: [User!]
