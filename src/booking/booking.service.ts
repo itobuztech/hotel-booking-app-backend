@@ -908,9 +908,17 @@ export class BookingService {
     }
   }
 
-  async notificationsService(ctx) {
+  async notificationsService(ctx, paginationArgs) {
     try {
+      let { skip = 0, limit = 10 } = paginationArgs || {};
+      skip = skip ?? 0;
+      limit = limit ?? 10;
+
+      const notificationCount = await this.prisma.notification.count();
+
       const notifications = await this.prisma.notification.findMany({
+        skip,
+        take: limit,
         include: {
           User: {
             select: { id: true, name: true, email: true },
@@ -938,7 +946,7 @@ export class BookingService {
 
       return {
         notifications,
-        total: notifications.length,
+        total: notificationCount,
         unreadNotificationCount,
       };
     } catch (error) {
