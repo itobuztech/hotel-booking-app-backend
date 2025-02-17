@@ -1,30 +1,73 @@
 # Hotel Management
 
-[![License](https://img.shields.io/github/license/saluki/nestjs-template.svg)](https://github.com/pgm-arthtemm/nestjs-auth-rbac-starter/blob/main/LICENSE)
+This is the backend for the Simple Room Booking system, built with NestJS, TypeScript, GraphQL, and Prisma.
 
-Quick starter template for a [NestJS](https://nestjs.com/) **GraphQL** API with **user authentication** and **role based access control**.  
-This template uses:
+## Features
 
-- GraphQL
-- Prisma
-- Postgres
-- Apollo Server
-- Passport-JWT
-- AWS
+- User authentication with JWT
+- Room management
+- Booking management
+- GraphQL API with TypeScript
+- PostgreSQL database using Prisma ORM
+- Role-based access control
+
+## Tech Stack
+
+- Backend: NestJS, TypeScript
+- Database: PostgreSQL with Prisma ORM
+- API: GraphQL
+- Authentication: Passport.js with JWT
+- Storage: AWS S3 (for file uploads)
+- Email: AWS SES (Simple Email Service)
 
 ## Setup
 
 Start by cloning the repository into your local workstation:
 
 ```sh
-git clone https://github.com/pgm-arthtemm/nestjs-auth-rbac-starter.git my-project
+git clone https://github.com/itobuztech/hotel-booking-app-backend.git my-project
 ```
 
 This project is made with yarn. So use `yarn add`, not anything else.
 
+## Install Dependencies
+
 ```sh
 cd ./my-project
 yarn install
+```
+
+## Running Prisma Migration
+
+```sh
+npx prisma migrate dev
+```
+
+```sh
+npx prisma migrate deploy
+```
+
+```sh
+npx prisma generate
+```
+
+## Start the development server:
+
+```sh
+yarn start:dev
+```
+
+## Production Mode
+
+```sh
+yarn build
+yarn start:prod
+```
+
+## API Documentation
+
+```sh
+http://localhost:3000/graphql
 ```
 
 Create two `.env` files in the root of the project:
@@ -68,16 +111,6 @@ To login a user:
 
 Running this mutation will check the credentials of the user, if the credentials are correct, the mutation will return a JWT.
 This token contains the user information, including the user role.
-
-## Running Prisma Migration
-
-```
-npx prisma migrate deploy
-```
-
-```
-npx prisma generate
-```
 
 ## Jwt Guards
 
