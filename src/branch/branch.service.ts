@@ -38,6 +38,9 @@ export class BranchService {
             },
           },
           BranchRoomTypeRelation: {
+            where: {
+              deletedAt: null,
+            },
             select: {
               id: true,
               offerPrice: true,
@@ -64,6 +67,9 @@ export class BranchService {
                 },
               },
               Room: {
+                where: {
+                  deletedAt: null,
+                },
                 select: {
                   id: true,
                 },
@@ -81,6 +87,7 @@ export class BranchService {
               checkOutDate: {
                 gte: new Date(),
               },
+              deletedAt: null,
             },
             select: {
               BranchRoomTypeRelation: {
@@ -367,6 +374,9 @@ export class BranchService {
           },
         },
         BranchRoomTypeRelation: {
+          where: {
+            deletedAt: null,
+          },
           select: {
             id: true,
             offerPrice: true,
@@ -377,6 +387,9 @@ export class BranchService {
               },
             },
             Room: {
+              where: {
+                deletedAt: null,
+              },
               select: {
                 id: true,
               },
@@ -388,6 +401,7 @@ export class BranchService {
         },
         Booking: {
           where: {
+            deletedAt: null,
             checkInDate: {
               lte: new Date(),
             },
@@ -497,6 +511,9 @@ export class BranchService {
           },
         },
         BranchRoomTypeRelation: {
+          where: {
+            deletedAt: null,
+          },
           select: {
             id: true,
             setPrice: true,
@@ -509,6 +526,7 @@ export class BranchService {
             },
             Room: {
               where: {
+                deletedAt: null,
                 NOT: {
                   BookingRoomRelation: {
                     some: {
@@ -581,12 +599,90 @@ export class BranchService {
 
   async delete(deleteBranchInput: DeleteBranchInput): Promise<string> {
     const { id } = deleteBranchInput;
-    await this.prisma.branch.delete({
-      where: {
-        id: id,
-      },
-    });
-    return "Branch deleted successfully";
+
+    try {
+      const branchPresence = await this.prisma.branch.findUnique({
+        where: { id },
+        select: {
+          Booking: {
+            select: {
+              id: true,
+              bookingStatus: true,
+            },
+          },
+        },
+      });
+      if (!branchPresence) {
+        throw new NotFoundException(`Branch does not exist.`);
+      }
+
+      if (branchPresence.Booking.length > 0) {
+        const notIncludeType = ["CANCELLED", "CHECKDOUT"];
+        const bookedOrNot = branchPresence.Booking.filter(
+          (booking) => !notIncludeType.includes(booking.bookingStatus)
+        );
+
+        if (bookedOrNot.length > 0) {
+          throw new BadRequestException(
+            `This branch have active bookings. Please cancel the bookings first.`
+          );
+        }
+      }
+
+      await this.prisma.$transaction([
+        this.prisma.branch.delete({
+          where: {
+            id: id,
+          },
+        }),
+
+        this.prisma.branchAmenitiesRelation.deleteMany({
+          where: {
+            branchId: id,
+          },
+        }),
+
+        this.prisma.uploadRelation.deleteMany({
+          where: {
+            branchId: id,
+          },
+        }),
+
+        this.prisma.branchRoomTypeRelation.deleteMany({
+          where: {
+            branchId: id,
+          },
+        }),
+
+        this.prisma.room.deleteMany({
+          where: {
+            branchRoomType: {
+              branchId: id,
+            },
+          },
+        }),
+
+        this.prisma.branchRoomTypeAmenitiesRelation.deleteMany({
+          where: {
+            branchRoomType: {
+              branchId: id,
+            },
+          },
+        }),
+      ]);
+
+      return "Branch deleted successfully";
+    } catch (error) {
+      console.log("Error=", error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try after some time!");
+      }
+    }
   }
 
   private async getNotIdenticalElements<T>(

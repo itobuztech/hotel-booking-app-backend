@@ -168,40 +168,48 @@ export class BookingService {
         );
       }
 
-      const booking = await this.prisma.booking.create({
-        data: {
-          fullName,
-          contactNumber,
-          finalPrice,
-          checkInDate,
-          checkOutDate,
-          description,
-          source: loggedInUserRole === "CUSTOMER" ? "online" : "walk-in",
-          bookingStatus: BookingStatus.BOOKED,
-          email,
-          region,
-          numberOfRooms,
-          upload: {
-            connect: {
-              id: image || null,
-            },
-          },
-          branch: {
-            connect: {
-              id: branch,
-            },
-          },
-          BranchRoomTypeRelation: {
-            connect: {
-              id: roomTypeLinkedToBranch.id,
-            },
-          },
-          bookedBy: {
-            connect: {
-              id: bookedById,
-            },
+      let bookingData: any = {
+        fullName,
+        contactNumber,
+        finalPrice,
+        checkInDate,
+        checkOutDate,
+        description,
+        source: loggedInUserRole === "CUSTOMER" ? "online" : "walk-in",
+        bookingStatus: BookingStatus.BOOKED,
+        email,
+        region,
+        numberOfRooms,
+        branch: {
+          connect: {
+            id: branch,
           },
         },
+        BranchRoomTypeRelation: {
+          connect: {
+            id: roomTypeLinkedToBranch.id,
+          },
+        },
+        bookedBy: {
+          connect: {
+            id: bookedById,
+          },
+        },
+      };
+
+      if (image) {
+        bookingData = {
+          ...bookingData,
+          upload: {
+            connect: {
+              id: image,
+            },
+          },
+        };
+      }
+
+      const booking = await this.prisma.booking.create({
+        data: bookingData,
       });
 
       let finalRooms = null;
@@ -862,14 +870,35 @@ export class BookingService {
         take: limit,
         where,
         include: {
-          branch: true,
+          branch: {
+            where: {
+              deletedAt: null,
+            },
+          },
           BranchRoomTypeRelation: {
+            where: {
+              deletedAt: null,
+            },
             include: {
-              roomType: true,
+              roomType: {
+                where: {
+                  deletedAt: null,
+                },
+              },
             },
           },
           BookingRoomRelation: {
-            select: { roomId: true, room: true },
+            where: {
+              deletedAt: null,
+            },
+            select: {
+              roomId: true,
+              room: {
+                where: {
+                  deletedAt: null,
+                },
+              },
+            },
           },
         },
       };
