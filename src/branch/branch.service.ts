@@ -38,6 +38,9 @@ export class BranchService {
             },
           },
           BranchRoomTypeRelation: {
+            where: {
+              deletedAt: null,
+            },
             select: {
               id: true,
               offerPrice: true,
@@ -64,6 +67,9 @@ export class BranchService {
                 },
               },
               Room: {
+                where: {
+                  deletedAt: null,
+                },
                 select: {
                   id: true,
                 },
@@ -81,6 +87,7 @@ export class BranchService {
               checkOutDate: {
                 gte: new Date(),
               },
+              deletedAt: null,
             },
             select: {
               BranchRoomTypeRelation: {
@@ -367,6 +374,9 @@ export class BranchService {
           },
         },
         BranchRoomTypeRelation: {
+          where: {
+            deletedAt: null,
+          },
           select: {
             id: true,
             offerPrice: true,
@@ -377,6 +387,9 @@ export class BranchService {
               },
             },
             Room: {
+              where: {
+                deletedAt: null,
+              },
               select: {
                 id: true,
               },
@@ -388,6 +401,7 @@ export class BranchService {
         },
         Booking: {
           where: {
+            deletedAt: null,
             checkInDate: {
               lte: new Date(),
             },
@@ -497,6 +511,9 @@ export class BranchService {
           },
         },
         BranchRoomTypeRelation: {
+          where: {
+            deletedAt: null,
+          },
           select: {
             id: true,
             setPrice: true,
@@ -509,6 +526,7 @@ export class BranchService {
             },
             Room: {
               where: {
+                deletedAt: null,
                 NOT: {
                   BookingRoomRelation: {
                     some: {
@@ -598,8 +616,6 @@ export class BranchService {
         throw new NotFoundException(`Branch does not exist.`);
       }
 
-      console.log("branchPresence=", branchPresence);
-
       if (branchPresence.Booking.length > 0) {
         const notIncludeType = ["CANCELLED", "CHECKDOUT"];
         const bookedOrNot = branchPresence.Booking.filter(
@@ -613,11 +629,48 @@ export class BranchService {
         }
       }
 
-      await this.prisma.branch.delete({
-        where: {
-          id: id,
-        },
-      });
+      await this.prisma.$transaction([
+        this.prisma.branch.delete({
+          where: {
+            id: id,
+          },
+        }),
+
+        this.prisma.branchAmenitiesRelation.deleteMany({
+          where: {
+            branchId: id,
+          },
+        }),
+
+        this.prisma.uploadRelation.deleteMany({
+          where: {
+            branchId: id,
+          },
+        }),
+
+        this.prisma.branchRoomTypeRelation.deleteMany({
+          where: {
+            branchId: id,
+          },
+        }),
+
+        this.prisma.room.deleteMany({
+          where: {
+            branchRoomType: {
+              branchId: id,
+            },
+          },
+        }),
+
+        this.prisma.branchRoomTypeAmenitiesRelation.deleteMany({
+          where: {
+            branchRoomType: {
+              branchId: id,
+            },
+          },
+        }),
+      ]);
+
       return "Branch deleted successfully";
     } catch (error) {
       console.log("Error=", error);

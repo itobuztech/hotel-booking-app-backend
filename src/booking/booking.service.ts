@@ -862,14 +862,35 @@ export class BookingService {
         take: limit,
         where,
         include: {
-          branch: true,
+          branch: {
+            where: {
+              deletedAt: null,
+            },
+          },
           BranchRoomTypeRelation: {
+            where: {
+              deletedAt: null,
+            },
             include: {
-              roomType: true,
+              roomType: {
+                where: {
+                  deletedAt: null,
+                },
+              },
             },
           },
           BookingRoomRelation: {
-            select: { roomId: true, room: true },
+            where: {
+              deletedAt: null,
+            },
+            select: {
+              roomId: true,
+              room: {
+                where: {
+                  deletedAt: null,
+                },
+              },
+            },
           },
         },
       };

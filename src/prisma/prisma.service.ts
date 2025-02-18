@@ -22,7 +22,35 @@ export class PrismaService
 {
   constructor() {
     super();
+    this.$use(this.findQueryMiddleware()); // Applying middleware
     this.$use(this.softDeleteMiddleware()); // Applying middleware
+  }
+
+  /**
+   * Middleware for handling `find` queries, ensuring soft-deleted records are excluded.
+   */
+  private findQueryMiddleware(): Prisma.Middleware {
+    return async (params, next) => {
+      const { model, action, args = {} } = params;
+
+      // Skip models that should not be affected
+      if (
+        excludedModels.includes(model) ||
+        excludedMasterModels.includes(model)
+      ) {
+        return next(params);
+      }
+
+      // If the action is a find query, ensure `deletedAt: null` is applied
+      if (["findUnique", "findFirst", "findMany", "count"].includes(action)) {
+        if (!args.where) {
+          args.where = {};
+        }
+        args.where.deletedAt = null;
+      }
+
+      return next(params);
+    };
   }
 
   // Soft delete middleware
@@ -33,23 +61,6 @@ export class PrismaService
       // Skip models in the excluded list
       if (excludedModels.includes(model)) {
         return next(params);
-      }
-
-      // Helper function to handle `deletedAt` field logic for find queries
-      const handleFindQuery = () => {
-        if (!args.where) {
-          args.where = {};
-        }
-        // Ensure soft-deleted records are excluded by adding `deletedAt: null`
-        args.where.deletedAt = null;
-      };
-
-      // Handle `find` queries (findUnique, findFirst, findMany, count) with exclusion of models
-      if (
-        ["findUnique", "findFirst", "findMany", "count"].includes(action) &&
-        !excludedMasterModels.includes(model)
-      ) {
-        handleFindQuery();
       }
 
       // Handle `delete` action (convert to soft delete)
