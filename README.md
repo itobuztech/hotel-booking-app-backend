@@ -4,12 +4,17 @@ This is the backend for the Simple Room Booking system, built with NestJS, TypeS
 
 ## Features
 
-- User authentication with JWT
-- Room management
-- Booking management
-- GraphQL API with TypeScript
-- PostgreSQL database using Prisma ORM
-- Role-based access control
+- User authentication with JWT.
+- Room management.
+- Booking management.
+- GraphQL API with TypeScript.
+- PostgreSQL database using Prisma ORM.
+- Role-based access control.
+- In app notification to admins and email notification to customers based on booking and status change of bookings.
+- Giving branches and rooms based on number of rooms required, checkedin date and checkedout date!
+- Wide range of different Amenities for branches and for rooms specific to those branches.
+- Booking Calender, which contains data of rooms for users based on branch, room type, and booking status. Along with room number.
+- Amenities and Room Type manged by the admin. Which can be enabled and disabled.
 
 ## Tech Stack
 
@@ -149,6 +154,10 @@ Only a user with the OWNER role can access this endpoint.
     return this.usersService.findAll();
   }
 ```
+
+## Roles
+
+There are two roles in this application, Admin and Customer.
 
 ## Permissions Guards
 

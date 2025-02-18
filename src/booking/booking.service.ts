@@ -428,12 +428,12 @@ export class BookingService {
         throw new BadRequestException(`Room type is not linked with branch.`);
       }
 
-      let updatedRooms = [];
       if (roomIds.length !== numberOfRooms) {
         throw new BadRequestException(
           `Need to assign rooms as per number of rooms given!`
         );
       }
+
       // Validate if room exists
       for (const roomId of roomIds) {
         const roomPresence = await this.prisma.room.findUnique({
@@ -494,10 +494,6 @@ export class BookingService {
           throw new BadRequestException(
             `Room ${roomPresence.roomName} is already booked for the selected dates.`
           );
-        }
-
-        if (!BookedRoomIds.includes(roomId)) {
-          updatedRooms.push(roomId);
         }
       }
 
@@ -571,6 +567,9 @@ export class BookingService {
       if (Booking.bookingStatus !== bookingStatus) {
         updateDataObj = { ...updateDataObj, bookingStatus };
       }
+      if (Booking.numberOfRooms !== numberOfRooms) {
+        updateDataObj = { ...updateDataObj, numberOfRooms };
+      }
       if (Booking.branchId !== branch) {
         updateDataObj = {
           ...updateDataObj,
@@ -581,6 +580,7 @@ export class BookingService {
           },
         };
       }
+
       if (Booking.branchRoomTypeRelationId !== roomTypeLinkedToBranch.id) {
         updateDataObj = {
           ...updateDataObj,
@@ -603,10 +603,16 @@ export class BookingService {
         };
       }
 
-      if (
-        Object.keys(updateDataObj).length === 0 &&
-        updatedRooms.length === 0
-      ) {
+      const haveSameElements = (arr1: any[], arr2: any[]): boolean => {
+        if (arr1.length !== arr2.length) return false; // Length check is necessary
+        return arr1.sort().toString() === arr2.sort().toString();
+      };
+
+      const sameRoomIds = haveSameElements(BookedRoomIds, roomIds);
+
+      console.log("sameRoomIds=", sameRoomIds);
+
+      if (Object.keys(updateDataObj).length === 0 && sameRoomIds) {
         throw new BadRequestException("There is no data to be updated!");
       }
 
@@ -620,7 +626,7 @@ export class BookingService {
         });
       }
 
-      if (updatedRooms.length !== 0) {
+      if (!sameRoomIds) {
         const roomsToLink = await this.getNotIdenticalElements(
           roomIds,
           BookedRoomIds
@@ -630,7 +636,7 @@ export class BookingService {
           roomIds
         );
 
-        // Create Images
+        // Create Rooms
         if (roomsToLink.length > 0) {
           const roomsLinkArr = roomsToLink.map((room) => {
             return {
@@ -643,7 +649,7 @@ export class BookingService {
             data: roomsLinkArr,
           });
         }
-        // Delete Images
+        // Delete Rooms
         if (roomsToDlink.length > 0) {
           const roomsDlinkArr = roomsToDlink.map((room) => {
             return {
