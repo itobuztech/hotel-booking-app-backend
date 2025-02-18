@@ -581,12 +581,55 @@ export class BranchService {
 
   async delete(deleteBranchInput: DeleteBranchInput): Promise<string> {
     const { id } = deleteBranchInput;
-    await this.prisma.branch.delete({
-      where: {
-        id: id,
-      },
-    });
-    return "Branch deleted successfully";
+
+    try {
+      const branchPresence = await this.prisma.branch.findUnique({
+        where: { id },
+        select: {
+          Booking: {
+            select: {
+              id: true,
+              bookingStatus: true,
+            },
+          },
+        },
+      });
+      if (!branchPresence) {
+        throw new NotFoundException(`Branch does not exist.`);
+      }
+
+      console.log("branchPresence=", branchPresence);
+
+      if (branchPresence.Booking.length > 0) {
+        const notIncludeType = ["CANCELLED", "CHECKDOUT"];
+        const bookedOrNot = branchPresence.Booking.filter(
+          (booking) => !notIncludeType.includes(booking.bookingStatus)
+        );
+
+        if (bookedOrNot.length > 0) {
+          throw new BadRequestException(
+            `This branch have active bookings. Please cancel the bookings first.`
+          );
+        }
+      }
+
+      await this.prisma.branch.delete({
+        where: {
+          id: id,
+        },
+      });
+      return "Branch deleted successfully";
+    } catch (error) {
+      console.log("Error=", error);
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
+      } else {
+        throw new Error("Internal Server Error. Please try after some time!");
+      }
+    }
   }
 
   private async getNotIdenticalElements<T>(

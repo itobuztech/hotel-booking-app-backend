@@ -678,10 +678,47 @@ export class RoomService {
       const branchRoomTypeRelationPresence =
         await this.prisma.branchRoomTypeRelation.findUnique({
           where: { id: branchRoomTypeId.id },
+          select: {
+            id: true,
+            Room: {
+              select: {
+                roomName: true,
+                BookingRoomRelation: {
+                  select: {
+                    booking: {
+                      select: {
+                        id: true,
+                        bookingStatus: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         });
 
       if (!branchRoomTypeRelationPresence) {
         throw new NotFoundException(`Branch room type does not exist.`);
+      }
+
+      if (branchRoomTypeRelationPresence.Room.length > 0) {
+        const rooms = branchRoomTypeRelationPresence.Room;
+        const notIncludeType = ["CANCELLED", "CHECKDOUT"];
+        const roomsWithBookings = rooms.filter((room) =>
+          room.BookingRoomRelation.some(
+            (bookingRoomRelation) =>
+              !notIncludeType.includes(
+                bookingRoomRelation.booking.bookingStatus
+              )
+          )
+        );
+
+        if (roomsWithBookings.length > 0) {
+          throw new BadRequestException(
+            `Some rooms have active bookings. Please cancel the bookings first.`
+          );
+        }
       }
 
       await this.prisma.$transaction([
@@ -704,6 +741,9 @@ export class RoomService {
       console.log("Error=", error);
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
       } else {
         throw new Error("Internal Server Error. Please try after some time!");
       }
@@ -714,11 +754,38 @@ export class RoomService {
     try {
       // Validate if room exists
       const roomPresence = await this.prisma.room.findUnique({
+        select: {
+          BookingRoomRelation: {
+            select: {
+              booking: {
+                select: {
+                  id: true,
+                  bookingStatus: true,
+                },
+              },
+            },
+          },
+        },
         where: { id: roomId.id },
       });
 
       if (!roomPresence) {
         throw new NotFoundException(`Room does not exist.`);
+      }
+
+      if (roomPresence.BookingRoomRelation.length > 0) {
+        const bookings = roomPresence.BookingRoomRelation;
+        const notIncludeType = ["CANCELLED", "CHECKDOUT"];
+        const roomsWithBookings = bookings.filter(
+          (bookingRoomRelation) =>
+            !notIncludeType.includes(bookingRoomRelation.booking.bookingStatus)
+        );
+
+        if (roomsWithBookings.length > 0) {
+          throw new BadRequestException(
+            `This room have active bookings. Please cancel the bookings first.`
+          );
+        }
       }
 
       await this.prisma.room.delete({
@@ -730,6 +797,9 @@ export class RoomService {
       console.log("Error=", error);
       if (error instanceof NotFoundException) {
         throw new NotFoundException(error.message);
+      }
+      if (error instanceof BadRequestException) {
+        throw new BadRequestException(error.message);
       } else {
         throw new Error("Internal Server Error. Please try after some time!");
       }

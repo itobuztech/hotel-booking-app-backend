@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from "@nestjs/common";
 import { PrismaClient, Prisma } from "@prisma/client";
 
-// List of models that have the `deletedAt` column (soft-delete enabled models)
+// List of models that does not have the `deletedAt` field.
 const excludedModels = [
   "Role",
   "Upload",
