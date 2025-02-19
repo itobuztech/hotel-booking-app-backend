@@ -600,12 +600,12 @@ export class BookingService {
         };
       }
 
-      if (Booking.uploadId !== image) {
+      if (image && Booking.uploadId !== image) {
         updateDataObj = {
           ...updateDataObj,
           upload: {
             connect: {
-              id: image || null,
+              id: image,
             },
           },
         };
@@ -870,34 +870,16 @@ export class BookingService {
         take: limit,
         where,
         include: {
-          branch: {
-            where: {
-              deletedAt: null,
-            },
-          },
+          branch: true,
           BranchRoomTypeRelation: {
-            where: {
-              deletedAt: null,
-            },
             include: {
-              roomType: {
-                where: {
-                  deletedAt: null,
-                },
-              },
+              roomType: true,
             },
           },
           BookingRoomRelation: {
-            where: {
-              deletedAt: null,
-            },
             select: {
               roomId: true,
-              room: {
-                where: {
-                  deletedAt: null,
-                },
-              },
+              room: true,
             },
           },
         },
